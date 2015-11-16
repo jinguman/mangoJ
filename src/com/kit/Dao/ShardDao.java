@@ -22,8 +22,8 @@ public class ShardDao {
 	private MongoDatabase config;
 	
 	public ShardDao(MongoClient client, MongoDatabase database) {
-		client = this.client;
-		database = this.database;
+		this.client = client;
+		this.database = database;
 		admin = client.getDatabase("admin");
 		config = client.getDatabase("config");
 	}
