@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<project name="mango_all"  default="all"  basedir=".">
+
+	<!--target name="all" depends="common, package, ftp"/-->
+	<target name="all" depends="common, package"/>
+	<target name="common">
+		<ant inheritall="false" antfile="${basedir}/common.xml" />
+	</target>
+
+	<target name="package">
+		<ant inheritall="false" antfile="${basedir}/package.xml" />
+	</target>
+	
+	<target name="ftp">
+		<ant inheritall="false" antfile="${basedir}/ftp.xml" />
+	</target>
+</project>

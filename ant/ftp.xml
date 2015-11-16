@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<project name="ftp" default="all" basedir=".">
+	<property file="mango.properties" />
+
+	<target name="all" depends="ftp">
+		<echo message="${name.en} Package copied" />    
+		<echo message="" />
+	</target>
+
+	<target name="ftp">
+		<echo message="copying package" />
+	
+		<scp todir="mango:mango1!@192.168.5.40:/home/mango/mangoJ" trust="yes">
+		<!--scp todir="niauser:nianiauser@210.114.91.91:/home/niauser/mangoJC" trust="yes" port="18830"-->
+			<fileset dir="${target.dir}"/>
+		</scp>
+		
+	</target>
+
+</project>

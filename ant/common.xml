@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<project name="common" default="all" basedir=".">
+	<property file="mango.properties" />
+	
+	<path id="mango-compile.classpath">
+		<fileset dir="${mango.lib}">
+		    <include name="**/*.jar" />
+	    </fileset>
+	</path>
+	<target name="clean">
+	  <delete dir="${build.dir}" />
+	</target>
+
+	<target name="all" depends="clean ,compile ">
+	    <echo message="----- ${name.en} Compile complete----" />        
+        <echo message="" />
+	</target>
+
+	<target name="compile">	
+		<mkdir dir="${build.dir}" />   
+		<mkdir dir="${build.dir}/mangoJ" />   
+
+		<javac destdir="${build.dir}/mangoJ" encoding="euc-kr" debug="on" debuglevel="lines,vars,source" nowarn="true" includeantruntime="false">
+			<src path="${mango.src.dir}" />
+			<classpath refid="mango-compile.classpath" />
+		</javac>	
+		
+		<copy todir="${build.dir}/mangoJ" overwrite="true">
+			<fileset dir="${mango.src.dir}" casesensitive="yes" >
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+		
+		<jar destfile="${build.dir}/mangoJ/mangoJ-${version}.jar">
+		    <fileset dir="${build.dir}/mangoJ" casesensitive="yes" >
+				<include name="**/*.class" />
+			</fileset>
+		</jar>
+	 </target>
+	
+ </project>
