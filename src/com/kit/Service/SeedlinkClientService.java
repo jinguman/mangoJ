@@ -198,7 +198,6 @@ public class SeedlinkClientService {
 	            List<Document> stationDocList = networkMap.get(key);
 	            doc.append(key, stationDocList);
 	        }
-
 			
 		} catch (SAXException | ParserConfigurationException e) {
 			logger.error("{}", e);
