@@ -45,7 +45,6 @@ public class SeedlinkClient implements Runnable {
 
 	public void run() {
 
-        //start = "2015,10,28,07,34";
 		logger.info("SeedlinkClient start.. network: {}", network);
 
 		SeedlinkClientService scs = new SeedlinkClientService(queue, pm);
