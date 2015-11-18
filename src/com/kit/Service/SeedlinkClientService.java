@@ -46,10 +46,10 @@ public class SeedlinkClientService {
 
 	final Logger logger = LoggerFactory.getLogger(SeedlinkClientService.class);
 	final String EMPTY = SeedlinkReader.EMPTY;
-	
+
 	private BlockingQueue<Document> queue;
 	private PropertyManager pm;
-	
+
 	@Setter @Getter private String network;
 	@Setter @Getter private String station;
 	@Setter @Getter private String location;
@@ -60,7 +60,7 @@ public class SeedlinkClientService {
 	@Setter @Getter private int port;
 	@Setter @Getter private int timeoutSeconds;
 	@Setter @Getter private boolean verbose;
-   
+
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy,DDD,HH:mm:ss");	//2015,306,00:49:01.7750
 

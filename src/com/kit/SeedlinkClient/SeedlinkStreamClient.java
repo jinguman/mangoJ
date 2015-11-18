@@ -73,44 +73,47 @@ public class SeedlinkStreamClient implements Runnable {
 					return;
 				}
 			}
-		} 
+		}
 		
 		addStreams();
 	}
 	
 	private void addStreams() {
 		
-		
-		
+		// { NETWORK : [{
+		//			STATION: [{
+		//					LOCATION:CHANNEL
+		//					},{
+		//					LOCATION:CHANNEL
+		//			}]
+		//			
+		//Helpers.printJson(streamsInfoDoc);
 		
 		for(String network : networks) {
 			List<Document> stationListDoc = (List<Document>) streamsInfoDoc.get(network);
 			
 			for(Document stationDoc : stationListDoc) {
-				
-				Helpers.printJson(stationDoc);
-				
 				for( String station : stationDoc.keySet() ){
-		            
 					List<Document> channelListDoc = (List<Document>) stationDoc.get(station);
-					
 					for(Document channelDoc : channelListDoc) {
-						
 						for( String location : channelDoc.keySet() ){
-							
 							String channel = channelDoc.getString(location);
-							System.out.println(network + ", " + station + ", " + location + ", " + channel);
+
+							Document doc = new Document().append("network", network)
+										.append("station", station)
+										.append("location", location)
+										.append("channel", channel);
+
+							try {
+								queue.put(doc);
+							} catch (InterruptedException e) {
+								logger.error("{}", e);
+							}
 						}
 					}
-					
 		        }
-				
 			}
-			
-			
 		}
-		
 	}
-
 
 }

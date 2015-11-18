@@ -123,7 +123,7 @@ public class MongoSimpleClient implements Runnable {
 
 				// add index
 				String indexKey = collection.getNamespace().getFullName() + "." + channel + ".et";
-				//addIndex(indexKey, new Document(channel+".et",1), indexOptions);
+				addIndex(indexKey, new Document(channel+".et",1), indexOptions);
 
 				if ( isShard ) {
 

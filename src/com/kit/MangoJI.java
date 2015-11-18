@@ -1,8 +1,6 @@
 package com.kit;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -10,9 +8,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.kit.MongoClient.MongoShardClient;
-import com.kit.MongoClient.MongoSimpleClient;
-import com.kit.SeedlinkClient.SeedlinkClient;
+import com.kit.MongoClient.MongoInitialClient;
 import com.kit.SeedlinkClient.SeedlinkStreamClient;
 import com.kit.Util.PropertyManager;
 
@@ -22,27 +18,34 @@ public class MangoJI {
     	// Run configuration.. vm argument: -Dlog4j.configuration="file:./home/config/log4j.xml"
     	Logger logger = LoggerFactory.getLogger(MangoJI.class);
     	logger.info("{}","MangoJI start..");
-	
+
     	// queue
     	BlockingQueue<Document> queue = new LinkedBlockingQueue<Document>();
-    	
+
     	// get property
     	PropertyManager pm = new PropertyManager();
-    	
+
     	// therad array
     	ArrayList<Thread> threads = new ArrayList<Thread>();
+
+    	// get argument
+    	if ( args.length != 2) {
+    		System.out.println("Usage: YYYY MM");
+    		return;
+    	}
+    	
+    	String shardYear = args[0];
+    	String shardMonth = args[1];
     	
     	// MongoShardClient Thread
-    	/*
     	int threadCnt = pm.getIntegerProperty("ms.thread");
     	for (int i = 0; i < threadCnt; i++) {
-    		MongoSimpleClient msc = new MongoSimpleClient(queue, pm, indexSet);
+    		MongoInitialClient msc = new MongoInitialClient(queue, pm, shardYear, shardMonth);
     		Thread thdMsc = new Thread(msc);
     		threads.add(thdMsc);
     		thdMsc.start();
     	}
-    	*/
-
+    	
     	// SeedlinkShardClient Thread
     	int slinkThdCnt = pm.getIntegerProperty("sc.thread");
     	for(int i=1; i<slinkThdCnt+1; i++) {
@@ -55,7 +58,7 @@ public class MangoJI {
         	threads.add(thdSlink);
         	thdSlink.start();
     	}
-    	
+
     	// Thread Join
 		for (int i = 0; i < threads.size(); i++) {
 			Thread t = threads.get(i);
@@ -67,3 +70,4 @@ public class MangoJI {
 
     }
 }
+

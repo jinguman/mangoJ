@@ -23,6 +23,13 @@ public class Test {
 	public static void main(String[] args) throws ParseException {
 		
 		
+		System.out.println(Helpers.getTraceCollectionName("network", "station", "location", "year", "month"));
+		System.out.println(Helpers.getTraceCollectionName("network", "station", "location", "year", "month"));
+		System.out.println(Helpers.getTraceCollectionName("network", "station", "location", "year", ""));
+		System.out.println(Helpers.getTraceCollectionName("network", "station", "location", "", ""));
+		
+		
+		
 		String str = "true";
 		boolean a = Boolean.valueOf("true");
 		System.out.println(a);
@@ -57,7 +64,7 @@ public class Test {
 		 * 
 		 * */
 		 
-		
+		/*
 		// TEST2. shard command
 		MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40:12800"));
 		MongoDatabase admin = client.getDatabase("admin");
@@ -148,6 +155,7 @@ public class Test {
 		System.out.println(trace.getName());
 		
 		System.out.println(tags.getNamespace().getFullName());
+		*/
 	}
 	
 	

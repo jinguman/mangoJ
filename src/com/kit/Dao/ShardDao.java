@@ -32,10 +32,7 @@ public class ShardDao {
 		
 		MongoCollection<Document> collection = database.getCollection(collectionName);
 		String databaseName = database.getName();
-		
-		// ensureIndex
-		collection.createIndex(key);
-		
+
 		// make shardCollection
 		try {
 			Document d = admin.runCommand(new Document("shardCollection", databaseName + "." + collectionName)
