@@ -83,6 +83,8 @@ public class ApiNettyRequestHandler extends SimpleChannelInboundHandler<FullHttp
 			if ( !headers.isEmpty() ) {
 				for (Map.Entry<String, String> h : headers ) {
 					reqData.put(h.getKey(), h.getValue());
+					
+					System.out.println(">>> " + h.getKey() + ", " + h.getValue());
 				}
 			}
 			

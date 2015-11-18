@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.kit.Dao.ShardDao;
 import com.kit.Dao.TraceStatsDao;
+import com.kit.Service.MongoInitialClientService;
 import com.kit.Util.Helpers;
 import com.kit.Util.PropertyManager;
 import com.mongodb.MongoClient;
@@ -43,6 +44,7 @@ public class MongoSimpleClient implements Runnable {
 	boolean isShard = true;
 	int cnt = 0; // log print count
 	int restartSec = 5;
+	private MongoInitialClientService mics;
 
 	final Logger logger = LoggerFactory.getLogger(MongoSimpleClient.class);
 	
@@ -62,6 +64,8 @@ public class MongoSimpleClient implements Runnable {
 		
 		isShard = pm.getBooleanProperty("mongo.shard");
 		restartSec = pm.getIntegerProperty("mc.restartsec");
+		
+		mics = new MongoInitialClientService(client, database);
 	}
 
 	public void run() {
@@ -111,7 +115,9 @@ public class MongoSimpleClient implements Runnable {
 				d.remove("location");
 
 				String collectionName = network + "_" + station + "_" + location;
-				collectionName += "_" + Helpers.getYearString(st, sdfToSecond) + Helpers.getMonthString(st, sdfToSecond); 
+				String year = Helpers.getYearString(st, sdfToSecond);
+				String month = Helpers.getMonthString(st, sdfToSecond);
+				collectionName += "_" + year + month;  
 
 				Document key = new Document();
 				//key.append("_id", Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute))
@@ -126,6 +132,8 @@ public class MongoSimpleClient implements Runnable {
 				addIndex(indexKey, new Document(channel+".et",1), indexOptions);
 
 				if ( isShard ) {
+					
+					mics.doIndex(network, station, location, channel, year, month);
 
 					// add shardCollection
 					indexKey = collection.getNamespace().getFullName() + ".shardCollection";
@@ -154,9 +162,6 @@ public class MongoSimpleClient implements Runnable {
 				addTrace(key, new Document("$addToSet",new Document(channel,d))
 						, options, channel + ".st:" + st);				
 				
-				//indexKey = collection.getNamespace().getFullName() + ".sta";
-				addIndex(indexKey, new Document("sta",1), indexOptions);
-
 				// make stats
 				Document keyTraceStatsDoc = new Document()
 						.append("_id", network + "_" + station + "_" + location + "_" + channel);

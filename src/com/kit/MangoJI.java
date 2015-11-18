@@ -38,7 +38,7 @@ public class MangoJI {
     	String shardMonth = args[1];
     	
     	// MongoShardClient Thread
-    	int threadCnt = pm.getIntegerProperty("ms.thread");
+    	int threadCnt = pm.getIntegerProperty("mi.thread");
     	for (int i = 0; i < threadCnt; i++) {
     		MongoInitialClient msc = new MongoInitialClient(queue, pm, shardYear, shardMonth);
     		Thread thdMsc = new Thread(msc);

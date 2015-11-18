@@ -6,13 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.kit.Controller.ApiNettyController;
-import com.kit.Controller.ApiSparkController;
 import com.kit.Util.PropertyManager;
 
 public class MangoJA {
 
 	public static void main( String[] args ) throws IOException {
-    	Logger logger = LoggerFactory.getLogger(MangoJA.class);
+    	
+		// Run configuration.. vm argument: -Dlog4j.configuration="file:./home/config/log4j.xml"
+		Logger logger = LoggerFactory.getLogger(MangoJA.class);
     	logger.info("{}","MangoJA start..");
 		
     	// get property

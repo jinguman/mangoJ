@@ -33,6 +33,14 @@ public class ApiRequestStations extends ApiRequestTemplate {
 	@Override
 	public void requestParamValidation() throws com.kit.Exception.RequestParamException {
 		
+		if ( StringUtils.isEmpty(this.reqData.get("username"))) {
+			throw new RequestParamException("username parameter is mandatory.");
+		}
+		
+		if ( StringUtils.isEmpty(this.reqData.get("password"))) {
+			throw new RequestParamException("password parameter is mandatory.");
+		}
+		
 		if ( StringUtils.isEmpty(this.reqData.get("contents"))) {
 			throw new RequestParamException("contents parameter is mandatory.");
 		}

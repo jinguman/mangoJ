@@ -30,7 +30,6 @@ public class ShardDao {
 	
 	public void shardCollection(String collectionName, Document key) {
 		
-		MongoCollection<Document> collection = database.getCollection(collectionName);
 		String databaseName = database.getName();
 
 		// make shardCollection

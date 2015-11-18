@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.kit.Dao.ShardDao;
 import com.kit.Dao.TraceStatsDao;
+import com.kit.Service.MongoInitialClientService;
 import com.kit.Service.SeedlinkClientService;
 import com.kit.Util.Helpers;
 import com.kit.Util.MangoJCode;
@@ -43,8 +44,9 @@ public class MongoInitialClient implements Runnable {
 	private ShardDao shardDao;
 	int logThreshold = 0;
 	int scRestartSec = 5;
-	int mcRestartSec = 5;
+	int miRestartSec = 5;
 	Document streamsInfoDoc = null;
+	MongoInitialClientService mics = null; 
 
 	final Logger logger = LoggerFactory.getLogger(MongoInitialClient.class);
 	
@@ -56,10 +58,11 @@ public class MongoInitialClient implements Runnable {
 		shardDao = new ShardDao(client, database);
 		
 		scRestartSec = pm.getIntegerProperty("sc.restartsec");
-		mcRestartSec = pm.getIntegerProperty("mc.restartsec");
+		miRestartSec = pm.getIntegerProperty("mi.restartsec");
 		this.shardYear = shardYear;
 		this.shardMonth = shardMonth;
 		this.queue = queue;
+		mics = new MongoInitialClientService(client, database);
 	}
 
 	public void run() {
@@ -67,9 +70,9 @@ public class MongoInitialClient implements Runnable {
 		try {
 			addInitial();
 		} catch (MongoSocketReadException | InterruptedException e) {
-			logger.info("MongoInitialClient restart after {} seconds.", mcRestartSec);
+			logger.info("MongoInitialClient restart after {} seconds.", miRestartSec);
 			try {
-				Thread.sleep(mcRestartSec*1000);
+				Thread.sleep(miRestartSec*1000);
 			} catch (InterruptedException e1) {
 				logger.error("{}",e1);
 			}
@@ -85,33 +88,10 @@ public class MongoInitialClient implements Runnable {
 			String location = doc.getString("location");
 			String channel = doc.getString("channel");
 			
-			doIndex(network, station, location, channel);
-			doShard(network, station, location, shardYear, shardMonth);
-			logger.debug("execute shard({}).", queue.size());
+			if ( pm.getBooleanProperty("mi.index")) mics.doIndex(network, station, location, channel, shardYear, shardMonth);
+			if ( pm.getBooleanProperty("mi.shard")) mics.doShard(network, station, location, shardYear, shardMonth);
+			logger.info("execute initiate.({}).", queue.size());
 		}
-	}
-	
-	private void doIndex(String network, String station, String location, String channel) {
-		
-	}
-	
-	private void doShard(String network, String station, String location, String year, String month) {
-
-		String collectionName = Helpers.getTraceCollectionName(network, station, location, year, month);
-		collection = database.getCollection(collectionName);
-		
-		// add shardCollection
-		//String indexKey = collection.getNamespace().getFullName() + ".shardCollection";
-		shardDao.shardCollection(collectionName, new Document("_id",1));
-
-		// add shardRange
-		//indexKey = collection.getNamespace().getFullName() + ".rangeATAG";
-		shardDao.addTagRange(collection.getNamespace().getFullName(), new Document("_id","0"), new Document("_id","L"), "ATAG");
-
-		//indexKey = collection.getNamespace().getFullName() + ".rangeBTAG";
-		shardDao.addTagRange(collection.getNamespace().getFullName(), new Document("_id","M"), new Document("_id","Z"), "BTAG");
-	
-		
 	}
 
 }
