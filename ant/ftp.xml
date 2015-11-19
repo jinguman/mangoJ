@@ -10,7 +10,7 @@
 	<target name="ftp">
 		<echo message="copying package" />
 	
-		<scp todir="mango:mango1!@192.168.5.41:/home/mango/mangoJ" trust="yes">
+		<scp todir="mango:mango1!@192.168.5.40:/home/mango/mangoJ" trust="yes">
 		<!--scp todir="niauser:nianiauser@210.114.91.91:/home/niauser/mangoJC" trust="yes" port="18830"-->
 			<fileset dir="${target.dir}"/>
 		</scp>

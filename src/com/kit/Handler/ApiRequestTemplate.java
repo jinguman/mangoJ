@@ -78,7 +78,7 @@ public abstract class ApiRequestTemplate implements ApiRequest {
                 + paramClass.getClass().getName());
     }
 	
-    private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status, String error) {
+    public void sendError(ChannelHandlerContext ctx, HttpResponseStatus status, String error) {
     	
     	Document doc = new Document();
     	if ( !error.isEmpty() ) {

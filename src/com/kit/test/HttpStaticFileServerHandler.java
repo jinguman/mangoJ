@@ -191,6 +191,7 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
             }
         }
 
+        // 여기부터 복사하면 될듯...
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
         //HttpHeaders.setContentLength(response, fileLength);
         setContentTypeHeader(response, file);
@@ -212,21 +213,21 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
             //is = new FileInputStream(file);
             
             /***MongoDB Test******************************************/
-            MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
-    		MongoDatabase database = client.getDatabase("trace3");
+            MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40:12800"));
+    		MongoDatabase database = client.getDatabase("trace");
     		
-    		MongoCollection collection = database.getCollection("AK_ANM");
+    		MongoCollection collection = database.getCollection("AK_ANM__201511");
     		
     		Document query = new Document();
-    		query.append("BHN.et", new Document("$gte","2015-11-10T00:00:00"))
-    			.append("BHN.st", new Document("$lte","2015-11-10T04:00:00"));
+    		query.append("_id", new Document("$gte","2015-11-121T09:00"))
+    			.append("BHZ.et", new Document("$lte","2015-11-12T09:20:00"));
     		
     		List<Document> docs = new ArrayList<Document>();
     		collection.find(query).into(docs);
             
     		int totLen = 0;
     		for(Document doc : docs) {
-    			List<Document> d = (List<Document>) doc.get("BHN");
+    			List<Document> d = (List<Document>) doc.get("BHZ");
     			for(Document t : d) {
     				System.out.println(t);
     				Binary bytes = (Binary) t.get("d");
@@ -452,6 +453,8 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
     private static void setContentTypeHeader(HttpResponse response, File file) {
         MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
         response.headers().set(CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+        
+        System.out.println(">>>>>>> CONTENT_TYPE" + mimeTypesMap.getContentType(file.getPath()));
     }
 }
 

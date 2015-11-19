@@ -62,7 +62,7 @@ public class MongoSimpleClient implements Runnable {
 		shardDao = new ShardDao(client, database);
 		logThreshold = pm.getIntegerProperty("mc.logthreshold");
 		
-		isShard = pm.getBooleanProperty("mongo.shard");
+		isShard = pm.getBooleanProperty("mc.shard");
 		restartSec = pm.getIntegerProperty("mc.restartsec");
 		
 		mics = new MongoInitialClientService(client, database);

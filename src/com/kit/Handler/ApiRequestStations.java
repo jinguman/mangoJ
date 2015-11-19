@@ -21,6 +21,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.CharsetUtil;
 import spark.utils.StringUtils;
 
@@ -33,12 +35,8 @@ public class ApiRequestStations extends ApiRequestTemplate {
 	@Override
 	public void requestParamValidation() throws com.kit.Exception.RequestParamException {
 		
-		if ( StringUtils.isEmpty(this.reqData.get("username"))) {
-			throw new RequestParamException("username parameter is mandatory.");
-		}
-		
-		if ( StringUtils.isEmpty(this.reqData.get("password"))) {
-			throw new RequestParamException("password parameter is mandatory.");
+		if ( StringUtils.isEmpty(this.reqData.get("REQUEST_USERNAME")) ) {
+			sendError(ctx, HttpResponseStatus.NOT_ACCEPTABLE, "Username, password is empty");
 		}
 		
 		if ( StringUtils.isEmpty(this.reqData.get("contents"))) {

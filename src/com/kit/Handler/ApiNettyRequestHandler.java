@@ -7,6 +7,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERR
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,10 +18,12 @@ import org.slf4j.LoggerFactory;
 import com.kit.Util.PropertyManager;
 import com.mongodb.client.MongoDatabase;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -84,10 +87,13 @@ public class ApiNettyRequestHandler extends SimpleChannelInboundHandler<FullHttp
 				for (Map.Entry<String, String> h : headers ) {
 					reqData.put(h.getKey(), h.getValue());
 					
+					if ( h.getKey().equals(HttpHeaders.Names.AUTHORIZATION) ) decodeAuthorization(h.getValue());
+					
 					System.out.println(">>> " + h.getKey() + ", " + h.getValue());
 				}
 			}
-			
+
+			// parsing authorization
 			reqData.put("REQUEST_URI", request.getUri());
 			reqData.put("REQUEST_METHOD", request.getMethod().name());
 		}
@@ -97,7 +103,7 @@ public class ApiNettyRequestHandler extends SimpleChannelInboundHandler<FullHttp
 			//logger.debug("LastHttpContent message received. {}", request.getUri() );
 			
 			readPostData();
-			
+
 			// dispatch
 			ApiRequest service = ServiceDispatcher.dispatch(ctx, reqData);
 			
@@ -115,6 +121,24 @@ public class ApiNettyRequestHandler extends SimpleChannelInboundHandler<FullHttp
 	private void reset() {
         request = null;
     }
+	
+	
+	private void decodeAuthorization(String str) {
+
+		// Basic dXNlcjpwd2Q=
+		if ( str.startsWith("Basic")) {
+			str = str.substring(6, str.length());
+			ByteBuf stringByteBuf = Unpooled.copiedBuffer(str.toCharArray(), Charset.defaultCharset());
+			ByteBuf decodeByteBuf = Base64.decode(stringByteBuf);
+			
+			String[] strings = decodeByteBuf.toString(Charset.defaultCharset()).split(":");
+			
+			if ( strings.length == 2) {
+				reqData.put("REQUEST_USERNAME", strings[0]);
+				reqData.put("REQUEST_PASSWORD", strings[1]);
+			}
+		}
+	}
 	
 	private void readPostData() {
 
