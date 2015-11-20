@@ -82,9 +82,9 @@ public class Helpers {
 
 		return String.format("%03d", day);
 	}
-	
+
 	public static String getMonthString(String strDate, SimpleDateFormat fromFormat) throws ParseException {
-		
+
 		Calendar ca = Calendar.getInstance();
 		ca.setTime(fromFormat.parse(strDate));
 		
@@ -92,21 +92,20 @@ public class Helpers {
 
 		return String.format("%02d", month);
 	}
-	
+
 	public static String getTraceCollectionName(String network, String station, String location, String year, String month) {
-		
+
 		StringBuffer sb = new StringBuffer();
 		if ( !network.isEmpty() ) sb.append(network);
 		sb.append("_");
 		if ( !station.isEmpty() ) sb.append(station);
 		sb.append("_");
 		if ( !location.isEmpty() ) sb.append(location);
-		//sb.append("_");
-		//if ( !channel.isEmpty() ) sb.append(channel);
-		
-		if ( !year.isEmpty() ) sb.append("_").append(year);
-		if ( !month.isEmpty() ) sb.append("_").append(month);
-		
+
+		if ( !year.isEmpty() || !month.isEmpty() ) sb.append("_");		
+		if ( !year.isEmpty() ) sb.append(year);
+		if ( !month.isEmpty() ) sb.append(month);
+
 		return sb.toString(); 
 	}
 		

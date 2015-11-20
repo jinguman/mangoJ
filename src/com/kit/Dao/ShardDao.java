@@ -35,7 +35,7 @@ public class ShardDao {
 		// make shardCollection
 		try {
 			Document d = admin.runCommand(new Document("shardCollection", databaseName + "." + collectionName)
-					.append("key", key)
+					.append("key", key).append("unique", "true")
 				);
 			logger.debug("Update shardCollection. {}", d.toJson());
 		} catch (MongoCommandException e) {

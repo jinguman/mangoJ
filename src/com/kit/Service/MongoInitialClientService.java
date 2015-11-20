@@ -17,6 +17,7 @@ public class MongoInitialClientService {
 	private ShardDao shardDao = null;
 	private MongoCollection<Document> collection = null;
 	private MongoDatabase database = null;
+	private IndexOptions indexOptions = null;
 	
 	final Logger logger = LoggerFactory.getLogger(MongoInitialClientService.class);
 	
@@ -24,18 +25,19 @@ public class MongoInitialClientService {
 		
 		shardDao = new ShardDao(client, database);
 		this.database = database;
+		
+		indexOptions = new IndexOptions();
+		indexOptions.background(false);
 	}
 	
 	public void doIndex(String network, String station, String location, String channel, String year, String month) {
-		IndexOptions indexOptions = new IndexOptions();
-		indexOptions.background(true);
 		
 		String collectionName = Helpers.getTraceCollectionName(network, station, location, year, month);
 		collection = database.getCollection(collectionName);
 		
 		Document doc = new Document(channel+".et",1);
 		String str = collection.createIndex(doc, indexOptions);
-		logger.debug("Create initial index. col: {}, idx: {}, rtn: {}", collectionName, doc.toJson(), str);
+		logger.debug("Create index. col: {}, idx: {}, rtn: {}", collectionName, doc.toJson(), str);
 		
 	}
 	

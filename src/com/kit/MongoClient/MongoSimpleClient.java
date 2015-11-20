@@ -114,10 +114,11 @@ public class MongoSimpleClient implements Runnable {
 				d.remove("channel");
 				d.remove("location");
 
-				String collectionName = network + "_" + station + "_" + location;
+				//String collectionName = network + "_" + station + "_" + location;
 				String year = Helpers.getYearString(st, sdfToSecond);
 				String month = Helpers.getMonthString(st, sdfToSecond);
-				collectionName += "_" + year + month;  
+				//collectionName += "_" + year + "_" + month;
+				String collectionName = Helpers.getTraceCollectionName(network, station, location, year, month);
 
 				Document key = new Document();
 				//key.append("_id", Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute))
@@ -129,11 +130,19 @@ public class MongoSimpleClient implements Runnable {
 
 				// add index
 				String indexKey = collection.getNamespace().getFullName() + "." + channel + ".et";
-				addIndex(indexKey, new Document(channel+".et",1), indexOptions);
+				//addIndex(indexKey, new Document(channel+".et",1), indexOptions);
+				if ( !indexSet.contains(indexKey)) {
+					indexSet.add(indexKey);
+					mics.doIndex(network, station, location, channel, year, month);
+				}
+
 
 				if ( isShard ) {
 					
-					mics.doIndex(network, station, location, channel, year, month);
+					if ( !indexSet.contains(indexKey)) { 
+						indexSet.add(indexKey);
+						mics.doIndex(network, station, location, channel, year, month);
+					}
 
 					// add shardCollection
 					indexKey = collection.getNamespace().getFullName() + ".shardCollection";
