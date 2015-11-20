@@ -47,6 +47,7 @@ public class MongoInitialClient implements Runnable {
 	int miRestartSec = 5;
 	Document streamsInfoDoc = null;
 	MongoInitialClientService mics = null; 
+	int sleepSec = -1;
 
 	final Logger logger = LoggerFactory.getLogger(MongoInitialClient.class);
 	
@@ -63,6 +64,7 @@ public class MongoInitialClient implements Runnable {
 		this.shardMonth = shardMonth;
 		this.queue = queue;
 		mics = new MongoInitialClientService(client, database);
+		sleepSec = pm.getIntegerProperty("mi.sleepsec");
 	}
 
 	public void run() {
@@ -91,6 +93,9 @@ public class MongoInitialClient implements Runnable {
 			if ( pm.getBooleanProperty("mi.index")) mics.doIndex(network, station, location, channel, shardYear, shardMonth);
 			if ( pm.getBooleanProperty("mi.shard")) mics.doShard(network, station, location, shardYear, shardMonth);
 			logger.info("execute initiate.({}).", queue.size());
+			
+		
+			if ( sleepSec > 0 ) Thread.sleep(sleepSec*1000);
 		}
 	}
 

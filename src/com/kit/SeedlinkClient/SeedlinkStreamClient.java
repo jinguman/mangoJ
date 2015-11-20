@@ -39,10 +39,13 @@ public class SeedlinkStreamClient implements Runnable {
 	@Setter @Getter private int timeoutSeconds = SeedlinkReader.DEFAULT_TIMEOUT_SECOND;
 	@Setter @Getter private boolean verbose = false;
 	private Document streamsInfoDoc = null;
+	private boolean isBuildEntireList = false;
 
 	public SeedlinkStreamClient(BlockingQueue<Document> queue, PropertyManager pm) {
 		this.queue = queue;
 		this.pm = pm;
+		
+		isBuildEntireList = pm.getBooleanProperty("mi.buildentirelist");
 	}
 
 	public void run() {
@@ -88,32 +91,66 @@ public class SeedlinkStreamClient implements Runnable {
 		//			}]
 		//			
 		//Helpers.printJson(streamsInfoDoc);
-		
-		for(String network : networks) {
-			List<Document> stationListDoc = (List<Document>) streamsInfoDoc.get(network);
+		if ( isBuildEntireList ) {
 			
-			for(Document stationDoc : stationListDoc) {
-				for( String station : stationDoc.keySet() ){
-					List<Document> channelListDoc = (List<Document>) stationDoc.get(station);
-					for(Document channelDoc : channelListDoc) {
-						for( String location : channelDoc.keySet() ){
-							String channel = channelDoc.getString(location);
+			for(String network : streamsInfoDoc.keySet()) {
+				List<Document> stationListDoc = (List<Document>) streamsInfoDoc.get(network);
+				
+				for(Document stationDoc : stationListDoc) {
+					for( String station : stationDoc.keySet() ){
+						List<Document> channelListDoc = (List<Document>) stationDoc.get(station);
+						for(Document channelDoc : channelListDoc) {
+							for( String location : channelDoc.keySet() ){
+								String channel = channelDoc.getString(location);
 
-							Document doc = new Document().append("network", network)
-										.append("station", station)
-										.append("location", location)
-										.append("channel", channel);
+								Document doc = new Document().append("network", network)
+											.append("station", station)
+											.append("location", location)
+											.append("channel", channel);
 
-							try {
-								queue.put(doc);
-							} catch (InterruptedException e) {
-								logger.error("{}", e);
+								try {
+									queue.put(doc);
+								} catch (InterruptedException e) {
+									logger.error("{}", e);
+								}
 							}
 						}
-					}
-		        }
+			        }
+				}
 			}
+			
+		} else {
+			
+			for(String network : networks) {
+				List<Document> stationListDoc = (List<Document>) streamsInfoDoc.get(network);
+				
+				for(Document stationDoc : stationListDoc) {
+					for( String station : stationDoc.keySet() ){
+						List<Document> channelListDoc = (List<Document>) stationDoc.get(station);
+						for(Document channelDoc : channelListDoc) {
+							for( String location : channelDoc.keySet() ){
+								String channel = channelDoc.getString(location);
+
+								Document doc = new Document().append("network", network)
+											.append("station", station)
+											.append("location", location)
+											.append("channel", channel);
+
+								try {
+									queue.put(doc);
+								} catch (InterruptedException e) {
+									logger.error("{}", e);
+								}
+							}
+						}
+			        }
+				}
+			}
+			
 		}
+		
+		
+		
 	}
 
 }

@@ -44,12 +44,12 @@ public class ShardDao {
 	}
 	
 	public void addTagRange(String ns, Document min, Document max, String tag) {
-				
+
 		MongoCollection<Document> tags = config.getCollection("tags");
-				
+
 		UpdateOptions options = new UpdateOptions();
 		options.upsert(true);
-				
+	
 		Document key = new Document("_id", 
 				new Document("ns", ns).append("min", min)
 				);
@@ -58,14 +58,14 @@ public class ShardDao {
 				.append("min", min)
 				.append("max", max)
 				.append("tag", tag);
-		
+
 		long l = tags.count(key);
 		if ( l > 0 ) {
 			// already exist
 			logger.debug("Update tagRange. Already exists.");
 			return;
 		}
-		
+
 		try {
 			UpdateResult result = tags.updateOne(key, new Document("$set", doc), options);
 			logger.debug("Update tagRange. {}", result);

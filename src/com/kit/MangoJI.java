@@ -53,7 +53,7 @@ public class MangoJI {
     		String[] networks = pm.getStringListProperty("sc." + i + ".network");
     		SeedlinkStreamClient ssc = new SeedlinkStreamClient(queue, pm);
     		ssc.setNetworks(networks);
-    		
+
     		Thread thdSlink = new Thread(ssc);
         	threads.add(thdSlink);
         	thdSlink.start();

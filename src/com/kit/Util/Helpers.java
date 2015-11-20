@@ -104,7 +104,7 @@ public class Helpers {
 
 		if ( !year.isEmpty() || !month.isEmpty() ) sb.append("_");		
 		if ( !year.isEmpty() ) sb.append(year);
-		if ( !month.isEmpty() ) sb.append(month);
+		//if ( !month.isEmpty() ) sb.append(month);
 
 		return sb.toString(); 
 	}
