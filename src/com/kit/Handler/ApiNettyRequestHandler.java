@@ -149,6 +149,9 @@ public class ApiNettyRequestHandler extends SimpleChannelInboundHandler<FullHttp
 					try {
 						Attribute attribute = (Attribute) data;
 						reqData.put(attribute.getName(), attribute.getValue());
+						
+						System.out.println(">>> " + attribute.getName() + ", " + attribute.getValue());
+						
 					} catch (IOException e) {
 						logger.error("BODY Attribute: {}. {}", data.getHttpDataType().name(), e);
 						return;

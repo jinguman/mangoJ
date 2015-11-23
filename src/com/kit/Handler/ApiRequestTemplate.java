@@ -78,7 +78,7 @@ public abstract class ApiRequestTemplate implements ApiRequest {
                 + paramClass.getClass().getName());
     }
 	
-    public void sendError(ChannelHandlerContext ctx, HttpResponseStatus status, String error) {
+    protected void sendError(ChannelHandlerContext ctx, HttpResponseStatus status, String error) {
     	
     	Document doc = new Document();
     	if ( !error.isEmpty() ) {
@@ -97,4 +97,5 @@ public abstract class ApiRequestTemplate implements ApiRequest {
         // Close the connection as soon as the error message is sent.
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
+
 }

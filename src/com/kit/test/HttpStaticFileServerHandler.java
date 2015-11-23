@@ -174,8 +174,11 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
             sendError(ctx, FORBIDDEN);
             return;
         }
+        
+        System.out.println("channel read..");
 
         // Cache Validation
+        /*
         String ifModifiedSince = request.headers().get(IF_MODIFIED_SINCE);
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
             SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
@@ -190,12 +193,20 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
                 return;
             }
         }
+        */
 
+        
+        System.out.println("send file..");
+        
         // 여기부터 복사하면 될듯...
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
+        
+        
+        response.headers().add("Content-Disposition", "inline; filename=myfile.txt");
+        
         //HttpHeaders.setContentLength(response, fileLength);
         setContentTypeHeader(response, file);
-        setDateAndCacheHeaders(response, file);
+        //setDateAndCacheHeaders(response, file);
         response.headers().set(TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
         ctx.write(response);
         
@@ -213,14 +224,14 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
             //is = new FileInputStream(file);
             
             /***MongoDB Test******************************************/
-            MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40:12800"));
+            MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
     		MongoDatabase database = client.getDatabase("trace");
     		
-    		MongoCollection collection = database.getCollection("AK_ANM__201511");
+    		MongoCollection collection = database.getCollection("AK_ANM__2015");
     		
     		Document query = new Document();
-    		query.append("_id", new Document("$gte","2015-11-121T09:00"))
-    			.append("BHZ.et", new Document("$lte","2015-11-12T09:20:00"));
+    		query.append("_id", new Document("$gte","2015-11-23T01:00"))
+    			.append("BHZ.et", new Document("$lte","2015-11-23T02:00:00"));
     		
     		List<Document> docs = new ArrayList<Document>();
     		collection.find(query).into(docs);
@@ -452,9 +463,11 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
      */
     private static void setContentTypeHeader(HttpResponse response, File file) {
         MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+
+        // forced.. test
+        //response.headers().set(CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+        response.headers().set(CONTENT_TYPE, "application/octet-stream");
         
-        System.out.println(">>>>>>> CONTENT_TYPE" + mimeTypesMap.getContentType(file.getPath()));
     }
 }
 

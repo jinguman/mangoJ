@@ -7,12 +7,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.bson.BSONObject;
+import org.bson.BasicBSONDecoder;
+import org.bson.BsonDocumentReader;
+import org.bson.BsonReader;
 import org.bson.Document;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.EncoderContext;
+import org.bson.conversions.Bson;
 import org.bson.json.JsonMode;
 import org.bson.json.JsonWriter;
 import org.bson.json.JsonWriterSettings;
+
+import com.mongodb.util.JSON;
 
 public class Helpers {
 
@@ -23,6 +30,15 @@ public class Helpers {
 				EncoderContext.builder().isEncodingCollectibleDocument(true).build());
 		System.out.println(jsonWriter.getWriter());
 		System.out.flush();
+	}
+	
+	public static String toJson(Bson bson) {
+	
+		//BsonReader bsonReader = new BsonDocumentReader();
+		
+		//new DocumentCodec().decode(arg0, arg1)
+		
+		return JSON.serialize(bson);
 	}
 	
 	public static String getCurrentUTC(SimpleDateFormat sdf) {
