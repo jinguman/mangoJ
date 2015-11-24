@@ -42,6 +42,7 @@ import io.netty.handler.codec.http.DefaultHttpContent;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.LastHttpContent;
 import spark.utils.StringUtils;
 
@@ -57,6 +58,10 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 	@Override
 	public void requestParamValidation() throws com.kit.Exception.RequestParamException {
 		
+		if ( StringUtils.isEmpty(this.reqData.get("REQUEST_USERNAME")) ) {
+			throw new RequestParamException("There is no username, password parameter.");
+		}
+		
 		if ( StringUtils.isEmpty(this.reqData.get("net"))) {
 			throw new RequestParamException("There is no net parameter.");
 		} else if ( StringUtils.isEmpty(this.reqData.get("sta"))) {
@@ -67,6 +72,8 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 			throw new RequestParamException("There is no st parameter.");
 		} else if ( StringUtils.isEmpty(this.reqData.get("et"))) {
 			throw new RequestParamException("There is no et parameter.");
+		} else if ( StringUtils.isEmpty(this.reqData.get("content"))) {
+			throw new RequestParamException("There is no content(raw,...) parameter.");
 		}
 		
 		// format
@@ -76,14 +83,13 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 			throw new RequestParamException("st parameter's format 'yyyy-MM-dd'T'HH:mm:ss.SSSS'");
 		}
 		
-		
-		
 		try {
 			sdfToSecond.parse(this.reqData.get("et"));
 		} catch (ParseException e) {
 			throw new RequestParamException("et parameter's format 'yyyy-MM-dd'T'HH:mm:ss.SSSS'");
 		}
-	};
+		
+	}
 	
 	@Override
 	public void service() throws ApiNettyServiceException, RequestParamException {
@@ -134,7 +140,7 @@ public class ApiRequestTrace extends ApiRequestTemplate {
     		aggregateParams.add(project);
     		aggregateParams.add(sort);
     		
-    		logger.debug("Mongo query. match: " + Helpers.toJson(match) + ", unwind: " + Helpers.toJson(unwind) + ", project: " + Helpers.toJson(project) + ", sort: " + Helpers.toJson(sort) );
+    		//logger.debug("Mongo query. match: " + Helpers.toJson(match) + ", unwind: " + Helpers.toJson(unwind) + ", project: " + Helpers.toJson(project) + ", sort: " + Helpers.toJson(sort) );
     		MongoCursor<Document> cursor = collection.aggregate(aggregateParams).iterator();
     		
     		// check document
@@ -185,8 +191,8 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 			
 			@Override
 			public void operationComplete(ChannelFuture future) throws Exception {
-				// TODO Auto-generated method stub
-				System.out.println(">>>>>>> complete./.");
+				logger.debug("Send lastContent complete.");
+				//System.out.println(">>>>>>> complete./.");
 			}
 		});
 
