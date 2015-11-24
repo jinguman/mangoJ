@@ -11,7 +11,7 @@ usage() {
 ### MAIN ###
 
 #PID=`ps -ef | grep java | grep spis |  grep -v grep | grep -v CassandraDaemon | awk '{print $2}'`
-PID=`jps | grep mangoJI | awk '{print $1}'`
+PID=`jps | grep MangoJI | awk '{print $1}'`
 export JAVA=/usr/local/java/bin/java
 export JAVAOPTION='-Dlog4j.configuration=file:../config/log4j.xml -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+HeapDumpOnOutOfMemoryError -Xloggc:./gc.log -Dsun.reflect.inflationThreshold=30'
 

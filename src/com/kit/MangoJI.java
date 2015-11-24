@@ -1,7 +1,9 @@
 package com.kit;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.bson.Document;
@@ -10,7 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import com.kit.MongoClient.MongoInitialClient;
 import com.kit.SeedlinkClient.SeedlinkStreamClient;
+import com.kit.Service.MongoInitialClientService;
 import com.kit.Util.PropertyManager;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoDatabase;
 
 public class MangoJI {
 
@@ -22,6 +28,9 @@ public class MangoJI {
     	// queue
     	BlockingQueue<Document> queue = new LinkedBlockingQueue<Document>();
 
+    	// index map
+    	Map<String, Object> indexMap = new ConcurrentHashMap<>();
+    	
     	// get property
     	PropertyManager pm = new PropertyManager();
 
@@ -37,10 +46,21 @@ public class MangoJI {
     	String shardYear = args[0];
     	String shardMonth = args[1];
     	
+    	// getIndexes, shardCollection, shardRange
+    	MongoClient client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
+		MongoDatabase database = client.getDatabase(pm.getStringProperty("mongo.database"));
+    	MongoInitialClientService mics = new MongoInitialClientService(client, database, indexMap);
+    	mics.getIndexes();
+    	logger.debug("getIndexes from mongodb");
+    	mics.getShardCollections();
+    	logger.debug("getShardcollections from mongodb");
+    	mics.getShardRange();
+    	logger.debug("getShardRange from mongodb");
+    	
     	// MongoShardClient Thread
     	int threadCnt = pm.getIntegerProperty("mi.thread");
     	for (int i = 0; i < threadCnt; i++) {
-    		MongoInitialClient msc = new MongoInitialClient(queue, pm, shardYear, shardMonth);
+    		MongoInitialClient msc = new MongoInitialClient(queue, pm, shardYear, shardMonth, indexMap);
     		Thread thdMsc = new Thread(msc);
     		threads.add(thdMsc);
     		thdMsc.start();

@@ -45,8 +45,6 @@ public class SeedlinkClient implements Runnable {
 
 	public void run() {
 
-		logger.info("SeedlinkClient start.. network: {}", network);
-
 		SeedlinkClientService scs = new SeedlinkClientService(queue, pm);
 		scs.setNetwork(network);
 		scs.setStation(station);
@@ -61,10 +59,13 @@ public class SeedlinkClient implements Runnable {
 		
 		while(true) {
 			try {
+				
+				logger.info("SeedlinkClient start.. network: {}", network);
+				
 				scs.getTraceRaw();
 			} catch (SeedlinkException | SeedFormatException | IOException | CodecException | ParseException
 					| InterruptedException e) {
-				logger.warn("{} {}", "Failure in Seedlink.", e);
+				logger.warn("{} {}", "Failure in Seedlink. net: {}", network, e);
 			}
 
 			int restartSec = pm.getIntegerProperty("sc.restartsec");

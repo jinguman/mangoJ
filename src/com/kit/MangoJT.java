@@ -6,10 +6,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.bson.Document;
@@ -35,7 +37,7 @@ public class MangoJT {
     	BlockingQueue<Document> queue = new LinkedBlockingQueue<Document>();
     	
     	// index set
-    	Set<String> indexSet = new HashSet<>();
+    	Map<String, Object> indexMap = new ConcurrentHashMap();
     	
     	// get property
     	PropertyManager pm = new PropertyManager();
@@ -46,7 +48,7 @@ public class MangoJT {
     	// MongoClient Thread
     	int mcThreadCnt = pm.getIntegerProperty("mc.thread"); 
     	for (int i = 0; i < mcThreadCnt; i++) {
-    		MongoSimpleClient ip = new MongoSimpleClient(queue, pm, indexSet);
+    		MongoSimpleClient ip = new MongoSimpleClient(queue, pm, indexMap);
     		Thread thdIp = new Thread(ip);
     		threads.add(thdIp);
     		thdIp.start();

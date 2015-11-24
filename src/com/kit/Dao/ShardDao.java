@@ -1,6 +1,13 @@
 package com.kit.Dao;
 
+import static com.mongodb.client.model.Aggregates.project;
+import static com.mongodb.client.model.Aggregates.unwind;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +33,41 @@ public class ShardDao {
 		this.database = database;
 		admin = client.getDatabase("admin");
 		config = client.getDatabase("config");
+	}
+	
+	public List<String> getShardCollections() {
+		
+		List<String> list = new ArrayList<>();
+		
+		List<Document> docs = new ArrayList<>();
+		config.getCollection("collections").find().into(docs);
+		
+		for(Document doc : docs) {
+			
+			String ns = doc.getString("_id");
+			Document keyDoc = (Document) doc.get("key");
+			
+			for(String key : keyDoc.keySet()) {
+				list.add(ns + ".shardCollection." + key);
+			}
+		}
+		return list;
+	}
+	
+	public List<String> getShardRange() {
+		
+		List<String> list = new ArrayList<>();
+		
+		List<Document> docs = new ArrayList<>();
+		config.getCollection("tags").find().into(docs);
+		
+		for(Document doc : docs) {
+			
+			String ns = doc.getString("ns");
+			String tag = doc.getString("tag");
+			list.add(ns + ".shardRange." + tag);
+		}
+		return list;
 	}
 	
 	public void shardCollection(String collectionName, Document key) {

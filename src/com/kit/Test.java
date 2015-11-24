@@ -8,13 +8,16 @@ import java.util.TimeZone;
 
 import org.bson.Document;
 
+import com.kit.Dao.ShardDao;
 import com.kit.Util.Helpers;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCommandException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
@@ -22,17 +25,33 @@ public class Test {
 
 	public static void main(String[] args) throws ParseException {
 		
+		MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
+		MongoDatabase database = client.getDatabase("trace");
 		
-		System.out.println(Helpers.getTraceCollectionName("network", "station", "location", "year", "month"));
-		System.out.println(Helpers.getTraceCollectionName("network", "station", "location", "year", "month"));
-		System.out.println(Helpers.getTraceCollectionName("network", "station", "location", "year", ""));
-		System.out.println(Helpers.getTraceCollectionName("network", "station", "location", "", ""));
+		/*
+		int count = 0;
+		MongoCursor<String> cursor = database.listCollectionNames().iterator();
+		while(cursor.hasNext()) {
+			String s = cursor.next();
+			//System.out.println(s);
+			
+			MongoCollection col = database.getCollection(s);
+			MongoCursor<Document> c =  col.listIndexes().iterator();
+			
+			while(c.hasNext()) {
+				Document d = c.next();
+				//System.out.println(d.toJson());
+				System.out.println((String)d.get("ns") + ".index." + (String)d.get("name") );
+				count++;
+			}
+		}
 		
+		System.out.println(count);
+		*/
 		
+		ShardDao dao = new ShardDao(client, database);
+		dao.getShardCollections();
 		
-		String str = "true";
-		boolean a = Boolean.valueOf("true");
-		System.out.println(a);
 		
 		/*
 		MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40:12800"));

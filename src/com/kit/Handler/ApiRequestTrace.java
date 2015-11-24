@@ -75,7 +75,7 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 		} else if ( StringUtils.isEmpty(this.reqData.get("content"))) {
 			throw new RequestParamException("There is no content(raw,...) parameter.");
 		}
-		
+
 		// format
 		try {
 			sdfToSecond.parse(this.reqData.get("st"));
@@ -197,11 +197,8 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 		});
 
         // Decide whether to close the connection or not.
-       // if (!HttpHeaders.isKeepAlive(response)) {
-       //     sendFileFuture.addListener(ChannelFutureListener.CLOSE);
-       // }
-		
+        if (!HttpHeaders.isKeepAlive(response)) {
+            sendFileFuture.addListener(ChannelFutureListener.CLOSE);
+        }
 	}
-
-
 }

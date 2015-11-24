@@ -3,6 +3,7 @@ package com.kit.MongoClient;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
@@ -51,7 +52,7 @@ public class MongoInitialClient implements Runnable {
 
 	final Logger logger = LoggerFactory.getLogger(MongoInitialClient.class);
 	
-	public MongoInitialClient(BlockingQueue<Document> queue, PropertyManager pm, String shardYear, String shardMonth) {
+	public MongoInitialClient(BlockingQueue<Document> queue, PropertyManager pm, String shardYear, String shardMonth, Map<String, Object> indexMap) {
 		this.pm = pm;
 		
 		client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
@@ -63,7 +64,7 @@ public class MongoInitialClient implements Runnable {
 		this.shardYear = shardYear;
 		this.shardMonth = shardMonth;
 		this.queue = queue;
-		mics = new MongoInitialClientService(client, database);
+		mics = new MongoInitialClientService(client, database, indexMap);
 		sleepSec = pm.getIntegerProperty("mi.sleepsec");
 	}
 
@@ -90,9 +91,9 @@ public class MongoInitialClient implements Runnable {
 			String location = doc.getString("location");
 			String channel = doc.getString("channel");
 			
-			if ( pm.getBooleanProperty("mi.index")) mics.doIndex(network, station, location, channel, shardYear, shardMonth);
+			if ( pm.getBooleanProperty("mi.index")) mics.doEtIndex(network, station, location, channel, shardYear, shardMonth, false);
 			if ( pm.getBooleanProperty("mi.shard")) mics.doShard(network, station, location, shardYear, shardMonth);
-			logger.info("execute initiate.({}).", queue.size());
+			logger.info("Execute initiate.({}).", queue.size());
 			
 		
 			if ( sleepSec > 0 ) Thread.sleep(sleepSec*1000);

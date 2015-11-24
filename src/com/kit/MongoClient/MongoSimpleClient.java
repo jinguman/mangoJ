@@ -2,7 +2,8 @@ package com.kit.MongoClient;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Set;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 
 import org.bson.Document;
@@ -16,7 +17,6 @@ import com.kit.Util.Helpers;
 import com.kit.Util.PropertyManager;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.MongoCommandException;
 import com.mongodb.MongoSocketReadException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
@@ -39,19 +39,20 @@ public class MongoSimpleClient implements Runnable {
 	private SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	private TraceStatsDao traceStatsDao;
 	private ShardDao shardDao;
-	private Set<String> indexSet;
+	private Map<String, Object> indexMap;
 	int logThreshold = 0;
 	boolean isShard = true;
+	boolean isIndex = true;
 	int cnt = 0; // log print count
 	int restartSec = 5;
 	private MongoInitialClientService mics;
 
 	final Logger logger = LoggerFactory.getLogger(MongoSimpleClient.class);
 	
-	public MongoSimpleClient(BlockingQueue<Document> queue, PropertyManager pm, Set<String> indexSet) {
+	public MongoSimpleClient(BlockingQueue<Document> queue, PropertyManager pm, Map<String, Object> indexMap) {
 		this.queue = queue;
 		this.pm = pm;
-		this.indexSet = indexSet;
+		this.indexMap = indexMap;
 		
 		client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
 		database = client.getDatabase(pm.getStringProperty("mongo.database"));
@@ -63,9 +64,15 @@ public class MongoSimpleClient implements Runnable {
 		logThreshold = pm.getIntegerProperty("mc.logthreshold");
 		
 		isShard = pm.getBooleanProperty("mc.shard");
+		isIndex= pm.getBooleanProperty("mc.index");
 		restartSec = pm.getIntegerProperty("mc.restartsec");
 		
-		mics = new MongoInitialClientService(client, database);
+		mics = new MongoInitialClientService(client, database, indexMap);
+		
+		// get random start cnt
+		Random random = new Random();
+		cnt = random.nextInt(logThreshold);
+		
 	}
 
 	public void run() {
@@ -114,63 +121,26 @@ public class MongoSimpleClient implements Runnable {
 				d.remove("channel");
 				d.remove("location");
 
-				//String collectionName = network + "_" + station + "_" + location;
 				String year = Helpers.getYearString(st, sdfToSecond);
 				String month = Helpers.getMonthString(st, sdfToSecond);
-				//collectionName += "_" + year + "_" + month;
 				String collectionName = Helpers.getTraceCollectionName(network, station, location, year, month);
 
-				Document key = new Document();
-				//key.append("_id", Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute))
-				//	.append("sta", station);
-				key.append("_id", station + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
 
 				// get collection
 				collection = database.getCollection(collectionName);
 
-				// add index
-				String indexKey = collection.getNamespace().getFullName() + "." + channel + ".et";
-				//addIndex(indexKey, new Document(channel+".et",1), indexOptions);
-				if ( !indexSet.contains(indexKey)) {
-					indexSet.add(indexKey);
-					mics.doIndex(network, station, location, channel, year, month);
-				}
-
+				if ( isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
 
 				if ( isShard ) {
-					
-					if ( !indexSet.contains(indexKey)) { 
-						indexSet.add(indexKey);
-						mics.doIndex(network, station, location, channel, year, month);
-					}
-
-					// add shardCollection
-					indexKey = collection.getNamespace().getFullName() + ".shardCollection";
-					if ( !indexSet.contains(indexKey)) {
-						indexSet.add(indexKey);
-						//shardCollection(collectionName, new Document("sta",1));
-						shardDao.shardCollection(collectionName, new Document("_id",1));
-					}
-
-					// add shardRange
-					indexKey = collection.getNamespace().getFullName() + ".rangeATAG";
-					if ( !indexSet.contains(indexKey) ) {
-						indexSet.add(indexKey);
-						//addTagRange(collection.getNamespace().getFullName(), new Document("sta","0"), new Document("sta","L"), "ATAG");
-						shardDao.addTagRange(collection.getNamespace().getFullName(), new Document("_id","0"), new Document("_id","L"), "ATAG");
-					}
-					indexKey = collection.getNamespace().getFullName() + ".rangeBTAG";
-					if ( !indexSet.contains(indexKey) ) {
-						indexSet.add(indexKey);
-						//addTagRange(collection.getNamespace().getFullName(), new Document("sta","M"), new Document("sta","Z"), "BTAG");
-						shardDao.addTagRange(collection.getNamespace().getFullName(), new Document("_id","M"), new Document("_id","Z"), "BTAG");
-					}
+					if ( !isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
+					mics.doShard(network, station, location, year, month);
 				}
 				
 				// add trace
+				Document key = new Document("_id", station + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
 				addTrace(key, new Document("$addToSet",new Document(channel,d))
 						, options, channel + ".st:" + st);				
-				
+
 				// make stats
 				Document keyTraceStatsDoc = new Document()
 						.append("_id", network + "_" + station + "_" + location + "_" + channel);
@@ -204,16 +174,7 @@ public class MongoSimpleClient implements Runnable {
 				//queue.add(d);
 			}
 		}	
-	}
-
-	private void addIndex(String key, Document doc, IndexOptions options) {
-		
-		if ( !indexSet.contains(key)) {
-			indexSet.add(key);
-			collection.createIndex(doc, options);
-		} 
-	}
-	
+	}	
 
 	private void addTrace(Document key, Document doc, UpdateOptions options, String logStr) {
 

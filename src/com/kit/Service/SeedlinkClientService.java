@@ -81,6 +81,8 @@ public class SeedlinkClientService {
         
         try {
 
+
+        	
 			reader.select(network, station, location, channel);
 			reader.startData(start, end);
 		} catch (SeedlinkException | IOException e) {
@@ -169,7 +171,7 @@ public class SeedlinkClientService {
 					List<Document> channelDocList = new ArrayList<Document>();
 					for(int j=0; j<streamList.getLength(); j++) {
 						Node streamNode = streamList.item(j);
-						if ( streamNode.getNodeType() == Node.ELEMENT_NODE) {
+						if ( streamNode.getNodeType() == Node.ELEMENT_NODE ) {
 							Element streamElemnt = (Element) streamNode;
 							String location = streamElemnt.getAttribute("location");
 							String channel = streamElemnt.getAttribute("seedname");
@@ -210,13 +212,20 @@ public class SeedlinkClientService {
 		// Get seedlink
         SeedlinkReader reader = null;
 		reader = new SeedlinkReader(host, port, timeoutSeconds, verbose);
-		
+
 		// Seedlink verbose setting
-        LoggingOutputStream los = new LoggingOutputStream(logger, Level.DEBUG);
-        PrintWriter out = new PrintWriter(los, true);
-        if (verbose) reader.setVerboseWriter(out);
+
+        //LoggingOutputStream los = new LoggingOutputStream(logger, Level.DEBUG);
+        //PrintWriter out = new PrintWriter(los, true);
+        PrintWriter out = new PrintWriter(System.out, true);
+        
+        if (verbose) {
+        	reader.setVerbose(true);
+        	reader.setVerboseWriter(out);
+        }
 
         try {
+
 			reader.select(network, station, location, channel);
 			reader.startData(start, end);
 		} catch (SeedlinkException | IOException e) {
@@ -253,6 +262,8 @@ public class SeedlinkClientService {
 					.append("station", stationIdentifier)
 					.append("location", locationIdentifier)
 					.append("channel", channelIdentifier);
+            
+            //System.out.println("Get packet. st:" + startTime + ", et: " + endTime );
             
             queue.put(d);
 
