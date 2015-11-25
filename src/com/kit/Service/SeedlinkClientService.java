@@ -80,9 +80,6 @@ public class SeedlinkClientService {
         if (verbose) reader.setVerboseWriter(out);
         
         try {
-
-
-        	
 			reader.select(network, station, location, channel);
 			reader.startData(start, end);
 		} catch (SeedlinkException | IOException e) {

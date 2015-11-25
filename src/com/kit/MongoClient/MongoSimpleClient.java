@@ -129,15 +129,15 @@ public class MongoSimpleClient implements Runnable {
 				// get collection
 				collection = database.getCollection(collectionName);
 
-				//if ( isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
+				if ( isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
 
 				if ( isShard ) {
-					//if ( !isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
+					if ( !isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
 					mics.doShard(network, station, location, year, month);
 				}
 				
 				// add trace
-				Document key = new Document("_id", station + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
+				Document key = new Document("_id", station + "_" + location + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
 				addTrace(key, new Document("$addToSet",new Document(channel,d))
 						, options, channel + ".st:" + st);		
 
@@ -214,6 +214,4 @@ public class MongoSimpleClient implements Runnable {
 			}
 		}
 	}
-
-
 }

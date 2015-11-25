@@ -119,12 +119,14 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 
     		MongoCollection<Document> collection = mongoDatabase.getCollection(Helpers.getTraceCollectionName(network, station, location, year, month));
     		
-    		// db.AK_ANM__2015.aggregate([
-    		//{ $match: { "_id" : {"$gte" : "ANM_2015-11-23T00:31"}, "BHZ.et" : {"$lte" : "2015-11-23T00:32:00.0000"}}},
+    		// db.AK__2015.aggregate([
+    		//{ $match: { $and:[ {"_id" : {"$gte" : "ANM_2015-11-23T00:31"}}, {"_id" : {"$lte" : "ANM_2015-11-23T00:32"}}]}},
     		//{ $unwind : "$BHZ" },
     		//{ $project: {_id:0, "BHZ":1}},
     		//{ $sort: {"BHZ.et":1}}
     		//]).pretty()
+    		
+    		//db.AK_2015.aggregate([{ $match: { $and:[{"_id" : {$gte:"ANM_2015-11-25T06:00"}},{_id:{$lte:"ANM_2015-11-25T06:02"}}]}},{ $unwind : "$BHE" },{ $project: {_id:1,"BHE":1}}]).pretty()
     		
     		Bson match = match( 
 	    				and( gte("_id", station + "_" + Helpers.convertDate(stStr, sdfToSecond, sdfToMinute)),

@@ -12,6 +12,7 @@ import com.kit.MongoClient.MongoSimpleClient;
 import com.kit.Util.Helpers;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -84,10 +85,19 @@ public class MongoInitialClientService {
 		indexMap.put(key, true);
 		
 		// make index
-		//Document doc = new Document(channel+".et",1);
-		//indexOptions.background(isBackground);
-		//String str = collection.createIndex(doc, indexOptions);
-		//logger.debug("Create index. col: {}, idx: {}, rtn: {}", collectionName, doc.toJson(), str);
+		Document doc = new Document(channel+".et",1);
+		indexOptions.background(isBackground);
+		
+		try {
+			String str = collection.createIndex(doc, indexOptions);
+			logger.debug("Create index. col: {}, idx: {}, rtn: {}", collectionName, doc.toJson(), str);
+		} catch (MongoException e) {
+			if ( e.getCode() == 67 ) {
+				// too many indexes for collection
+				logger.warn("Too many index. col: {}, idx: {}", collectionName, doc.toJson());
+			}
+		}
+		
 		
 	}
 	

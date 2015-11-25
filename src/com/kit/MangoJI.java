@@ -50,8 +50,8 @@ public class MangoJI {
     	MongoClient client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
 		MongoDatabase database = client.getDatabase(pm.getStringProperty("mongo.database"));
     	MongoInitialClientService mics = new MongoInitialClientService(client, database, indexMap);
-    	//mics.getIndexes();
-    	//logger.debug("getIndexes from mongodb");
+    	mics.getIndexes();
+    	logger.debug("getIndexes from mongodb");
     	mics.getShardCollections();
     	logger.debug("getShardcollections from mongodb");
     	//mics.getShardRange();
@@ -68,6 +68,8 @@ public class MangoJI {
     	
     	// SeedlinkShardClient Thread
     	int slinkThdCnt = pm.getIntegerProperty("sc.thread");
+    	if ( pm.getBooleanProperty("mi.buildentirelist")) slinkThdCnt = 1;
+    	
     	for(int i=1; i<slinkThdCnt+1; i++) {
 
     		String[] networks = pm.getStringListProperty("sc." + i + ".network");
