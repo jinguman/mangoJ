@@ -84,10 +84,10 @@ public class MongoInitialClientService {
 		indexMap.put(key, true);
 		
 		// make index
-		Document doc = new Document(channel+".et",1);
-		indexOptions.background(isBackground);
-		String str = collection.createIndex(doc, indexOptions);
-		logger.debug("Create index. col: {}, idx: {}, rtn: {}", collectionName, doc.toJson(), str);
+		//Document doc = new Document(channel+".et",1);
+		//indexOptions.background(isBackground);
+		//String str = collection.createIndex(doc, indexOptions);
+		//logger.debug("Create index. col: {}, idx: {}, rtn: {}", collectionName, doc.toJson(), str);
 		
 	}
 	
@@ -104,17 +104,17 @@ public class MongoInitialClientService {
 		}
 		
 		// shardRange1
-		key = collection.getNamespace().getFullName() + ".shardRange.ATAG";
-		if ( !indexMap.containsKey(key)) {
-			indexMap.put(key, true);
-			shardDao.addTagRange(collection.getNamespace().getFullName(), new Document("_id","0"), new Document("_id","L"), "ATAG");
-		}
+		//key = collection.getNamespace().getFullName() + ".shardRange.ATAG";
+		//if ( !indexMap.containsKey(key)) {
+		//	indexMap.put(key, true);
+		//	shardDao.addTagRange(collection.getNamespace().getFullName(), new Document("_id","0"), new Document("_id","L"), "ATAG");
+		//}
 		
 		// shardRange2
-		key = collection.getNamespace().getFullName() + ".shardRange.BTAG";
-		if ( !indexMap.containsKey(key)) {
-			indexMap.put(key, true);
-			shardDao.addTagRange(collection.getNamespace().getFullName(), new Document("_id","M"), new Document("_id","Z"), "BTAG");
-		}
+		//key = collection.getNamespace().getFullName() + ".shardRange.BTAG";
+		//if ( !indexMap.containsKey(key)) {
+		//	indexMap.put(key, true);
+		//	shardDao.addTagRange(collection.getNamespace().getFullName(), new Document("_id","M"), new Document("_id","Z"), "BTAG");
+		//}
 	}
 }

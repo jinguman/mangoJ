@@ -113,10 +113,10 @@ public class Helpers {
 
 		StringBuffer sb = new StringBuffer();
 		if ( !network.isEmpty() ) sb.append(network);
-		sb.append("_");
-		if ( !station.isEmpty() ) sb.append(station);
-		sb.append("_");
-		if ( !location.isEmpty() ) sb.append(location);
+		//sb.append("_");
+		//if ( !station.isEmpty() ) sb.append(station);
+		//sb.append("_");
+		//if ( !location.isEmpty() ) sb.append(location);
 
 		if ( !year.isEmpty() || !month.isEmpty() ) sb.append("_");		
 		if ( !year.isEmpty() ) sb.append(year);

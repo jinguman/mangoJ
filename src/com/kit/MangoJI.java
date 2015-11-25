@@ -50,12 +50,12 @@ public class MangoJI {
     	MongoClient client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
 		MongoDatabase database = client.getDatabase(pm.getStringProperty("mongo.database"));
     	MongoInitialClientService mics = new MongoInitialClientService(client, database, indexMap);
-    	mics.getIndexes();
-    	logger.debug("getIndexes from mongodb");
+    	//mics.getIndexes();
+    	//logger.debug("getIndexes from mongodb");
     	mics.getShardCollections();
     	logger.debug("getShardcollections from mongodb");
-    	mics.getShardRange();
-    	logger.debug("getShardRange from mongodb");
+    	//mics.getShardRange();
+    	//logger.debug("getShardRange from mongodb");
     	
     	// MongoShardClient Thread
     	int threadCnt = pm.getIntegerProperty("mi.thread");
