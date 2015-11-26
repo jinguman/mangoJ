@@ -132,7 +132,7 @@ public class MongoSimpleClient implements Runnable {
 				if ( isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
 
 				if ( isShard ) {
-					if ( !isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
+					if ( isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
 					mics.doShard(network, station, location, year, month);
 				}
 				

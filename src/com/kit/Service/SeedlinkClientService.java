@@ -69,10 +69,12 @@ public class SeedlinkClientService {
 		this.pm = pm;
 	}
 
+	@Deprecated
 	public void getTrace() throws SeedlinkException, SeedFormatException, UnsupportedCompressionType, IOException, CodecException, ParseException, InterruptedException, SocketTimeoutException {
 		// Get seedlink
         SeedlinkReader reader = null;
 		reader = new SeedlinkReader(host, port, timeoutSeconds, verbose);
+		
 
 		// Seedlink verbose setting
         LoggingOutputStream los = new LoggingOutputStream(logger, Level.DEBUG);
@@ -130,6 +132,9 @@ public class SeedlinkClientService {
 					.append("channel", channelIdentifier);
 
             queue.put(d);
+            
+
+            
 
         }
         reader.close();    
@@ -210,6 +215,11 @@ public class SeedlinkClientService {
         SeedlinkReader reader = null;
 		reader = new SeedlinkReader(host, port, timeoutSeconds, verbose);
 
+		// queue limit
+		int queueLimit = pm.getIntegerProperty("sc.queuelimit");
+		int queueLimitSize = (int)(queueLimit/100);
+		if (queueLimitSize < 10 ) queueLimitSize = 10;
+		
 		// Seedlink verbose setting
 
         //LoggingOutputStream los = new LoggingOutputStream(logger, Level.DEBUG);
@@ -263,7 +273,18 @@ public class SeedlinkClientService {
             //System.out.println("Get packet. st:" + startTime + ", et: " + endTime );
             
             queue.put(d);
-
+            
+            if ( queueLimit > 0 ) {
+            	if ( queue.size() > queueLimit ) {
+                	logger.debug("Queue is full. size: {}, limit: {}, withdraw: {}", queue.size(), queueLimit, queueLimitSize);
+                	
+                	for(int j=0; j> queueLimitSize; j++ ) {
+                		queue.take();
+                		if ( queue.size() == 0 ) break;
+                	}
+                }
+            }
+            
         }
         reader.close();    
 	}

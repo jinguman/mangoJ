@@ -15,6 +15,11 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
+/**
+ * shard와 관련된 명령을 처리하는 DAO
+ * @author jman
+ *
+ */
 public class ShardDao {
 
 	final Logger logger = LoggerFactory.getLogger(ShardDao.class);
@@ -24,6 +29,11 @@ public class ShardDao {
 	private MongoDatabase admin;
 	private MongoDatabase config;
 	
+	/**
+	 * 생성자
+	 * @param client mongodbClient 객체
+	 * @param database mongodbDatabase 객체
+	 */
 	public ShardDao(MongoClient client, MongoDatabase database) {
 		this.client = client;
 		this.database = database;
@@ -31,6 +41,10 @@ public class ShardDao {
 		config = client.getDatabase("config");
 	}
 	
+	/**
+	 * mongodb에서 shardCollection된 collection리스트를 가져온다.
+	 * @return shardCollection된 collection의 리스트
+	 */
 	public List<String> getShardCollections() {
 		
 		List<String> list = new ArrayList<>();
@@ -50,6 +64,10 @@ public class ShardDao {
 		return list;
 	}
 	
+	/**
+	 * mongodb에서 shardRange된 collection리스트를 가져온다.
+	 * @return shardRange된 collection의 리스트
+	 */
 	public List<String> getShardRange() {
 		
 		List<String> list = new ArrayList<>();
@@ -66,6 +84,11 @@ public class ShardDao {
 		return list;
 	}
 	
+	/**
+	 * shardCollection명령을 수행한다.
+	 * @param collectionName collection명
+	 * @param key collection 키
+	 */
 	public void shardCollection(String collectionName, Document key) {
 		
 		String databaseName = database.getName();
@@ -81,6 +104,13 @@ public class ShardDao {
 		}
 	}
 	
+	/**
+	 * TagRange명령을 수행한다.
+	 * @param ns mongodb namespace
+	 * @param min range 중 최소값
+	 * @param max range 중 최대값
+	 * @param tag 태그명
+	 */
 	public void addTagRange(String ns, Document min, Document max, String tag) {
 
 		MongoCollection<Document> tags = config.getCollection("tags");

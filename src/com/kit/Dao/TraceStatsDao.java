@@ -11,11 +11,20 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
+/**
+ * Trace collection俊 包访等 DAO
+ * @author jman
+ *
+ */
 public class TraceStatsDao {
 
 	private final MongoCollection<Document> traceStatsColl;
 	private UpdateOptions options = new UpdateOptions();
 	
+	/**
+	 * 积己磊
+	 * @param database mongodbDatabase 按眉
+	 */
     public TraceStatsDao(final MongoDatabase database) {
     	traceStatsColl = database.getCollection(MangoJCode.COLLECTION_TRACE_STATS);
     }
