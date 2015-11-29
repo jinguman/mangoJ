@@ -217,7 +217,7 @@ public class SeedlinkClientService {
 
 		// queue limit
 		int queueLimit = pm.getIntegerProperty("sc.queuelimit");
-		int queueLimitSize = (int)(queueLimit/100);
+		int queueLimitSize = (int)(queueLimit/10);
 		if (queueLimitSize < 10 ) queueLimitSize = 10;
 		
 		// Seedlink verbose setting
