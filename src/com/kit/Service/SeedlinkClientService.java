@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -276,11 +277,15 @@ public class SeedlinkClientService {
             
             if ( queueLimit > 0 ) {
             	if ( queue.size() > queueLimit ) {
-                	logger.debug("Queue is full. size: {}, limit: {}, withdraw: {}", queue.size(), queueLimit, queueLimitSize);
+                	logger.debug("Queue is full. size: {}, init..", queue.size());
                 	
-                	for(int j=0; j> queueLimitSize; j++ ) {
-                		queue.take();
-                		if ( queue.size() == 0 ) break;
+                	while(true) {
+                		try {
+                			queue.remove();
+                			
+                		} catch (NoSuchElementException e) {
+                			break;
+                		}
                 	}
                 }
             }
