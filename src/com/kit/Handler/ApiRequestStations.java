@@ -48,7 +48,7 @@ public class ApiRequestStations extends ApiRequestTemplate {
 				|| value.equals(MangoJCode.PARAM_CONTENTS_VALUE_COUNT)) ) {
 			throw new RequestParamException("contents parameter's value is " 
 				+ MangoJCode.PARAM_CONTENTS_VALUE_STATIONS
-				+ " or "
+				+ ", "
 				+ MangoJCode.PARAM_CONTENTS_VALUE_COUNT
 				);
 		}

@@ -109,7 +109,7 @@ public class Helpers {
 		return String.format("%02d", month);
 	}
 
-	public static String getTraceCollectionName(String network, String station, String location, String year, String month) {
+	public static String getTraceCollectionName(String network, String station, String location, String channel, String year, String month) {
 
 		StringBuffer sb = new StringBuffer();
 		if ( !network.isEmpty() ) sb.append(network);
@@ -117,7 +117,11 @@ public class Helpers {
 		//if ( !station.isEmpty() ) sb.append(station);
 		//sb.append("_");
 		//if ( !location.isEmpty() ) sb.append(location);
-
+		if ( !channel.isEmpty() ) {
+			sb.append("_");
+			sb.append(channel.charAt(0));
+		}
+		
 		if ( !year.isEmpty() || !month.isEmpty() ) sb.append("_");		
 		if ( !year.isEmpty() ) sb.append(year);
 		//if ( !month.isEmpty() ) sb.append(month);

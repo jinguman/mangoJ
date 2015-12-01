@@ -1,36 +1,24 @@
 package com.kit.Handler;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.gte;
-import static com.mongodb.client.model.Filters.lte;
-import static com.mongodb.client.model.Aggregates.match;
-import static com.mongodb.client.model.Aggregates.project;
-import static com.mongodb.client.model.Aggregates.unwind;
-import static com.mongodb.client.model.Aggregates.sort;
-
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaders.Names.TRANSFER_ENCODING;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpResponseStatus.REQUESTED_RANGE_NOT_SATISFIABLE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.bson.types.Binary;
 
+import com.kit.Dao.TraceDao;
 import com.kit.Exception.ApiNettyServiceException;
 import com.kit.Exception.RequestParamException;
-import com.kit.Util.Helpers;
-import com.mongodb.client.MongoCollection;
+import com.kit.Util.MangoJCode;
 import com.mongodb.client.MongoCursor;
 
 import io.netty.buffer.ByteBuf;
@@ -42,17 +30,17 @@ import io.netty.handler.codec.http.DefaultHttpContent;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.LastHttpContent;
 import spark.utils.StringUtils;
 
 public class ApiRequestTrace extends ApiRequestTemplate {
 
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
-	private SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+	private TraceDao traceDao = null;
 	
 	public ApiRequestTrace(ChannelHandlerContext ctx, Map<String, String> reqData) {
 		super(ctx, reqData);
+		this.traceDao = new TraceDao(mongoDatabase); 
 	}
 
 	@Override
@@ -89,6 +77,15 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 			throw new RequestParamException("et parameter's format 'yyyy-MM-dd'T'HH:mm:ss.SSSS'");
 		}
 		
+		String value = this.reqData.get("contents");
+		if ( !(value.equals(MangoJCode.PARAM_CONTENTS_VALUE_RAW) 
+				|| value.equals(MangoJCode.PARAM_CONTENTS_VALUE_RAWMERGE)) ) {
+			throw new RequestParamException("contents parameter's value is " 
+				+ MangoJCode.PARAM_CONTENTS_VALUE_RAW
+				+ ", "
+				+ MangoJCode.PARAM_CONTENTS_VALUE_RAWMERGE
+				);
+		}
 	}
 	
 	@Override
@@ -101,55 +98,24 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 		String channel = this.reqData.get("cha");
 		String stStr = this.reqData.get("st");
 		String etStr = this.reqData.get("et");
-		
-		String year, month;
-		try {
-			year = Helpers.getYearString(stStr, sdfToSecond); 
-			month = Helpers.getMonthString(stStr, sdfToSecond);
-		} catch (ParseException e) {
-			throw new RequestParamException("et parameter's format 'yyyy-MM-dd'T'HH:mm:ss.SSSS'");
+
+    	MongoCursor<Document> cursor = traceDao.getTraceCursor(network, station, location, channel, stStr, etStr);
+    	if ( cursor == null ) {
+    		logger.warn("Cursor is null.");
+    		sendError(ctx, NO_CONTENT, "No Data found.");
+    		return;
+    	}
+
+		// check document
+		if ( false == cursor.hasNext() ) {
+			sendError(ctx, NO_CONTENT, "No Data found.");
+			return;
 		}
-
 		
-
         // Write Contents
 		HttpResponse response;
         ChannelFuture sendFileFuture = null;
         try {
-
-    		MongoCollection<Document> collection = mongoDatabase.getCollection(Helpers.getTraceCollectionName(network, station, location, year, month));
-    		
-    		// db.AK__2015.aggregate([
-    		//{ $match: { $and:[ {"_id" : {"$gte" : "ANM_2015-11-23T00:31"}}, {"_id" : {"$lte" : "ANM_2015-11-23T00:32"}}]}},
-    		//{ $unwind : "$BHZ" },
-    		//{ $project: {_id:0, "BHZ":1}},
-    		//{ $sort: {"BHZ.et":1}}
-    		//]).pretty()
-    		
-    		//db.AK_2015.aggregate([{ $match: { $and:[{"_id" : {$gte:"ANM_2015-11-25T06:00"}},{_id:{$lte:"ANM_2015-11-25T06:02"}}]}},{ $unwind : "$BHE" },{ $project: {_id:1,"BHE":1}}]).pretty()
-    		
-    		Bson match = match( 
-	    				and( gte("_id", station + "_" + Helpers.convertDate(stStr, sdfToSecond, sdfToMinute)),
-	    	    				lte(channel + ".et", etStr))
-    				);
-    		Bson unwind = unwind("$"+channel);
-    		Bson project = project(new Document("_id",0).append(channel, 1));
-    		Bson sort = sort(new Document(channel + ",et", 1));
-    		
-    		List<Bson> aggregateParams = new ArrayList<>();
-    		aggregateParams.add(match);
-    		aggregateParams.add(unwind);
-    		aggregateParams.add(project);
-    		aggregateParams.add(sort);
-    		
-    		//logger.debug("Mongo query. match: " + Helpers.toJson(match) + ", unwind: " + Helpers.toJson(unwind) + ", project: " + Helpers.toJson(project) + ", sort: " + Helpers.toJson(sort) );
-    		MongoCursor<Document> cursor = collection.aggregate(aggregateParams).iterator();
-    		
-    		// check document
-    		if ( false == cursor.hasNext() ) {
-    			sendError(ctx, NO_CONTENT, "No Data found.");
-    			return;
-    		}
     		
     		response = new DefaultHttpResponse(HTTP_1_1, OK);
     		response.headers().add("Content-Disposition", "inline; filename=myfile.txt");
@@ -202,5 +168,13 @@ public class ApiRequestTrace extends ApiRequestTemplate {
         if (!HttpHeaders.isKeepAlive(response)) {
             sendFileFuture.addListener(ChannelFutureListener.CLOSE);
         }
+	}
+	
+	private void writeRaw() {
+		
+	}
+	
+	private void writeRawMerge() {
+		
 	}
 }

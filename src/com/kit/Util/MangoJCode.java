@@ -8,4 +8,7 @@ public class MangoJCode {
 	public static final String PARAM_CONTENTS_VALUE_STATIONS = "stations";
 	public static final String PARAM_CONTENTS_VALUE_COUNT = "count";
 	
+	public static final String PARAM_CONTENTS_VALUE_RAW = "raw";
+	public static final String PARAM_CONTENTS_VALUE_RAWMERGE = "rawmerge";
+	
 }

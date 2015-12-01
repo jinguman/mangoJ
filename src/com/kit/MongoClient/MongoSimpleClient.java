@@ -123,7 +123,7 @@ public class MongoSimpleClient implements Runnable {
 
 				String year = Helpers.getYearString(st, sdfToSecond);
 				String month = Helpers.getMonthString(st, sdfToSecond);
-				String collectionName = Helpers.getTraceCollectionName(network, station, location, year, month);
+				String collectionName = Helpers.getTraceCollectionName(network, station, location, channel, year, month);
 
 
 				// get collection
@@ -133,7 +133,7 @@ public class MongoSimpleClient implements Runnable {
 
 				if ( isShard ) {
 					if ( isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
-					mics.doShard(network, station, location, year, month);
+					mics.doShard(network, station, location, channel, year, month);
 				}
 				
 				// add trace

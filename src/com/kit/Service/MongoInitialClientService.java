@@ -76,7 +76,7 @@ public class MongoInitialClientService {
 	
 	public void doEtIndex(String network, String station, String location, String channel, String year, String month, boolean isBackground) {
 		
-		String collectionName = Helpers.getTraceCollectionName(network, station, location, year, month);
+		String collectionName = Helpers.getTraceCollectionName(network, station, location, channel, year, month);
 		collection = database.getCollection(collectionName);
 		
 		// check map
@@ -101,9 +101,9 @@ public class MongoInitialClientService {
 		
 	}
 	
-	public void doShard(String network, String station, String location, String year, String month) {
+	public void doShard(String network, String station, String location, String channel, String year, String month) {
 
-		String collectionName = Helpers.getTraceCollectionName(network, station, location, year, month);
+		String collectionName = Helpers.getTraceCollectionName(network, station, location, channel, year, month);
 		collection = database.getCollection(collectionName);
 
 		// shardCollection
