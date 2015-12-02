@@ -52,12 +52,16 @@ public class TraceDao {
 			//{ $sort: {"BHZ.et":1}}
 			//]).pretty()
 			
-			//db.AK_2015.aggregate([{ $match: { $and:[{"_id" : {$gte:"ANM_2015-11-25T06:00"}},{_id:{$lte:"ANM_2015-11-25T06:02"}}]}},{ $unwind : "$BHE" },{ $project: {_id:1,"BHE":1}}]).pretty()
+			//db.AK_B_2015.aggregate([{ $match: { $and:[{"_id" : {$gte:"ANM__2015-12-02T09:53"}},{_id:{$lte:"ANM_2015-12-02T09:58"}}]}},{ $unwind : "$BHZ" },{ $project: {_id:1,"BHZ":1}}]).pretty()
 
+			String gteCond = station + "_" + location + "_" + Helpers.convertDate(startStr, sdfToSecond, sdfToMinute);
+			String lteCond = station + "_" + location + "_" + Helpers.convertDate(endStr, sdfToSecond, sdfToMinute);
+			
 			Bson match = match( 
-	    				and( gte("_id", station + "_" + Helpers.convertDate(startStr, sdfToSecond, sdfToMinute)),
-	    	    				lte(channel + ".et", endStr))
+	    				and( gte("_id", gteCond),
+	    	    				lte("_id", lteCond))
 					);
+			
 			Bson unwind = unwind("$"+channel);
 			Bson project = project(new Document("_id",0).append(channel, 1));
 			Bson sort = sort(new Document(channel + ",et", 1));
@@ -67,7 +71,7 @@ public class TraceDao {
 			aggregateParams.add(unwind);
 			aggregateParams.add(project);
 			aggregateParams.add(sort);
-			
+
 			cursor = collection.aggregate(aggregateParams).iterator();
 			
 		} catch (ParseException e) {

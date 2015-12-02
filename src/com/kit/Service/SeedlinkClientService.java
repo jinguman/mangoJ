@@ -271,7 +271,7 @@ public class SeedlinkClientService {
 					.append("location", locationIdentifier)
 					.append("channel", channelIdentifier);
             
-            //System.out.println("Get packet. st:" + startTime + ", et: " + endTime );
+            //System.out.println("Get packet. st:" + startTime + ", et: " + endTime + ",byte: " + bytes.length);
             
             queue.put(d);
             

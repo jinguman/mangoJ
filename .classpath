@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="home"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJT/library/jetty-http-9.3.5.v20151012.jar"/>
@@ -33,5 +34,6 @@
 	<classpathentry kind="lib" path="D:/workspace/mangoJT/library/websocket-servlet-9.3.5.v20151012.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJT/library/woodstox-core-lgpl-4.2.0.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/netty-all-4.0.32.Final.jar" sourcepath="C:/Users/jman/.m2/repository/io/netty/netty-all/4.0.32.Final/netty-all-4.0.32.Final-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

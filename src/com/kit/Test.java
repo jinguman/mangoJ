@@ -21,12 +21,35 @@ import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
+import edu.sc.seis.seisFile.mseed.Btime;
+
 public class Test {
 
 	public static void main(String[] args) throws ParseException {
 		
-		MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
-		MongoDatabase database = client.getDatabase("trace");
+		String str = "2015-01-30T01:59:59.1234";
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		Btime bt = Helpers.getBtime(str, format);
+		System.out.println(bt);
+		
+		Calendar ca = bt.convertToCalendar();
+		System.out.println(format.format(ca.getTime()));
+		
+		System.out.println(Helpers.getJdateString(str, format));
+		System.out.println(Helpers.getMonthString(str, format));
+		
+		System.out.println(Helpers.getCurrentUTC(format));
+
+		Btime stbt = new Btime(1970, 1, 1, 1, 1, 1002);
+		Btime stbt1 = new Btime(1970, 1, 1, 1, 1, 1001);
+		
+		System.out.println(stbt.afterOrEquals(stbt1));
+		
+		
+		
+		
+		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
+		//MongoDatabase database = client.getDatabase("trace");
 		
 		/*
 		int count = 0;
@@ -49,8 +72,8 @@ public class Test {
 		System.out.println(count);
 		*/
 		
-		ShardDao dao = new ShardDao(client, database);
-		dao.getShardCollections();
+		//ShardDao dao = new ShardDao(client, database);
+		//dao.getShardCollections();
 		
 		
 		/*

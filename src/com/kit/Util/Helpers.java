@@ -7,19 +7,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.bson.BSONObject;
-import org.bson.BasicBSONDecoder;
-import org.bson.BsonDocumentReader;
-import org.bson.BsonReader;
 import org.bson.Document;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.EncoderContext;
-import org.bson.conversions.Bson;
 import org.bson.json.JsonMode;
 import org.bson.json.JsonWriter;
 import org.bson.json.JsonWriterSettings;
 
-import com.mongodb.util.JSON;
+import edu.sc.seis.seisFile.mseed.Btime;
 
 public class Helpers {
 
@@ -32,26 +27,14 @@ public class Helpers {
 		System.out.flush();
 	}
 	
-	public static String toJson(Bson bson) {
-	
-		//BsonReader bsonReader = new BsonDocumentReader();
-		
-		//new DocumentCodec().decode(arg0, arg1)
-		
-		return JSON.serialize(bson);
-	}
-	
 	public static String getCurrentUTC(SimpleDateFormat sdf) {
-		
-		//TimeZone tz = TimeZone.getTimeZone("Greenwich");
-		//sdf.setTimeZone(tz);
-		
+
 		Date date = new Date();
 		date.setTime(date.getTime() - (long)(60*60*9*1000));
 		
 		return sdf.format(date);
 	}
-	
+
 	/**
 	 * Convert to Standard format(yyyy-MM-dd'T'HH:mm:SS.SSSS) date from custom format
 	 * @param date
@@ -61,6 +44,7 @@ public class Helpers {
 	 */
 	public static String convertDatePerfectly(String strDate, SimpleDateFormat fromFormat, SimpleDateFormat toFormat) throws ParseException {
 		
+		// Don't care TIMEZONE
 		Calendar ca = Calendar.getInstance();
 		ca.setTime(fromFormat.parse(strDate));
 		String rtn = toFormat.format(ca.getTime());
@@ -72,6 +56,7 @@ public class Helpers {
 
 	public static String convertDate(String strDate, SimpleDateFormat fromFormat, SimpleDateFormat toFormat) throws ParseException {
 		
+		// Don't care TIMEZONE
 		Calendar ca = Calendar.getInstance();
 		ca.setTime(fromFormat.parse(strDate));
 		String rtn = toFormat.format(ca.getTime());
@@ -81,6 +66,7 @@ public class Helpers {
 	
 	public static String getYearString(String strDate, SimpleDateFormat fromFormat) throws ParseException {
 
+		// Don't care TIMEZONE
 		Calendar ca = Calendar.getInstance();
 		ca.setTime(fromFormat.parse(strDate));
 		
@@ -91,6 +77,7 @@ public class Helpers {
 	
 	public static String getJdateString(String strDate, SimpleDateFormat fromFormat) throws ParseException {
 		
+		// Don't care TIMEZONE
 		Calendar ca = Calendar.getInstance();
 		ca.setTime(fromFormat.parse(strDate));
 		
@@ -101,6 +88,7 @@ public class Helpers {
 
 	public static String getMonthString(String strDate, SimpleDateFormat fromFormat) throws ParseException {
 
+		// Don't care TIMEZONE
 		Calendar ca = Calendar.getInstance();
 		ca.setTime(fromFormat.parse(strDate));
 		
@@ -128,5 +116,50 @@ public class Helpers {
 
 		return sb.toString(); 
 	}
+
+	public static Btime getBtime(String strDate, SimpleDateFormat format) throws ParseException {
 		
+		Calendar ca = Calendar.getInstance();
+		ca.setTime(format.parse(strDate));
+		
+		int year = ca.get(Calendar.YEAR);
+		int jday = ca.get(Calendar.DAY_OF_YEAR);
+		int hour = ca.get(Calendar.HOUR_OF_DAY);
+		int min = ca.get(Calendar.MINUTE);
+		int sec = ca.get(Calendar.SECOND);
+		
+		int tenthMilli = 0;
+		int beginIndex = strDate.lastIndexOf(".");
+		if ( beginIndex > 0 ) {
+			double d = Double.parseDouble(strDate.substring(beginIndex, strDate.length()));
+			tenthMilli = (int)(Math.round(d * 10000) % 10000);
+		}
+		
+		Btime bt = new Btime(year, jday, hour, min, sec, tenthMilli);
+		return bt;
+	}
+	
+	public static double getEpochTime(Btime bt) {
+		
+		Calendar ca = bt.convertToCalendar();
+		long l = ca.getTimeInMillis();
+		l = l / 1000; // remove precision
+		
+		// recover precision
+		double d = l;
+		int tenthMilli = bt.getTenthMilli();
+		d += (double)tenthMilli / 10000.0;
+		
+		return d;
+	}
+	
+	public static Btime getBtimeAddSamples(Btime bt, int sampleRate, int samples) {
+		
+		double d = getEpochTime(bt);
+		d += samples * ( 1.0 / sampleRate);
+		Btime b = new Btime(d);
+
+		return b;
+	}
+
 }
