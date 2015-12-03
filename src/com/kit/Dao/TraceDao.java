@@ -64,7 +64,7 @@ public class TraceDao {
 			
 			Bson unwind = unwind("$"+channel);
 			Bson project = project(new Document("_id",0).append(channel, 1));
-			Bson sort = sort(new Document(channel + ",et", 1));
+			Bson sort = sort(new Document(channel + ".et", 1));
 			
 			List<Bson> aggregateParams = new ArrayList<>();
 			aggregateParams.add(match);

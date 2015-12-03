@@ -231,30 +231,30 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 	}
 	
 	public DataRecord splitSlPacket(String stStr, String etStr, DataRecord dr) {
-		
+
 		// seedlinkpacket parsing
 		try {
 			//SeedlinkPacket sp = new SeedlinkPacket(bytes.getData());
 			DataHeader header = dr.getHeader();
-			
+
 			// seedpacket time
 			Btime stPacketBtime = header.getStartBtime();
 			Btime etPacketBtime = header.getLastSampleBtime();
 			int sampleRate = Math.round(header.getSampleRate());
-			
+
 			// request time
 			Btime stReqBtime = Helpers.getBtime(stStr, sdfToSecond);
 			Btime etReqBtime = Helpers.getBtime(etStr, sdfToSecond);
-			
+
 			//System.out.println("Req: " + stReqBtime.toString() + " ~ " + etReqBtime.toString());
-			
+
 			// check range.
 			// 요청시작시간이 요청종료시간의 뒤에 있을 경우
 			if ( stReqBtime.afterOrEquals(etReqBtime) ) {
 				logger.warn("Range invalid. start time must be before endtime. stReq: " + stReqBtime.toString() + ", etReq: " + etReqBtime.toString());
 				return null;
 			}
-			
+
 			// check range. 
 			//                                       |stPacketBtime         |etPacketBtime
 			//       |stReqBtime            |etReqBtime
@@ -272,18 +272,18 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 						);
 				return null;
 			}
-			
+
 			// check range. 시작패킷시간이 요청시작시간보다 뒤에 있고, 요청종료시간이 종료패킷시간보다 뒤에 있을 경우
 			//              |stPacketBtime         |etPacketBtime
 			//       |stReqBtime                           |etReqBtime
 			if ( stPacketBtime.afterOrEquals(stReqBtime) && etReqBtime.afterOrEquals(etPacketBtime)) {
 				return dr;
 			}
-			
+
 			// get Data
 			DecompressedData decomData = dr.decompress();
             int[] temp = decomData.getAsInt();
-			
+
             System.out.println(">>>>>>>>LENGTH : " + temp.length);
             
             int lTrimDelta = 0;
@@ -312,17 +312,56 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 			int[] temp2 = new int[temp.length - lTrimDelta - rTrimDelta]; 
 			System.arraycopy(temp, lTrimDelta, temp2, 0, temp2.length);
 			
+			System.out.println(">>>>>>>> RESULT: " + temp2.length);
+			
+			/*
+			
 			// remake seedlink packet
-			SteimFrameBlock steimData = null;
-	        steimData = Steim2.encode(temp2, 63);
-	        
-	        // modify header
 	        header.setNumSamples((short)temp2.length);
 	        header.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
 
+	        // blockette1000
+	        Blockette1000 blockette1000 = (Blockette1000) dr.getUniqueBlockette(1000);
+	        blockette1000.setEncodingFormat((byte)B1000Types.STEIM2);
+	        //blockette1000.setWordOrder((byte)1);
+	        //blockette1000.setDataRecordLength((byte)10);
+	        
+	        SteimFrameBlock steimData = null;
+	
+	        steimData = Steim2.encode(temp2, 6);
 	        dr.setData(steimData.getEncodedData());
 			
-	        return dr;
+			*/
+			
+			// RENEW
+			byte seed4096 = (byte)10;
+			
+			DataHeader reheader = new DataHeader(header.getSequenceNum(), 'D', false);
+			reheader.setStationIdentifier(dr.getHeader().getStationIdentifier());
+			reheader.setChannelIdentifier(dr.getHeader().getChannelIdentifier());
+			reheader.setNetworkCode(dr.getHeader().getNetworkCode());
+			reheader.setLocationIdentifier(dr.getHeader().getLocationIdentifier());
+			reheader.setNumSamples((short) temp2.length);
+			reheader.setSampleRate(dr.getHeader().getSampleRate());
+	        reheader.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
+
+	        System.out.println(">>>>>>>DATAHEADER>>>>>>>" + reheader.toString());
+	        
+	        DataRecord record = new DataRecord(reheader);
+	        Blockette1000 blockette1000 = new Blockette1000();
+	        blockette1000.setEncodingFormat((byte)B1000Types.STEIM2);
+	        blockette1000.setWordOrder((byte)1);
+	        blockette1000.setDataRecordLength(seed4096);
+	        record.addBlockette(blockette1000);
+	        
+	        SteimFrameBlock steimData = null;
+	
+	        steimData = Steim2.encode(temp2, 14);
+	        record.setData(steimData.getEncodedData());
+			
+	        System.out.println(">>>>>>>DATARECORD>>>>>>>" + record.toString());
+	        
+	        return record;
 	        
 		} catch (ParseException e) {
 			logger.error("{}", e);
