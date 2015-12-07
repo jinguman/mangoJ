@@ -48,14 +48,14 @@ public class GetTrace {
 		MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
 		MongoDatabase database = client.getDatabase("trace");
 		
-		String network = "AK";
-		String station = "ANM";
-		String location = "";
-		String channel = "BHE";
+		String network = "WY";
+		String station = "YDC";
+		String location = "01";
+		String channel = "EHZ";
 		//String st = "2015-12-02T09:53:10.0000";
 		//String et = "2015-12-02T09:53:30.0000";
-		String st = "2015-12-06T02:00:00.0000";
-		String et = "2015-12-06T02:10:00.0000";
+		String st = "2015-12-06T08:00:00.0000";
+		String et = "2015-12-06T09:00:00.0000";
 
 		//{ "_id" : "AK_ANM__BHE", "it" : "2015-12-03T08:37:18", "net" : "AK", "sta" : "ANM", "loc" : "", "cha" : "BHE", "st" : "2015-12-02T01:38:22.2684", "et" : "2015-12-03T08:36:49.5284" }
 		
