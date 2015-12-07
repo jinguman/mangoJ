@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.kit.Dao.TraceDao;
 import com.kit.Exception.ApiNettyServiceException;
 import com.kit.Exception.RequestParamException;
+import com.kit.Service.GenerateMiniSeed;
 import com.kit.Service.MongoInitialClientService;
 import com.kit.Util.Helpers;
 import com.kit.Util.MangoJCode;
@@ -63,12 +64,13 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
 	private TraceDao traceDao = null;
+	private GenerateMiniSeed gm = null;
 	
 	final Logger logger = LoggerFactory.getLogger(ApiRequestTrace.class);
 	
 	public ApiRequestTrace(ChannelHandlerContext ctx, Map<String, String> reqData) {
 		super(ctx, reqData);
-		
+		gm = new GenerateMiniSeed();
 	}
 
 	@Override
@@ -199,17 +201,18 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 			
 			DataRecord dr = (DataRecord)SeedRecord.read(b.array());
 			
-			System.out.println("PACKET: " + dr.toString());
+			//System.out.println("PACKET: " + dr.toString());
 			
 			Blockette1000 b1000 = (Blockette1000)dr.getUniqueBlockette(1000);
-			System.out.println("PACKET_B1000: " + (int)b1000.getEncodingFormat() + ", " + b1000.getDataRecordLength());
+			//System.out.println("PACKET_B1000: " + (int)b1000.getEncodingFormat() + ", " + b1000.getDataRecordLength());
 			
-			splitSlPacket(stStr, etStr, dr);
+			//splitSlPacket(stStr, etStr, dr);
+			DataRecord dr2 = gm.trimPacket(stStr, etStr, dr);
 			
-			if ( dr != null ) {
+			if ( dr2 != null ) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				DataOutputStream dos = new DataOutputStream(baos);
-				dr.write(dos);
+				dr2.write(dos);
 				ByteBuf b2 = Unpooled.wrappedBuffer(baos.toByteArray());
 				
 				totLen += bytes.length();
@@ -224,10 +227,6 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 		
 		logger.debug("Response data length: " + totLen);
 		return sendFileFuture;
-	}
-	
-	private void writeRawMerge() {
-		
 	}
 	
 	public DataRecord splitSlPacket(String stStr, String etStr, DataRecord dr) {
