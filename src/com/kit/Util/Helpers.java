@@ -64,6 +64,17 @@ public class Helpers {
 		return rtn;
 	}
 	
+	public static String convertDateBefore1Min(String strDate, SimpleDateFormat fromFormat, SimpleDateFormat toFormat) throws ParseException {
+		
+		// Don't care TIMEZONE
+		Calendar ca = Calendar.getInstance();
+		ca.setTime(fromFormat.parse(strDate));
+		ca.add(Calendar.MINUTE, -1);
+		String rtn = toFormat.format(ca.getTime());
+		
+		return rtn;
+	}
+	
 	public static String getYearString(String strDate, SimpleDateFormat fromFormat) throws ParseException {
 
 		// Don't care TIMEZONE

@@ -54,7 +54,7 @@ public class TraceDao {
 			
 			//db.AK_B_2015.aggregate([{ $match: { $and:[{"_id" : {$gte:"ANM__2015-12-02T09:53"}},{_id:{$lte:"ANM_2015-12-02T09:58"}}]}},{ $unwind : "$BHZ" },{ $project: {_id:1,"BHZ":1}}]).pretty()
 
-			String gteCond = station + "_" + location + "_" + Helpers.convertDate(startStr, sdfToSecond, sdfToMinute);
+			String gteCond = station + "_" + location + "_" + Helpers.convertDateBefore1Min(startStr, sdfToSecond, sdfToMinute);
 			String lteCond = station + "_" + location + "_" + Helpers.convertDate(endStr, sdfToSecond, sdfToMinute);
 			
 			Bson match = match( 
