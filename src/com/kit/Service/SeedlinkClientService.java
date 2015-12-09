@@ -133,10 +133,6 @@ public class SeedlinkClientService {
 					.append("channel", channelIdentifier);
 
             queue.put(d);
-            
-
-            
-
         }
         reader.close();    
 	}
@@ -245,32 +241,10 @@ public class SeedlinkClientService {
             SeedlinkPacket slp = reader.readPacket();
             DataRecord dr = slp.getMiniSeed();
 
-            String networkCode = dr.getHeader().getNetworkCode().trim();
-            String stationIdentifier = dr.getHeader().getStationIdentifier().trim();
-            String channelIdentifier = dr.getHeader().getChannelIdentifier().trim();
-            String locationIdentifier = dr.getHeader().getLocationIdentifier().trim();
-
             String startTime = dr.getHeader().getStartTime();
             String endTime = dr.getHeader().getEndTime();
+            Document d = Helpers.dRecordToDoc(dr, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
 
-            float sampleRate = dr.getHeader().getSampleRate();
-            int numSamples = dr.getHeader().getNumSamples();
-
-
-            byte[] bytes = slp.getMseedBytes();
-            Binary data = new Binary(bytes);
-
-            Document d = new Document()
-            		.append("st", Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond))
-					.append("n", numSamples)
-					.append("s", sampleRate)
-					.append("et", Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond))
-					.append("d", data)
-					.append("network", networkCode)
-					.append("station", stationIdentifier)
-					.append("location", locationIdentifier)
-					.append("channel", channelIdentifier);
-            
             //System.out.println("Get packet. st:" + startTime + ", et: " + endTime + ",byte: " + bytes.length);
             
             queue.put(d);

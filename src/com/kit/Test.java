@@ -44,7 +44,7 @@ public class Test {
 
 		// read miniseed from file
 		//String filename = "d:/KWADG.HGE.KW.00.20150601";
-		String filename = "d:/trace.mseed";
+		String filename = "d:/ANM.HGZ.2015.335.00.00.00";
 		
 		
 		DataInputStream ls = null;

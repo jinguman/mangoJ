@@ -2,7 +2,6 @@ package com.kit.SeedlinkClient;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.concurrent.BlockingQueue;
 
 import org.bson.Document;
@@ -60,16 +59,16 @@ public class SeedlinkClient implements Runnable {
 		while(true) {
 			try {
 				
-				logger.info("SeedlinkClient start.. network: {}", network);
+				logger.info("SeedlinkClient start. {}", network);
 				
 				scs.getTraceRaw();
 			} catch (SeedlinkException | SeedFormatException | IOException | CodecException | ParseException
 					| InterruptedException e) {
-				logger.warn("{} {}", "Failure in Seedlink. net: {}", network, e);
+				logger.warn("{} {}", "Failure in Seedlink. {}", network, e);
 			}
 
 			int restartSec = pm.getIntegerProperty("sc.restartsec");
-			logger.info("SeedlinkClient restart after {} seconds.. network: {}", restartSec, network);
+			logger.info("SeedlinkClient restart after {} seconds. {}", restartSec, network);
 			try {
 				Thread.sleep(restartSec*1000);
 			} catch (InterruptedException e) {

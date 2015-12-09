@@ -3,6 +3,8 @@ package com.kit.Service;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +28,7 @@ public class GenerateMiniSeed {
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
 	final Logger logger = LoggerFactory.getLogger(GenerateMiniSeed.class);
 
-	public DataRecord trimPacket(String stStr, String etStr, DataRecord dr) {
+	public DataRecord trimPacket(String stStr, String etStr, DataRecord dr, boolean isForceNew) {
 
 		try {
 			DataHeader header = dr.getHeader();
@@ -79,28 +81,27 @@ public class GenerateMiniSeed {
 			
 			logger.debug("Original DataRecord. {}", dr.toString());
 			
-			// Modify or New packet?
+			// Get steim Frame size
 			int steimFrameSize = getSteimFrameSize(dr.getDataSize());
-			int availableDataSize = getAvailableDataSize(steimFrameSize);
 			
-			if ( availableDataSize > temp2.length ) {
-				// 기존것을 이용
-				
-				// header
-				header.setNumSamples((short)temp2.length);
-		        header.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
-		        
-		        // steim
-		        SteimFrameBlock steimData = null;
-		        steimData = Steim2.encode(temp2, steimFrameSize);
-		        dr.setData(steimData.getEncodedData());
-		        
-		        logger.debug("Modify DataRecord. {}", dr.toString());
-		        
-		        return dr;
-			} 
+			// Modify header
+			header.setNumSamples((short)temp2.length);
+	        header.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
 			
-			// 새로운 프레임을 생성
+	        // steim
+	        SteimFrameBlock steimData = null;
+	        steimData = Steim2.encode(temp2, steimFrameSize, temp2[0]);
+	        
+	        // Modify data record
+	        if ( !isForceNew ) {
+	        	if (steimData.getNumSamples() == temp2.length ) {
+		        	dr.setData(steimData.getEncodedData());
+		        	logger.debug("Modify DataRecord. {}", dr.toString());
+			        return dr;
+		        }
+	        }
+	        	        
+			// Renew data record
 			
 			// Header
 			int headerSize = 8;	// 1000 Blockette size
@@ -125,12 +126,24 @@ public class GenerateMiniSeed {
 	        	headerSize += b.getSize();
 	        }
 	        
-	        // calculate steimFrameSize
-	        steimFrameSize = (int) (Math.ceil((temp2.length / 1.4) /64));
+	        // Find steimFrameSize
+	        int cutRatio = (int) Math.floor((temp.length - temp2.length ) / temp.length); 
+	        steimFrameSize = steimFrameSize * cutRatio;
+	        while(true) {
+	        	steimFrameSize++;
+	        	
+	        	steimData = null;
+	 	        steimData = Steim2.encode(temp2, steimFrameSize, temp2[0]);
+	 	        
+	 	        if (steimData.getNumSamples() == temp2.length ) break;
+	 	        
+	        }
+
+	        // Calculate seed len
 	        int dataRecordSize = (steimFrameSize*64) + headerSize;
 	        byte seed = (byte)get2Power(dataRecordSize);
 	        logger.debug("Size: steimframe: {}, dataRecordSize: {}, seed: {}", steimFrameSize, dataRecordSize, seed);
-	        
+
 	        // 1000 Blockette
 	        Blockette1000 blockette1000 = new Blockette1000();
 	        blockette1000.setEncodingFormat((byte)B1000Types.STEIM2);
@@ -138,8 +151,8 @@ public class GenerateMiniSeed {
 	        blockette1000.setDataRecordLength(seed);
 	        record.addBlockette(blockette1000);
 	        
-	        SteimFrameBlock steimData = null;
-	        steimData = Steim2.encode(temp2, steimFrameSize);
+	        //steimData = null;
+	        //steimData = Steim2.encode(temp2, steimFrameSize, temp2[0]);
 	        record.setData(steimData.getEncodedData());
 			
 	        logger.debug("New DataRecord. {}", record.toString());
@@ -181,16 +194,16 @@ public class GenerateMiniSeed {
 		//       |stReqBtime            |etReqBtime
 		// 패킷시작시간이 요청종료시간의 뒤에 있을 경우
 		if ( stPacketBtime.afterOrEquals(etReqBtime) ) {
-			logger.warn("Range invalid. request time within miniseed packet time. Req: " + stReqBtime.toString() + " ~ " + etReqBtime.toString() 
-							+ ", packet: " + stPacketBtime.toString() + " ~ " + etPacketBtime.toString()
-					);
+			//logger.debug("Range invalid. request time within miniseed packet time. Req: " + stReqBtime.toString() + " ~ " + etReqBtime.toString() 
+			//				+ ", packet: " + stPacketBtime.toString() + " ~ " + etPacketBtime.toString()
+			//		);
 			return 0;
 		}
 		// 요청시작시간이 패킷종료시간의 뒤에 있을 경우
 		if ( stReqBtime.afterOrEquals(etPacketBtime)) {
-			logger.warn("Range invalid. request time within miniseed packet time. Req: " + stReqBtime.toString() + " ~ " + etReqBtime.toString() 
-			+ ", packet: " + stPacketBtime.toString() + " ~ " + etPacketBtime.toString()
-					);
+			//logger.debug("Range invalid. request time within miniseed packet time. Req: " + stReqBtime.toString() + " ~ " + etReqBtime.toString() 
+			//+ ", packet: " + stPacketBtime.toString() + " ~ " + etPacketBtime.toString()
+			//		);
 			return 0;
 		}
 
@@ -208,11 +221,6 @@ public class GenerateMiniSeed {
 		return dataSize/64;
 	}
 	
-	public int getAvailableDataSize(int steimFrame) {
-		// 실험측정에 의하면 대략 162%정도 가능하다.
-		return (int) ((steimFrame*64)*1.4);
-	}
-	
 	public int get2Power(int value) {
 		
 		int power = 0;
@@ -222,5 +230,14 @@ public class GenerateMiniSeed {
 			powerValue = (int) Math.pow(2, power);
 		}
 		return power;
+	}
+	
+	public List<DataRecord> splitPacketPerMinute(DataRecord dr) {
+		
+		List<DataRecord> drLists = new ArrayList<DataRecord>();
+		
+		// 
+		
+		return drLists;
 	}
 }

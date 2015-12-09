@@ -207,7 +207,7 @@ public class ApiRequestTrace extends ApiRequestTemplate {
 			//System.out.println("PACKET_B1000: " + (int)b1000.getEncodingFormat() + ", " + b1000.getDataRecordLength());
 			
 			//splitSlPacket(stStr, etStr, dr);
-			DataRecord dr2 = gm.trimPacket(stStr, etStr, dr);
+			DataRecord dr2 = gm.trimPacket(stStr, etStr, dr, false);
 			
 			if ( dr2 != null ) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
