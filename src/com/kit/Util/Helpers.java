@@ -166,7 +166,7 @@ public class Helpers {
 		return d;
 	}
 	
-	public static Btime getBtimeAddSamples(Btime bt, int sampleRate, int samples) {
+	public static Btime getBtimeAddSamples(Btime bt, float sampleRate, int samples) {
 		
 		double d = getEpochTime(bt);
 		d += samples * ( 1.0 / sampleRate);
@@ -199,5 +199,61 @@ public class Helpers {
 				.append("channel", channelIdentifier);
 		
 		return d;
+	}
+	
+	public static long getDiffByMinute(String stStr, String etStr, SimpleDateFormat format) throws ParseException {
+		
+		Calendar ca1 = Calendar.getInstance();
+		ca1.setTime(format.parse(stStr));
+		
+		Calendar ca2 = Calendar.getInstance();
+		ca2.setTime(format.parse(etStr));
+		
+		return getDiffByMinute(ca1, ca2); 
+	}
+
+	public static long getDiffByMinute(Btime st, Btime et) throws ParseException {
+		
+		Calendar ca1 = st.convertToCalendar();
+		Calendar ca2 = et.convertToCalendar();
+		
+		return getDiffByMinute(ca2, ca1);
+	}
+	
+	public static long getDiffByMinute(Calendar caSt, Calendar caEt) {
+		
+		caSt.set(Calendar.SECOND, 0);
+		caSt.set(Calendar.MILLISECOND, 0);
+		
+		caEt.set(Calendar.SECOND, 0);
+		caEt.set(Calendar.MILLISECOND, 0);
+		
+		long diffSec = (caEt.getTimeInMillis() - caSt.getTimeInMillis()) / 1000;
+		
+		return diffSec/60;
+	}
+
+	public static Btime getNextSharpMinute(Calendar ca, int amount) {
+		ca.set(Calendar.SECOND, 0);
+		ca.set(Calendar.MILLISECOND, 0);
+		ca.add(Calendar.MINUTE, amount);
+		ca.setTimeZone(TimeZone.getTimeZone("UTC"));
+		
+		return new Btime(ca.getTime());
+	}
+	
+	public static Btime getNextSharpMinute(Btime bt, int amount) {
+
+		return getNextSharpMinute(bt.convertToCalendar(), amount);
+	}
+	
+	
+	public static Btime getNextSharpMinute(String str, int amount, SimpleDateFormat format) throws ParseException {
+		
+		Calendar ca = Calendar.getInstance();
+		ca.setTime(format.parse(str));
+		ca.setTimeZone(TimeZone.getTimeZone("UTC"));
+		
+		return getNextSharpMinute(ca, amount);
 	}
 }

@@ -3,6 +3,7 @@ package com.kit.Util;
 public class MangoJCode {
 
 	public static final String COLLECTION_TRACE_STATS = "TRACE_STATS";
+	public static final String COLLECTION_TRACE_GAPS = "TRACE_GAPS";
 	
 	public static final String PARAM_CONTENTS = "contents";
 	public static final String PARAM_CONTENTS_VALUE_STATIONS = "stations";
@@ -12,3 +13,4 @@ public class MangoJCode {
 	public static final String PARAM_CONTENTS_VALUE_RAWMERGE = "rawmerge";
 	
 }
+

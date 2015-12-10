@@ -19,7 +19,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Level;
 import org.bson.Document;
-import org.bson.types.Binary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -61,13 +60,17 @@ public class SeedlinkClientService {
 	@Setter @Getter private int port;
 	@Setter @Getter private int timeoutSeconds;
 	@Setter @Getter private boolean verbose;
+	private boolean isSharpMinute = false;
 
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy,DDD,HH:mm:ss");	//2015,306,00:49:01.7750
+	private GenerateMiniSeed gm;
 
 	public SeedlinkClientService(BlockingQueue<Document> queue, PropertyManager pm) {
 		this.queue = queue;
 		this.pm = pm;
+		isSharpMinute = pm.getBooleanProperty("mc.sharpMinute");
+		gm = new GenerateMiniSeed();
 	}
 
 	@Deprecated
@@ -240,14 +243,26 @@ public class SeedlinkClientService {
         while (reader.hasNext()) {
             SeedlinkPacket slp = reader.readPacket();
             DataRecord dr = slp.getMiniSeed();
-
-            String startTime = dr.getHeader().getStartTime();
-            String endTime = dr.getHeader().getEndTime();
-            Document d = Helpers.dRecordToDoc(dr, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
-
-            //System.out.println("Get packet. st:" + startTime + ", et: " + endTime + ",byte: " + bytes.length);
             
-            queue.put(d);
+            if (isSharpMinute) {
+            	
+            	List<DataRecord> records = gm.splitPacketPerMinute(dr);
+            	for(DataRecord record : records) {
+            		
+            		String startTime = record.getHeader().getStartTime();
+                    String endTime = record.getHeader().getEndTime();
+                    Document d = Helpers.dRecordToDoc(record, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
+
+                    queue.put(d);
+            	}
+            	
+            } else {
+            	String startTime = dr.getHeader().getStartTime();
+                String endTime = dr.getHeader().getEndTime();
+                Document d = Helpers.dRecordToDoc(dr, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
+
+                queue.put(d);
+            }
             
             if ( queueLimit > 0 ) {
             	if ( queue.size() > queueLimit ) {

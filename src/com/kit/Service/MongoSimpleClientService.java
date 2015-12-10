@@ -31,6 +31,7 @@ public class MongoSimpleClientService {
 	private MongoCollection<Document> collection = null;
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+	private SimpleDateFormat sdfToDay = new SimpleDateFormat("yyyy-MM-dd");
 	private TraceStatsDao traceStatsDao;
 	boolean isShard = true;
 	boolean isIndex = true;
@@ -104,6 +105,10 @@ public class MongoSimpleClientService {
 
 		traceStatsDao.upsertTraceStats(keyTraceStatsDoc, traceStatsDoc);
 
+		// make gaps
+		Document keyTraceGapsDoc = new Document()
+				.append("_id", network + "_" + station + "_" + location + "_" + channel + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay));
+		
 		d.clear();
 		
 		return result;

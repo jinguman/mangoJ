@@ -57,7 +57,7 @@ public class SeedlinkStreamClient implements Runnable {
 		scs.setPort(port);
 		scs.setTimeoutSeconds(timeoutSeconds);
 		scs.setVerbose(verbose);
-		
+
 		while(true) {
 			try {
 				streamsInfoDoc = scs.getStreamsInfo();

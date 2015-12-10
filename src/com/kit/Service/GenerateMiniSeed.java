@@ -28,19 +28,16 @@ public class GenerateMiniSeed {
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
 	final Logger logger = LoggerFactory.getLogger(GenerateMiniSeed.class);
 
-	public DataRecord trimPacket(String stStr, String etStr, DataRecord dr, boolean isForceNew) {
-
+	public DataRecord trimPacket(Btime stReqBtime, Btime etReqBtime, DataRecord dr, boolean isForceNew) {
+		
 		try {
 			DataHeader header = dr.getHeader();
 
 			// Get packet information
 			Btime stPacketBtime = header.getStartBtime();
 			Btime etPacketBtime = header.getLastSampleBtime();
-			int sampleRate = Math.round(header.getSampleRate());
-
-			// Get request Btime
-			Btime stReqBtime = Helpers.getBtime(stStr, sdfToSecond);
-			Btime etReqBtime = Helpers.getBtime(etStr, sdfToSecond);
+			//int sampleRate = Math.round(header.getSampleRate());
+			float sampleRate = header.getSampleRate();
 
 			// Check range
 			int result = checkRangePacket(stReqBtime, etReqBtime, stPacketBtime, etPacketBtime); 
@@ -72,29 +69,33 @@ public class GenerateMiniSeed {
 				rTrimDelta = (int) Math.floor(( Helpers.getEpochTime(etPacketBtime) - Helpers.getEpochTime(etReqBtime) ) * sampleRate); 
 			}
 			
-			logger.debug("Calculate delta for cut. ltrim: {}, rtrim: {}", lTrimDelta, rTrimDelta);
+			//logger.debug("Calculate delta for cut. ltrim: {}, rtrim: {}", lTrimDelta, rTrimDelta);
 
 			// cut 
-			int[] temp2 = new int[temp.length - lTrimDelta - rTrimDelta]; 
+			int alpha = 0;	// alpha factor: 앞 부분이나 중간부분을 자를 경우에만 계산된 길이에서 -1을 한다
+			if ( rTrimDelta > 0 ) alpha = 1; 
+			int[] temp2 = new int[temp.length - lTrimDelta - rTrimDelta - alpha]; 
 			System.arraycopy(temp, lTrimDelta, temp2, 0, temp2.length);
-			logger.debug("Data cut by request. before: {}, after: {}", temp.length, temp2.length);
+			//logger.debug("Data cut by request. req: {} - {}, packet: {} - {},  before: {}, after: {}", stReqBtime.toString(), etReqBtime.toString(), 
+			//		stPacketBtime.toString(), etPacketBtime.toString(), temp.length, temp2.length);
 			
-			logger.debug("Original DataRecord. {}", dr.toString());
+			//logger.debug("Original DataRecord. {}", dr.toString());
 			
 			// Get steim Frame size
 			int steimFrameSize = getSteimFrameSize(dr.getDataSize());
 			
-			// Modify header
-			header.setNumSamples((short)temp2.length);
-	        header.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
-			
-	        // steim
+	        // steim encoding
 	        SteimFrameBlock steimData = null;
 	        steimData = Steim2.encode(temp2, steimFrameSize, temp2[0]);
 	        
 	        // Modify data record
 	        if ( !isForceNew ) {
 	        	if (steimData.getNumSamples() == temp2.length ) {
+	        		
+	        		// Modify header
+	    			header.setNumSamples((short)temp2.length);
+	    	        header.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
+	        		
 		        	dr.setData(steimData.getEncodedData());
 		        	logger.debug("Modify DataRecord. {}", dr.toString());
 			        return dr;
@@ -142,7 +143,7 @@ public class GenerateMiniSeed {
 	        // Calculate seed len
 	        int dataRecordSize = (steimFrameSize*64) + headerSize;
 	        byte seed = (byte)get2Power(dataRecordSize);
-	        logger.debug("Size: steimframe: {}, dataRecordSize: {}, seed: {}", steimFrameSize, dataRecordSize, seed);
+	        //logger.debug("Size: steimframe: {}, dataRecordSize: {}, seed: {}", steimFrameSize, dataRecordSize, seed);
 
 	        // 1000 Blockette
 	        Blockette1000 blockette1000 = new Blockette1000();
@@ -155,13 +156,10 @@ public class GenerateMiniSeed {
 	        //steimData = Steim2.encode(temp2, steimFrameSize, temp2[0]);
 	        record.setData(steimData.getEncodedData());
 			
-	        logger.debug("New DataRecord. {}", record.toString());
+	        //logger.debug("New DataRecord. {}", record.toString());
 	        
 	        return record;
 	        
-		} catch (ParseException e) {
-			logger.error("{}", e);
-			return null;
 		} catch (CodecException e) {
 			logger.error("{}", e);
 			return null;
@@ -172,6 +170,22 @@ public class GenerateMiniSeed {
 			logger.error("{}", e);
 			return null;
 		}
+	}
+	
+	public DataRecord trimPacket(String stStr, String etStr, DataRecord dr, boolean isForceNew) {
+
+		try {
+
+			// Get request Btime
+			Btime stReqBtime = Helpers.getBtime(stStr, sdfToSecond);
+			Btime etReqBtime = Helpers.getBtime(etStr, sdfToSecond);
+			
+			return trimPacket(stReqBtime, etReqBtime, dr, isForceNew);
+
+		} catch (ParseException e) {
+			logger.error("{}", e);
+			return null;
+		} 
     }
 	
 	/**
@@ -236,7 +250,40 @@ public class GenerateMiniSeed {
 		
 		List<DataRecord> drLists = new ArrayList<DataRecord>();
 		
-		// 
+		Btime st = dr.getHeader().getStartBtime();
+		Btime et = dr.getHeader().getPredictedNextStartBtime();
+		
+		try {
+			long l = Helpers.getDiffByMinute(et, st);
+			
+			if ( l > 0 ) {
+				
+				// start
+				Btime tempBtime = Helpers.getNextSharpMinute(st, 1);
+				DataRecord trimDr = trimPacket(st, tempBtime, dr, true);
+				if ( trimDr != null ) drLists.add(trimDr);
+				
+				// middle
+				int n = 1;
+				while( n < l ) {
+					
+					trimDr = trimPacket(Helpers.getNextSharpMinute(st, n), Helpers.getNextSharpMinute(st, n+1), dr, true);
+					if ( trimDr != null ) drLists.add(trimDr);
+					n++;
+				}
+					
+				// end
+				trimDr = trimPacket(Helpers.getNextSharpMinute(st, n), et, dr, true);
+				if ( trimDr != null ) drLists.add(trimDr);
+				
+			} else {
+				drLists.add(dr);
+			}
+			
+		} catch (ParseException e) {
+			drLists.add(dr);
+			logger.warn("Error in parsing dateformat. Can't split datarecord per minute.");			
+		}
 		
 		return drLists;
 	}

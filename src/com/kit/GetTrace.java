@@ -28,19 +28,19 @@ public class GetTrace {
 	public static void main(String[] args) throws ParseException, SeedFormatException, IOException, UnsupportedCompressionType, CodecException {
 		// TODO Auto-generated method stub
 
-		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost"));
-		MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
+		MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost"));
+		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
 		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://210.114.91.91:18832"));
 		MongoDatabase database = client.getDatabase("trace");
 		
-		String network = "CI";
-		String station = "ARV";
+		String network = "KS";
+		String station = "SEO";
 		String location = "";
-		String channel = "HHE";
+		String channel = "HHZ";
 		//String st = "2015-12-02T09:53:10.0000";
 		//String et = "2015-12-02T09:53:30.0000";
-		String st = "2015-12-09T00:00:00.0000";
-		String et = "2015-12-09T05:00:00.0000";
+		String st = "2015-12-04T04:20:00.0000";
+		String et = "2015-12-04T04:26:00.0000";
 
 		//{ "_id" : "AK_ANM__BHE", "it" : "2015-12-03T08:37:18", "net" : "AK", "sta" : "ANM", "loc" : "", "cha" : "BHE", "st" : "2015-12-02T01:38:22.2684", "et" : "2015-12-03T08:36:49.5284" }
 		
@@ -67,7 +67,7 @@ public class GetTrace {
 			ByteBuf b = Unpooled.wrappedBuffer(binary.getData());
 			
 			DataRecord dr = (DataRecord)SeedRecord.read(b.array());
-			//System.out.println(dr.toString());
+			System.out.println(dr.toString());
 			
 			DataRecord dr2 = gm.trimPacket(st, et, dr, false);
 			//if ( dr2 != null ) dr2.write(dos);

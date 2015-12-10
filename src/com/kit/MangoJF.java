@@ -19,7 +19,7 @@ public class MangoJF {
     	Map<String, Object> indexMap = new ConcurrentHashMap<>();
     	PropertyManager pm = new PropertyManager();
 	
-    	String filename = "d:/ANM.HGZ.2015.337.00.00.00";
+    	String filename = "d:/SEO.HHZ.2015.1204.00.00.00";
     	
     	MseedSimpleClient msc = new MseedSimpleClient(pm, indexMap);
     	msc.read(filename);

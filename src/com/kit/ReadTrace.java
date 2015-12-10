@@ -6,6 +6,8 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import com.kit.Service.GenerateMiniSeed;
 
@@ -19,7 +21,7 @@ public class ReadTrace {
 		DataInputStream ls = null;
 		DataOutputStream dos = null;
 		
-		String filename = "d:/ANM.HGZ.2015.337.00.00.00";
+		String filename = "d:/SEO.HHZ.2015.1204.00.00.00";
 		String filename2 = "d:/ANM.HGZ.2015.337.00.00.00.ccc";
 
 		String stStr = "2015-12-03T14:00:10.0000";
@@ -33,8 +35,10 @@ public class ReadTrace {
 			
 			while(true) {
 				DataRecord dr = (DataRecord) SeedRecord.read(di);
-				DataRecord record = gm.trimPacket(stStr, etStr, dr, false);
-				if ( record != null ) record.write(dos);
+				//DataRecord record = gm.trimPacket(stStr, etStr, dr, false);
+				System.out.println(dr.toString());
+				System.out.println(dr.getHeader().getSequenceNum());
+				//if ( record != null ) record.write(dos);
 			}
 			
 		} catch (EOFException e) {
