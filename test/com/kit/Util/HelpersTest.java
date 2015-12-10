@@ -20,6 +20,7 @@ public class HelpersTest {
 		assertEquals(61.845, d, 0);
 	}
 	
+	
 	@Test
 	public void getDiffByMinute() throws ParseException {
 		

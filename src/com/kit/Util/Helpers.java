@@ -110,6 +110,28 @@ public class Helpers {
 		return String.format("%02d", month);
 	}
 
+	public static String getHourString(String strDate, SimpleDateFormat fromFormat) throws ParseException {
+
+		// Don't care TIMEZONE
+		Calendar ca = Calendar.getInstance();
+		ca.setTime(fromFormat.parse(strDate));
+		
+		int hour = ca.get(Calendar.HOUR);
+
+		return String.format("%02d", hour);
+	}
+
+	public static String getMinuteString(String strDate, SimpleDateFormat fromFormat) throws ParseException {
+
+		// Don't care TIMEZONE
+		Calendar ca = Calendar.getInstance();
+		ca.setTime(fromFormat.parse(strDate));
+		
+		int min = ca.get(Calendar.HOUR);
+
+		return String.format("%02d", min);
+	}
+	
 	public static String getTraceCollectionName(String network, String station, String location, String channel, String year, String month) {
 
 		StringBuffer sb = new StringBuffer();

@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.kit.Dao.TraceGapsDao;
 import com.kit.Dao.TraceStatsDao;
 import com.kit.Util.Helpers;
 import com.kit.Util.PropertyManager;
@@ -19,6 +20,8 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
+
+import edu.sc.seis.seisFile.mseed.Btime;
 
 public class MongoSimpleClientService {
 
@@ -33,6 +36,7 @@ public class MongoSimpleClientService {
 	private SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	private SimpleDateFormat sdfToDay = new SimpleDateFormat("yyyy-MM-dd");
 	private TraceStatsDao traceStatsDao;
+	private TraceGapsDao traceGapsDao;
 	boolean isShard = true;
 	boolean isIndex = true;
 	int restartSec = 5;
@@ -44,6 +48,7 @@ public class MongoSimpleClientService {
 		database = client.getDatabase(pm.getStringProperty("mongo.database"));
 
 		traceStatsDao = new TraceStatsDao(database);
+		traceGapsDao = new TraceGapsDao(database);
 		
 		isShard = pm.getBooleanProperty("mc.shard");
 		isIndex= pm.getBooleanProperty("mc.index");
@@ -70,6 +75,11 @@ public class MongoSimpleClientService {
 
 		String year = Helpers.getYearString(st, sdfToSecond);
 		String month = Helpers.getMonthString(st, sdfToSecond);
+		
+		Btime stBtime = Helpers.getBtime(st, sdfToSecond);
+		String hour = String.format("%02d", stBtime.getHour());
+		String min = String.format("%02d", stBtime.getMin());
+		
 		String collectionName = Helpers.getTraceCollectionName(network, station, location, channel, year, month);
 
 		// get collection
@@ -86,6 +96,9 @@ public class MongoSimpleClientService {
 		Document key = new Document("_id", station + "_" + location + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
 		UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
 
+		// result에 따라 stats, gaps 기록해야 함...
+		// 일단은 그냥 하자..
+		
 		// make stats
 		Document keyTraceStatsDoc = new Document()
 				.append("_id", network + "_" + station + "_" + location + "_" + channel);
@@ -108,6 +121,12 @@ public class MongoSimpleClientService {
 		// make gaps
 		Document keyTraceGapsDoc = new Document()
 				.append("_id", network + "_" + station + "_" + location + "_" + channel + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay));
+		
+		Document traceGapsDoc = new Document()
+				.append("$set", new Document("s", d.get("s")))
+				.append("$inc", new Document(hour + ":" + min, d.get("n")));
+				
+		traceGapsDao.upsertTraceGaps(keyTraceGapsDoc, traceGapsDoc);
 		
 		d.clear();
 		

@@ -10,6 +10,7 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * Trace collection에 관련된 DAO
@@ -44,11 +45,11 @@ public class TraceGapsDao {
     	
     	options.upsert(true);
     	try {
-    		traceGapsColl.updateOne(key, doc, options);
+    		UpdateResult r = traceGapsColl.updateOne(key, doc, options);
 		} catch (MongoWriteException e) {
 			if ( e.getCode() == 11000) {
 				options.upsert(false);
-				traceGapsColl.updateOne(key, doc, options);
+				UpdateResult r = traceGapsColl.updateOne(key, doc, options);
 			}
 		}
     }
