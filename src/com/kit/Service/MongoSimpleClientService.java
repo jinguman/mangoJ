@@ -131,6 +131,10 @@ public class MongoSimpleClientService {
 		return result;
 	}	
 
+	public void SearchGap() {
+		
+	}
+	
 	private UpdateResult addTrace(Document key, Document doc) {
 
 		UpdateResult result = null;
