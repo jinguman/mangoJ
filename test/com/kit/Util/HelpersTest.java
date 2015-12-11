@@ -43,7 +43,7 @@ public class HelpersTest {
 	public void getNextSharpMinute() throws ParseException {
 		
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ss");
-		String st1 = "2015-01-01T01:17:20.1234";
+		String st1 = "2015-01-01T01:14:54.5500";
 		
 		Btime bt = Helpers.getNextSharpMinute(st1, 1, format);
 		Btime bt2 = Helpers.getNextSharpMinute(bt, -1);
@@ -51,5 +51,4 @@ public class HelpersTest {
 		
 		assertEquals(bt, bt3);
 	}
-	
 }

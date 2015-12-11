@@ -41,9 +41,9 @@ public class GenerateMiniSeedTest {
 		header.setNetworkCode("XX");
 		header.setLocationIdentifier("00");
 		header.setNumSamples((short) data.length);
-		header.setSampleRate(100f);
+		header.setSampleRate(1f);
 		//Btime btime = new Btime(new Date());
-		Btime btime = new Btime(2015,344,4,23,58,1230);
+		Btime btime = new Btime(2015,345,06,14,54,9500);
 		header.setStartBtime(btime);
 
 		DataRecord record = new DataRecord(header);
@@ -76,9 +76,7 @@ public class GenerateMiniSeedTest {
 			sum += dr.getHeader().getNumSamples();
 			
 		} 
-		
 		assertEquals(data.length, sum);
-
 	}
 
 }

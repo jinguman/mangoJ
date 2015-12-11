@@ -269,7 +269,6 @@ public class Helpers {
 		return getNextSharpMinute(bt.convertToCalendar(), amount);
 	}
 	
-	
 	public static Btime getNextSharpMinute(String str, int amount, SimpleDateFormat format) throws ParseException {
 		
 		Calendar ca = Calendar.getInstance();

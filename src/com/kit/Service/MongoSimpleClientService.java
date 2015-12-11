@@ -96,40 +96,38 @@ public class MongoSimpleClientService {
 		Document key = new Document("_id", station + "_" + location + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
 		UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
 
-		// result에 따라 stats, gaps 기록해야 함...
-		// 일단은 그냥 하자..
-		
-		// make stats
-		Document keyTraceStatsDoc = new Document()
-				.append("_id", network + "_" + station + "_" + location + "_" + channel);
-		Document traceStatsDoc = new Document()
-				.append("$set", new Document("net", network))
-				.append("$set", new Document("sta", station))
-				.append("$set", new Document("loc", location))
-				.append("$set", new Document("cha", channel))
-				.append("$min", new Document("st",st))
-				.append("$max", new Document("et",et))
-				.append("$set", new Document("it",Helpers.getCurrentUTC(sdfToSecond)) 
-										.append("net", network)
-										.append("sta", station)
-										.append("loc", location)
-										.append("cha", channel)
-						);
+		if ( result.getModifiedCount() > 0 ) {
+			// make stats
+			Document keyTraceStatsDoc = new Document()
+					.append("_id", network + "_" + station + "_" + location + "_" + channel);
+			Document traceStatsDoc = new Document()
+					.append("$set", new Document("net", network))
+					.append("$set", new Document("sta", station))
+					.append("$set", new Document("loc", location))
+					.append("$set", new Document("cha", channel))
+					.append("$min", new Document("st",st))
+					.append("$max", new Document("et",et))
+					.append("$set", new Document("it",Helpers.getCurrentUTC(sdfToSecond)) 
+											.append("net", network)
+											.append("sta", station)
+											.append("loc", location)
+											.append("cha", channel)
+							);
 
-		traceStatsDao.upsertTraceStats(keyTraceStatsDoc, traceStatsDoc);
+			traceStatsDao.upsertTraceStats(keyTraceStatsDoc, traceStatsDoc);
 
-		// make gaps
-		Document keyTraceGapsDoc = new Document()
-				.append("_id", network + "_" + station + "_" + location + "_" + channel + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay));
-		
-		Document traceGapsDoc = new Document()
-				.append("$set", new Document("s", d.get("s")))
-				.append("$inc", new Document(hour + ":" + min, d.get("n")));
-				
-		traceGapsDao.upsertTraceGaps(keyTraceGapsDoc, traceGapsDoc);
+			// make gaps
+			Document keyTraceGapsDoc = new Document()
+					.append("_id", network + "_" + station + "_" + location + "_" + channel + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay));
+			
+			Document traceGapsDoc = new Document()
+					.append("$set", new Document("s", d.get("s")))
+					.append("$inc", new Document(hour + ":" + min, d.get("n")));
+					
+			traceGapsDao.upsertTraceGaps(keyTraceGapsDoc, traceGapsDoc);
+		}
 		
 		d.clear();
-		
 		return result;
 	}	
 

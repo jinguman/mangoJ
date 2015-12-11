@@ -43,6 +43,8 @@ public class GenerateMiniSeed {
 			int result = checkRangePacket(stReqBtime, etReqBtime, stPacketBtime, etPacketBtime); 
 			switch (result) {
 				case 0:
+					//logger.debug("Data range invalid. req: {} - {}, packet: {} - {},  before: {}, after: {}", stReqBtime.toString(), etReqBtime.toString(), 
+					//				stPacketBtime.toString(), etPacketBtime.toString());
 					return null;
 				case 1:
 					return dr;
@@ -59,24 +61,26 @@ public class GenerateMiniSeed {
 			//                    |stReqBtime
 			// 요청시작시간이 시작패킷시간보다 뒤에 있고
 			if ( stReqBtime.after(stPacketBtime) ) {
-				lTrimDelta = (int) (Math.floor((Helpers.getEpochTime(stPacketBtime) - Helpers.getEpochTime(stReqBtime))* sampleRate)) * -1;
+				double tmp = (Helpers.getEpochTime(stReqBtime) - Helpers.getEpochTime(stPacketBtime)) * sampleRate;
+				tmp = Math.round(tmp * 10000000)/10000000;
+				lTrimDelta = (int)( Math.floor(tmp) ) +1;
 			}
 			
 			// case2.       |stPacketBtime         |etPacketBtime
 			//                                 |etReqBtime      
 			// 패킷종료시간이 요청종료시간보다 뒤에 있고
 			if ( etPacketBtime.after(etReqBtime) ) {
-				rTrimDelta = (int) Math.floor(( Helpers.getEpochTime(etPacketBtime) - Helpers.getEpochTime(etReqBtime) ) * sampleRate); 
+				double tmp = (Helpers.getEpochTime(etReqBtime) - Helpers.getEpochTime(stPacketBtime)) * sampleRate;
+				tmp = Math.round(tmp * 10000000)/10000000;
+				rTrimDelta = temp.length - (int)( Math.floor(tmp) ) -1;
 			}
 			
 			//logger.debug("Calculate delta for cut. ltrim: {}, rtrim: {}", lTrimDelta, rTrimDelta);
 
 			// cut 
-			int alpha = 0;	// alpha factor: 앞 부분이나 중간부분을 자를 경우에만 계산된 길이에서 -1을 한다
-			if ( rTrimDelta > 0 ) alpha = 1; 
-			int[] temp2 = new int[temp.length - lTrimDelta - rTrimDelta - alpha]; 
+			int[] temp2 = new int[temp.length - lTrimDelta - rTrimDelta]; 
 			System.arraycopy(temp, lTrimDelta, temp2, 0, temp2.length);
-			//logger.debug("Data cut by request. req: {} - {}, packet: {} - {},  before: {}, after: {}", stReqBtime.toString(), etReqBtime.toString(), 
+			//logger.debug("Data cut by request. req: {} - {}, packet: {} - {},  before: {}, after: {}, alpha: {}", stReqBtime.toString(), etReqBtime.toString(), 
 			//		stPacketBtime.toString(), etPacketBtime.toString(), temp.length, temp2.length);
 			
 			//logger.debug("Original DataRecord. {}", dr.toString());
@@ -97,7 +101,7 @@ public class GenerateMiniSeed {
 	    	        header.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
 	        		
 		        	dr.setData(steimData.getEncodedData());
-		        	logger.debug("Modify DataRecord. {}", dr.toString());
+		        	//logger.debug("Modify DataRecord. {}", dr.toString());
 			        return dr;
 		        }
 	        }
@@ -200,7 +204,7 @@ public class GenerateMiniSeed {
 		
 		// 요청시작시간이 요청종료시간의 뒤에 있을 경우
 		if ( stReqBtime.afterOrEquals(etReqBtime) ) {
-			logger.warn("Range invalid. start time must be before endtime. stReq: " + stReqBtime.toString() + ", etReq: " + etReqBtime.toString());
+			//logger.warn("Range invalid. start time must be before endtime. stReq: " + stReqBtime.toString() + ", etReq: " + etReqBtime.toString());
 			return 0;
 		}
 
@@ -260,6 +264,10 @@ public class GenerateMiniSeed {
 				
 				// start
 				Btime tempBtime = Helpers.getNextSharpMinute(st, 1);
+				//Btime tempBtimeBeforeMilliSec = Helpers.getBtimeBeforeMilliSecond(tempBtime);
+				
+				//System.out.println(tempBtime.toString() + ", " + tempBtimeBeforeMilliSec.toString());
+				
 				DataRecord trimDr = trimPacket(st, tempBtime, dr, true);
 				if ( trimDr != null ) drLists.add(trimDr);
 				

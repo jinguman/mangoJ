@@ -45,11 +45,11 @@ public class TraceGapsDao {
     	
     	options.upsert(true);
     	try {
-    		UpdateResult r = traceGapsColl.updateOne(key, doc, options);
+    		traceGapsColl.updateOne(key, doc, options);
 		} catch (MongoWriteException e) {
 			if ( e.getCode() == 11000) {
 				options.upsert(false);
-				UpdateResult r = traceGapsColl.updateOne(key, doc, options);
+				traceGapsColl.updateOne(key, doc, options);
 			}
 		}
     }

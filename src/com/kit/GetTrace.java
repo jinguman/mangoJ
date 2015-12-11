@@ -28,19 +28,20 @@ public class GetTrace {
 	public static void main(String[] args) throws ParseException, SeedFormatException, IOException, UnsupportedCompressionType, CodecException {
 		// TODO Auto-generated method stub
 
-		MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost"));
+		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost"));
 		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
-		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://210.114.91.91:18832"));
+		MongoClient client = new MongoClient(new MongoClientURI("mongodb://210.114.91.91:18832"));
 		MongoDatabase database = client.getDatabase("trace");
+		int totSample = 0;
 		
-		String network = "KS";
-		String station = "SEO";
+		String network = "UW";
+		String station = "FINN";
 		String location = "";
-		String channel = "HHZ";
+		String channel = "ENN";
 		//String st = "2015-12-02T09:53:10.0000";
 		//String et = "2015-12-02T09:53:30.0000";
-		String st = "2015-12-04T04:20:00.0000";
-		String et = "2015-12-04T04:26:00.0000";
+		String st = "2015-12-11T08:18:00.0000";
+		String et = "2015-12-11T08:22:00.0000";
 
 		//{ "_id" : "AK_ANM__BHE", "it" : "2015-12-03T08:37:18", "net" : "AK", "sta" : "ANM", "loc" : "", "cha" : "BHE", "st" : "2015-12-02T01:38:22.2684", "et" : "2015-12-03T08:36:49.5284" }
 		
@@ -61,13 +62,13 @@ public class GetTrace {
 		while(cursor.hasNext()) {
 			Document doc = cursor.next();
 			Document sub = (Document) doc.get(channel);
-			System.out.println(sub.toJson());
+			//System.out.println(sub.toJson());
 			
 			Binary binary = (Binary) sub.get("d");
 			ByteBuf b = Unpooled.wrappedBuffer(binary.getData());
 			
 			DataRecord dr = (DataRecord)SeedRecord.read(b.array());
-			System.out.println(dr.toString());
+			//System.out.println(dr.toString());
 			
 			DataRecord dr2 = gm.trimPacket(st, et, dr, false);
 			//if ( dr2 != null ) dr2.write(dos);
@@ -78,10 +79,15 @@ public class GetTrace {
 			//DataOutputStream dos = new DataOutputStream(new FileOutputStream(filename));
 			if ( dr2 != null ) {
 				//System.out.println(">>>>>>>>" + dr2.getControlHeader().getSequenceNum());
+				//System.out.println(dr2.toString());
+				System.out.println(dr2.getHeader().getStartTime() + "-" + dr2.getHeader().getEndTime() + ", " + dr2.getHeader().getNumSamples() + ", sample: " + dr2.getHeader().getSampleRate());
+				totSample += dr2.getHeader().getNumSamples();
 				dr2.write(dos);
 			}
 		
 		}
+		
+		System.out.println(">>>>>>>> total samples: " +totSample );
 		
 		dos.close();
 	}
