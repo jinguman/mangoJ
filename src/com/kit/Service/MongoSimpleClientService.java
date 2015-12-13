@@ -118,12 +118,15 @@ public class MongoSimpleClientService {
 
 			// make gaps
 			Document keyTraceGapsDoc = new Document()
-					.append("_id", network + "_" + station + "_" + location + "_" + channel + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay));
+					.append("_id", Helpers.getTraceGapsKey(network, station, location, channel, Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay))); 
 			
 			Document traceGapsDoc = new Document()
 					.append("$set", new Document("s", d.get("s")))
-					.append("$inc", new Document(hour + ":" + min, d.get("n")));
-					
+					.append("$inc", new Document("m." + hour + "." + min, d.get("n"))
+								.append("h." + hour, d.get("n"))
+								.append("d", d.get("n"))
+							);
+			
 			traceGapsDao.upsertTraceGaps(keyTraceGapsDoc, traceGapsDoc);
 		}
 		

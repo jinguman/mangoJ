@@ -40,8 +40,10 @@ public class TraceGapsDaoTest {
 		//
 		//));
 		
-		Document doc = new Document("$inc", new Document(hour + ":" + min,n));
-				
+		Document doc = new Document("$inc", new Document("m."+hour + "." + min,n)
+											.append("d", n)
+											.append("h."+hour, n)
+				);				
 		
 		dao.upsertTraceGaps(key, doc);
 	}

@@ -8,6 +8,7 @@ import org.bson.Document;
 import com.kit.Util.MangoJCode;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
@@ -33,12 +34,17 @@ public class TraceGapsDao {
     public List<Document> findTraceGaps(Document doc) {
 
         List<Document> gaps = new ArrayList<>();
-        traceGapsColl.find().into(gaps);
+        traceGapsColl.find(doc).into(gaps);
         return gaps;
+    }
+
+    public MongoCursor<Document> findTraceGapsCursor(Document doc) {
+
+        return traceGapsColl.find(doc).iterator();
     }
     
     public long countTraceGaps(Document doc) {
-    	return traceGapsColl.count();
+    	return traceGapsColl.count(doc);
     }
     
     public void upsertTraceGaps(Document key, Document doc) {    	
