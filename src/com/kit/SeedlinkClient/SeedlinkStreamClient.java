@@ -123,6 +123,7 @@ public class SeedlinkStreamClient implements Runnable {
 			
 			for(String network : networks) {
 				List<Document> stationListDoc = (List<Document>) streamsInfoDoc.get(network);
+				if ( stationListDoc == null ) continue;
 				
 				for(Document stationDoc : stationListDoc) {
 					for( String station : stationDoc.keySet() ){

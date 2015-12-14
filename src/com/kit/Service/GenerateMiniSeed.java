@@ -85,6 +85,8 @@ public class GenerateMiniSeed {
 			
 			//logger.debug("Original DataRecord. {}", dr.toString());
 			
+			if ( temp2.length == 0 ) return null;
+			
 			// Get steim Frame size
 			int steimFrameSize = getSteimFrameSize(dr.getDataSize());
 			

@@ -96,7 +96,7 @@ public class MongoSimpleClientService {
 		Document key = new Document("_id", station + "_" + location + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
 		UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
 
-		if ( result.getModifiedCount() > 0 ) {
+		if ( result.getModifiedCount() > 0 || result.getUpsertedId() != null ) {
 			// make stats
 			Document keyTraceStatsDoc = new Document()
 					.append("_id", network + "_" + station + "_" + location + "_" + channel);

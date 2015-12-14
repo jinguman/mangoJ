@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.kit.MseedClient.MseedSimpleClient;
 import com.kit.Util.MangoJCode;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
@@ -22,6 +25,7 @@ public class TraceGapsDao {
 
 	private final MongoCollection<Document> traceGapsColl;
 	private UpdateOptions options = new UpdateOptions();
+	final Logger logger = LoggerFactory.getLogger(TraceGapsDao.class);
 	
 	/**
 	 * »ý¼ºÀÚ
@@ -56,6 +60,8 @@ public class TraceGapsDao {
 			if ( e.getCode() == 11000) {
 				options.upsert(false);
 				traceGapsColl.updateOne(key, doc, options);
+			} else {
+				logger.warn("{}", e);
 			}
 		}
     }
