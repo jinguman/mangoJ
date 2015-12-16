@@ -75,7 +75,7 @@ public class TraceDao {
 			cursor = collection.aggregate(aggregateParams).iterator();
 			
 		} catch (ParseException e) {
-			logger.error("start or end parameter format is 'yyyy-MM-dd'T'HH:mm:ss.SSSS'");
+			logger.error("start or end parameter format is 'yyyy-MM-dd'T'HH:mm:ss.SSSS'. {}", e);
 			return null;
 		}
 
