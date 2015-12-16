@@ -42,7 +42,7 @@ public class TraceDao {
 		try {
 			year = Helpers.getYearString(startStr, sdfToSecond); 
 			month = Helpers.getMonthString(startStr, sdfToSecond);
-		
+
 			MongoCollection<Document> collection = database.getCollection(Helpers.getTraceCollectionName(network, station, location, channel, year, month));
 			
 			// db.AK__2015.aggregate([
@@ -82,7 +82,7 @@ public class TraceDao {
 		return cursor;
 	}
 	
-public MongoCursor<Document> getTraceCursorLight(String network, String station, String location, String channel, String startStr, String endStr) {
+	public MongoCursor<Document> getTraceCursorLight(String network, String station, String location, String channel, String startStr, String endStr) {
 		
 		String year, month;
 		MongoCursor<Document> cursor = null;

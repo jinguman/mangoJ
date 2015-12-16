@@ -285,4 +285,103 @@ public class Helpers {
 		
 		return getNextSharpMinute(ca, amount);
 	}
+	
+	public static String getStFromCalendar(String filename, Calendar ca) {
+		
+		int year = ca.get(Calendar.YEAR);
+		int month = ca.get(Calendar.MONTH) + 1;
+		int day = ca.get(Calendar.DAY_OF_MONTH);
+		int hour = ca.get(Calendar.HOUR_OF_DAY);
+		int min = ca.get(Calendar.MINUTE);
+		StringBuffer sb = new StringBuffer();
+		
+		if ( filename.length() >= 10) {
+			sb.append(String.format("%04d", year));
+			sb.append("-");
+			sb.append(String.format("%02d", month));
+			sb.append("-");
+			sb.append(String.format("%02d", day));
+		}
+		
+		if ( filename.length() >= 13 ) {
+			sb.append("T");
+			sb.append(String.format("%02d", hour));
+		} else {
+			sb.append("T");
+			sb.append("00");
+		}
+		
+		if ( filename.length() >= 16 ) {
+			sb.append(":");
+			sb.append(String.format("%02d", min));
+			sb.append(":");
+			sb.append("00");
+			sb.append(".0000");
+		} else {
+			sb.append(":");
+			sb.append("00");
+			sb.append(":");
+			sb.append("00");
+			sb.append(".0000");
+		}
+		return sb.toString();
+	}
+	
+	public static String getStFromFileName(String filename, SimpleDateFormat format) throws ParseException {
+		
+		// 2015-12-16 : 2015-12-16T00:00:00.0000 - 2015-12-17T00:00:00:0000
+		// 2015-12-16T09 : 2015-12-16T09:00:00.0000 - 2015-12-16T10:00:00:0000
+		// 2015-12-16T09:04 : 2015-12-16T09:04:00.0000 - 2015-12-16T09:05:00:0000
+
+		Calendar ca = Calendar.getInstance();
+		ca.setTime(format.parse(filename));
+		
+		return getStFromCalendar(filename, ca);
+	}
+	
+	public static String getEtFromFileName(String filename, SimpleDateFormat format) throws ParseException {
+		
+		// 2015-12-16 : 2015-12-16T00:00:00.0000 - 2015-12-17T00:00:00:0000
+		// 2015-12-16T09 : 2015-12-16T09:00:00.0000 - 2015-12-16T10:00:00:0000
+		// 2015-12-16T09:04 : 2015-12-16T09:04:00.0000 - 2015-12-16T09:05:00:0000
+
+		Calendar ca = Calendar.getInstance();
+		ca.setTime(format.parse(filename));
+		
+		if ( filename.length() == 10) {
+			ca.add(Calendar.DAY_OF_MONTH, 1);
+			return getStFromCalendar(filename, ca);
+		}
+		
+		if ( filename.length() == 13 ) {
+			ca.add(Calendar.HOUR_OF_DAY, 1);
+			return getStFromCalendar(filename, ca);
+		}
+		
+		if ( filename.length() == 16 ) {
+			ca.add(Calendar.MINUTE, 1);
+			return getStFromCalendar(filename, ca);
+		}
+		
+		return null;
+	}
+	
+	public static String getFileName(String network, String station, String location, String channel, Btime bt) {
+		
+		StringBuffer sb = new StringBuffer();
+		
+		if ( !network.equals("-")) sb.append(network).append(".");
+		if ( !station.equals("-")) sb.append(station).append(".");
+		if ( !location.equals("-")) sb.append(location).append(".");
+		if ( !channel.equals("-")) sb.append(channel).append(".");
+		
+		sb.append(String.format("%04d", bt.year)).append(".");
+		sb.append(String.format("%03d", bt.jday)).append(".");
+		sb.append(String.format("%02d", bt.hour)).append(".");
+		sb.append(String.format("%02d", bt.min)).append(".");
+		sb.append(String.format("%02d", bt.sec));
+		
+		return sb.toString();
+	}
 }
+

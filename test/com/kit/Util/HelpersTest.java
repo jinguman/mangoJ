@@ -24,7 +24,7 @@ public class HelpersTest {
 	@Test
 	public void getDiffByMinute() throws ParseException {
 		
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ss");
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		
 		String st1 = "2015-01-01T01:17:20.1234";
 		String st2 = "2015-01-01T01:19:10.1234";
@@ -42,7 +42,7 @@ public class HelpersTest {
 	@Test
 	public void getNextSharpMinute() throws ParseException {
 		
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ss");
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		String st1 = "2015-01-01T01:14:54.5500";
 		
 		Btime bt = Helpers.getNextSharpMinute(st1, 1, format);
@@ -50,5 +50,45 @@ public class HelpersTest {
 		Btime bt3 = Helpers.getNextSharpMinute(bt2, 1);
 		
 		assertEquals(bt, bt3);
+	}
+	
+	@Test
+	public void getStFromFileName() throws ParseException {
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		String st1 = "2015-01-01";
+		String s1 = Helpers.getStFromFileName(st1, format);
+		assertEquals("2015-01-01T00:00:00.0000", s1);
+		
+		SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH");
+		String st2 = "2015-12-31T12";
+		String s2 = Helpers.getStFromFileName(st2, format2);
+		assertEquals("2015-12-31T12:00:00.0000", s2);
+		
+		SimpleDateFormat format3 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+		String st3 = "2015-10-31T12:23";
+		String s3 = Helpers.getStFromFileName(st3, format3);
+		assertEquals("2015-10-31T12:23:00.0000", s3);
+				
+	}
+	
+	@Test
+	public void getEtFromFileName() throws ParseException {
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		String st1 = "2015-01-01";
+		String s1 = Helpers.getEtFromFileName(st1, format);
+		assertEquals("2015-01-02T00:00:00.0000", s1);
+		
+		SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH");
+		String st2 = "2015-12-31T12";
+		String s2 = Helpers.getEtFromFileName(st2, format2);
+		assertEquals("2015-12-31T13:00:00.0000", s2);
+		
+		SimpleDateFormat format3 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+		String st3 = "2015-10-31T12:23";
+		String s3 = Helpers.getEtFromFileName(st3, format3);
+		assertEquals("2015-10-31T12:24:00.0000", s3);
+				
 	}
 }

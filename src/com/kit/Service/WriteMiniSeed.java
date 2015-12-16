@@ -1,16 +1,18 @@
 package com.kit.Service;
 
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 import org.bson.types.Binary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.kit.Dao.TraceDao;
-import com.kit.Util.PropertyManager;import com.mongodb.MongoClient;
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
@@ -56,9 +58,9 @@ public class WriteMiniSeed {
 					totSample += dr2.getHeader().getNumSamples();
 					dr2.write(dos);
 				}
-			
 			}
-			logger.debug("Write to file. {}_{}_{}_{}, {}-{}, name: {}, nsamp: {}", network, station, location, channel, st, et, filename, totSample);
+			
+			logger.debug("Write to file. {}.{}.{}.{}, {} - {}, name: {}, nsamp: {}", network, station, location, channel, st, et, filename, totSample);
 			
 		} catch(IOException e) {
 			logger.warn("{}", e);
@@ -76,6 +78,17 @@ public class WriteMiniSeed {
 				return false;
 			}
 		}
+		
+		if ( totSample == 0 ) {
+			try {
+				FileUtils.forceDelete(new File(filename));
+				logger.debug("Delete file. file size is 0. name: {}", filename);
+			} catch (IOException e) {
+				logger.warn("Failed to delete file. {}", e);
+			}
+			return false;
+		} 
+		
 		return true;
 	}
 }
