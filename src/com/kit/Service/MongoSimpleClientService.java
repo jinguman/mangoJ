@@ -39,8 +39,10 @@ public class MongoSimpleClientService {
 	private TraceGapsDao traceGapsDao;
 	boolean isShard = true;
 	boolean isIndex = true;
+	boolean isWriteGapStats = true;
 	int restartSec = 5;
 	private MongoInitialClientService mics;
+
 	
 	public MongoSimpleClientService(PropertyManager pm, Map<String, Object> indexMap) {
 		
@@ -53,6 +55,7 @@ public class MongoSimpleClientService {
 		isShard = pm.getBooleanProperty("mc.shard");
 		isIndex= pm.getBooleanProperty("mc.index");
 		restartSec = pm.getIntegerProperty("mc.restartsec");
+		isWriteGapStats = pm.getBooleanProperty("mc.writeGapStats");
 		
 		mics = new MongoInitialClientService(client, database, indexMap);
 	}
@@ -96,8 +99,10 @@ public class MongoSimpleClientService {
 		Document key = new Document("_id", station + "_" + location + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
 		UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
 
+		// Update or Insert condition
 		if ( result.getModifiedCount() > 0 || result.getUpsertedId() != null ) {
-			// make stats
+			
+			// write trace statistics
 			Document keyTraceStatsDoc = new Document()
 					.append("_id", network + "_" + station + "_" + location + "_" + channel);
 			Document traceStatsDoc = new Document()
@@ -116,18 +121,20 @@ public class MongoSimpleClientService {
 
 			traceStatsDao.upsertTraceStats(keyTraceStatsDoc, traceStatsDoc);
 
-			// make gaps
-			Document keyTraceGapsDoc = new Document()
-					.append("_id", Helpers.getTraceGapsKey(network, station, location, channel, Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay))); 
-			
-			Document traceGapsDoc = new Document()
-					.append("$set", new Document("s", d.get("s")))
-					.append("$inc", new Document("m." + hour + "." + min, d.get("n"))
-								.append("h." + hour, d.get("n"))
-								.append("d", d.get("n"))
-							);
-			
-			traceGapsDao.upsertTraceGaps(keyTraceGapsDoc, traceGapsDoc);
+			// write trace gap statistics
+			if (isWriteGapStats) {
+				Document keyTraceGapsDoc = new Document()
+						.append("_id", Helpers.getTraceGapsKey(network, station, location, channel, Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay))); 
+				
+				Document traceGapsDoc = new Document()
+						.append("$set", new Document("s", d.get("s")))
+						.append("$inc", new Document("m." + hour + "." + min, d.get("n"))
+									.append("h." + hour, d.get("n"))
+									.append("d", d.get("n"))
+								);
+				
+				traceGapsDao.upsertTraceGaps(keyTraceGapsDoc, traceGapsDoc);
+			}
 		}
 		
 		d.clear();
