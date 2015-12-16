@@ -31,6 +31,7 @@ export CLASSPATH=$CLASSPATH:../lib/stax-api-1.0-2.jar
 export CLASSPATH=$CLASSPATH:../lib/woodstox-core-lgpl-4.2.0.jar
 export CLASSPATH=$CLASSPATH:../lib/lombok.jar
 export CLASSPATH=$CLASSPATH:../lib/netty-all-4.0.32.Final.jar
+export CLASSPATH=$CLASSPATH:../lib/commons-io-2.4.jar
 export CLASSPATH=$CLASSPATH:../
 
 case "$1" in
