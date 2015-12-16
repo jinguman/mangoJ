@@ -35,5 +35,6 @@
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/websocket-server-9.3.5.v20151012.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/websocket-servlet-9.3.5.v20151012.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/woodstox-core-lgpl-4.2.0.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/commons-io-2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
