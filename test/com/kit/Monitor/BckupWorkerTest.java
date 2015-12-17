@@ -12,6 +12,12 @@ import com.mongodb.client.MongoDatabase;
 
 public class BckupWorkerTest {
 
+	// file contents
+	/*
+	#COMMENT ST ET NET STA LOC CHA DOC (enable char *)
+	2015-12-15T00:00:00.0000 2015-12-15T00:20:00.0000 PB B013 * * d:/temp/
+	*/
+	
 	@Test
 	public void test() {
 		

@@ -32,8 +32,23 @@ public class TraceStatsDao {
     public List<Document> findTraceStats(Document doc) {
 
         List<Document> stats = new ArrayList<>();
-        traceStatsColl.find().into(stats);
+        traceStatsColl.find(doc).into(stats);
         return stats;
+    }
+    
+    public List<Document> findTraceStats(String network, String station, String location, String channel, String st, String et) {
+    	
+    	Document doc = new Document();
+    	
+    	if ( !network.equals("*") ) doc.append("net", network);
+    	if ( !station.equals("*") ) doc.append("sta", station);
+    	if ( !location.equals("*") ) doc.append("loc", location);
+    	if ( !channel.equals("*") ) doc.append("cha", channel);
+    	
+    	doc.append("st", new Document("$lte",st));
+    	doc.append("et", new Document("$gte",et));
+    	
+    	return findTraceStats(doc);
     }
     
     public long countTraceStats(Document doc) {
