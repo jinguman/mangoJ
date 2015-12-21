@@ -13,6 +13,12 @@ public class FileParser {
 
 	final Logger logger = LoggerFactory.getLogger(FileParser.class);
 	
+	/**
+	 * # Comment line
+	 * ST ET NET STA LOC CHA DIR
+	 * @param file
+	 * @return
+	 */
 	public List<FileContentVo> parse(File file) {
 		
 		List<FileContentVo> contents = new ArrayList<>();
@@ -40,6 +46,34 @@ public class FileParser {
 					
 					contents.add(content);
 				}
+			}
+			
+		} catch (IOException e) {
+			logger.warn("{}", e);
+		}
+		
+		return contents;
+	}
+	
+	/**
+	 * # Comment line
+	 * DIR
+	 * @param file
+	 * @return
+	 */
+	public List<FileContentVo> parse2(File file) {
+		
+		List<FileContentVo> contents = new ArrayList<>();
+		try {
+			List<String> lines = FileUtils.readLines(file);
+			
+			for(String line : lines) {
+				
+				if ( line.startsWith("#") ) continue;
+				
+				FileContentVo content = new FileContentVo();
+				content.setDir(line.trim());
+				contents.add(content);
 			}
 			
 		} catch (IOException e) {

@@ -51,9 +51,12 @@ public class BckupWorker {
 				String dir = content.getDir();
 				
 				List<Document> docs = traceStatsDao.findTraceStats(network, station, location, channel, st, et);
+				int totSize = docs.size();
+				logger.debug("Selected documents. {}", totSize);
 				
-				for(Document doc : docs) {
-					logger.debug("Selected doc: {}", doc.toJson());
+				for(int i=0; i<totSize; i++) {
+					Document doc = docs.get(i);
+					//logger.debug("Selected doc: {}", doc.toJson());
 					
 					network = doc.getString("net");
 					station = doc.getString("sta");
@@ -62,7 +65,7 @@ public class BckupWorker {
 					
 					Btime bt = Helpers.getBtime(st, sdfToSecond);
 					String filename = dir + Helpers.getFileName(network, station, location, channel, bt);
-					logger.debug("Request: {}.{}.{}.{} {} - {}", network, station, location, channel, st, et);
+					logger.debug("Request({}/{}). {}.{}.{}.{} {} - {}", i+1, totSize, network, station, location, channel, st, et);
 					writeMiniSeed.write(network, station, location, channel, st, et, filename);
 					
 				}

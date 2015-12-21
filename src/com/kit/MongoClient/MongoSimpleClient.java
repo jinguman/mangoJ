@@ -55,7 +55,7 @@ public class MongoSimpleClient implements Runnable {
 				String location = d.getString("location");
 				String st = d.getString("st");
 				
-				UpdateResult result = mscs.InsertDocumentPerMinute(d);
+				UpdateResult result = mscs.insertTraceRaw(d);
 				
 				String logStr = network + "." + station + "." + location + "." + channel + " " + st;
 				printTraceLog(result, logStr);

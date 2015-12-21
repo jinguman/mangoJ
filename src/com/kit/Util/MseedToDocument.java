@@ -28,8 +28,11 @@ public class MseedToDocument {
 					.append("network", networkCode)
 					.append("station", stationIdentifier)
 					.append("location", locationIdentifier)
-					.append("channel", channelIdentifier);
+					.append("channel", channelIdentifier)
+					.append("bst", dr.getHeader().getStartBtime())
+					.append("bet", dr.getHeader().getPredictedNextStartBtime());
 			
 			return d;
 	}
+	
 }

@@ -152,6 +152,15 @@ public class Helpers {
 		return sb.toString(); 
 	}
 	
+	/**
+	 * 
+	 * @param network network identifier
+	 * @param station station identifier
+	 * @param location location identifier
+	 * @param channel channel identifier
+	 * @param st yyyy-MM-dd
+	 * @return TRACE_GAPS collections's key
+	 */
 	public static String getTraceGapsKey(String network, String station, String location, String channel, String st) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(network).append("_").append(station).append("_").append(location).append("_").append(channel)

@@ -82,14 +82,13 @@ public class TraceDao {
 		return cursor;
 	}
 	
-	public MongoCursor<Document> getTraceCursorLight(String network, String station, String location, String channel, String startStr, String endStr) {
-		
+	public List<Document> getTraceTime(String network, String station, String location, String channel, String startStr, String endStr) {
+
 		String year, month;
-		MongoCursor<Document> cursor = null;
 		try {
 			year = Helpers.getYearString(startStr, sdfToSecond); 
 			month = Helpers.getMonthString(startStr, sdfToSecond);
-		
+
 			MongoCollection<Document> collection = database.getCollection(Helpers.getTraceCollectionName(network, station, location, channel, year, month));
 			
 			// db.AK__2015.aggregate([
@@ -101,7 +100,7 @@ public class TraceDao {
 			
 			//db.AK_B_2015.aggregate([{ $match: { $and:[{"_id" : {$gte:"ANM__2015-12-02T09:53"}},{_id:{$lte:"ANM_2015-12-02T09:58"}}]}},{ $unwind : "$BHZ" },{ $project: {_id:1,"BHZ":1}}]).pretty()
 
-			String gteCond = station + "_" + location + "_" + Helpers.convertDateBefore1Min(startStr, sdfToSecond, sdfToMinute);
+			String gteCond = station + "_" + location + "_" + Helpers.convertDate(startStr, sdfToSecond, sdfToMinute);
 			String lteCond = station + "_" + location + "_" + Helpers.convertDate(endStr, sdfToSecond, sdfToMinute);
 			
 			Bson match = match( 
@@ -110,22 +109,25 @@ public class TraceDao {
 					);
 			
 			Bson unwind = unwind("$"+channel);
-			Bson project = project(new Document("_id",0).append("st", "$"+channel+".st").append("et", "$"+channel+".et"));
+			Bson project = project(new Document("_id",0).append(channel + ".st", 1).append(channel + ".et", 1));
 			Bson sort = sort(new Document(channel + ".et", 1));
 			
 			List<Bson> aggregateParams = new ArrayList<>();
 			aggregateParams.add(match);
 			aggregateParams.add(unwind);
 			aggregateParams.add(project);
-			//aggregateParams.add(sort);
+			aggregateParams.add(sort);
 
-			cursor = collection.aggregate(aggregateParams).iterator();
+			List<Document> documents = new ArrayList<>();
+			collection.aggregate(aggregateParams).into(documents);
+			return documents;
 			
 		} catch (ParseException e) {
-			logger.error("start or end parameter format is 'yyyy-MM-dd'T'HH:mm:ss.SSSS'");
+			logger.error("start or end parameter format is 'yyyy-MM-dd'T'HH:mm:ss.SSSS'. {}", e);
 			return null;
 		}
 
-		return cursor;
+		
 	}
+
 }

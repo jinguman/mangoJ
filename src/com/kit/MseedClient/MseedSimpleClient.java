@@ -60,7 +60,7 @@ public class MseedSimpleClient {
 					String location = d.getString("location");
 					String st = d.getString("st");
 					
-					UpdateResult result = mscs.InsertDocumentPerMinute(d);
+					UpdateResult result = mscs.insertTraceRaw(d);
 					
 					String logStr = network + "." + station + "." + location + "." + channel + " " + st;
 					if ( result.getModifiedCount() > 0 ) {

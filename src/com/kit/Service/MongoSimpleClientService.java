@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.kit.Dao.TraceDao;
 import com.kit.Dao.TraceGapsDao;
 import com.kit.Dao.TraceStatsDao;
 import com.kit.Util.Helpers;
@@ -16,6 +17,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
@@ -37,30 +39,54 @@ public class MongoSimpleClientService {
 	private SimpleDateFormat sdfToDay = new SimpleDateFormat("yyyy-MM-dd");
 	private TraceStatsDao traceStatsDao;
 	private TraceGapsDao traceGapsDao;
+	private TraceDao traceDao;
+	
 	boolean isShard = true;
 	boolean isIndex = true;
 	boolean isWriteGapStats = true;
 	int restartSec = 5;
 	private MongoInitialClientService mics;
+	private GenerateMiniSeed gm;
 
-	
 	public MongoSimpleClientService(PropertyManager pm, Map<String, Object> indexMap) {
-		
+
 		client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
 		database = client.getDatabase(pm.getStringProperty("mongo.database"));
 
 		traceStatsDao = new TraceStatsDao(database);
 		traceGapsDao = new TraceGapsDao(database);
-		
+		traceDao = new TraceDao(database);
+
 		isShard = pm.getBooleanProperty("mc.shard");
 		isIndex= pm.getBooleanProperty("mc.index");
 		restartSec = pm.getIntegerProperty("mc.restartsec");
 		isWriteGapStats = pm.getBooleanProperty("mc.writeGapStats");
-		
+
 		mics = new MongoInitialClientService(client, database, indexMap);
+		gm = new GenerateMiniSeed();
 	}
 
-	public UpdateResult InsertDocumentPerMinute(Document d) throws ParseException {
+	public UpdateResult upsertTraceRaw(Document d) throws ParseException {
+
+		String network = d.getString("network");
+		String station = d.getString("station");
+		String channel = d.getString("channel");
+		String location = d.getString("location");
+		String st = d.getString("st");
+		String et = d.getString("et");
+		
+		MongoCursor<Document> cursor = traceDao.getTraceCursor(network, station, location, channel, st, et);
+		
+		// not exist
+		if ( cursor == null ) insertTraceRaw(d);
+		
+		// if exist
+		
+		
+		return null;
+	}
+	
+	public UpdateResult insertTraceRaw(Document d) throws ParseException {
 
 		indexOptions.background(true);
 
@@ -70,19 +96,24 @@ public class MongoSimpleClientService {
 		String location = d.getString("location");
 		String st = d.getString("st");
 		String et = d.getString("et");
+		Btime bst = (Btime) d.get("bst");
+		Btime bet = (Btime) d.get("bet");
 
 		d.remove("network");
 		d.remove("station");
 		d.remove("channel");
 		d.remove("location");
+		d.remove("bst");
+		d.remove("bet");
 
-		String year = Helpers.getYearString(st, sdfToSecond);
+		//String year = Helpers.getYearString(st, sdfToSecond);
+		String year = String.format("%04d", bst.getYear());
 		String month = Helpers.getMonthString(st, sdfToSecond);
-		
-		Btime stBtime = Helpers.getBtime(st, sdfToSecond);
-		String hour = String.format("%02d", stBtime.getHour());
-		String min = String.format("%02d", stBtime.getMin());
-		
+
+		//Btime stBtime = Helpers.getBtime(st, sdfToSecond);
+		String hour = String.format("%02d", bst.getHour());
+		String min = String.format("%02d", bst.getMin());
+
 		String collectionName = Helpers.getTraceCollectionName(network, station, location, channel, year, month);
 
 		// get collection
@@ -94,14 +125,14 @@ public class MongoSimpleClientService {
 			if ( isIndex ) mics.doEtIndex(network, station, location, channel, year, month, true);
 			mics.doShard(network, station, location, channel, year, month);
 		}
-		
+
 		// add trace
 		Document key = new Document("_id", station + "_" + location + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
 		UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
 
 		// Update or Insert condition
 		if ( result.getModifiedCount() > 0 || result.getUpsertedId() != null ) {
-			
+
 			// write trace statistics
 			Document keyTraceStatsDoc = new Document()
 					.append("_id", network + "_" + station + "_" + location + "_" + channel);
@@ -132,19 +163,15 @@ public class MongoSimpleClientService {
 									.append("h." + hour, d.get("n"))
 									.append("d", d.get("n"))
 								);
-				
+
 				traceGapsDao.upsertTraceGaps(keyTraceGapsDoc, traceGapsDoc);
 			}
 		}
-		
+
 		d.clear();
 		return result;
-	}	
-
-	public void SearchGap() {
-		
 	}
-	
+
 	private UpdateResult addTrace(Document key, Document doc) {
 
 		UpdateResult result = null;

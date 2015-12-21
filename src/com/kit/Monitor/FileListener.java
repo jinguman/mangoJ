@@ -14,6 +14,7 @@ public class FileListener implements FileAlterationListener {
 
 	final Logger logger = LoggerFactory.getLogger(FileListener.class);
 	@Setter private BckupWorker bckupWorker;
+	@Setter private RestoreWorker restoreWorker;
 
 	
 	@Override
@@ -50,8 +51,14 @@ public class FileListener implements FileAlterationListener {
 		// backup
 		int idx = jdate.indexOf(".bckup");
 		if ( idx > 0 ) {
-			String str = jdate.substring(0, idx);
-			//bckupWorker.run(str);
+			bckupWorker.service(file);
+			FileUtils.deleteQuietly(file);
+		}
+		
+		// restore
+		idx = jdate.indexOf(".restore");
+		if ( idx > 0 ) {
+			restoreWorker.service(file);
 			FileUtils.deleteQuietly(file);
 		}
 	}

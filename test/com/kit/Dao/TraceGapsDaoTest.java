@@ -2,25 +2,54 @@ package com.kit.Dao;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.bson.Document;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.kit.Util.Helpers;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
 public class TraceGapsDaoTest {
 
+	private MongoClient client = null;
+	private MongoDatabase database = null; 
+	private TraceGapsDao dao = null;
+	
+	@Before
+	public void setup() {
+		
+		//client = new MongoClient(new MongoClientURI("mongodb://localhost"));
+		client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
+		//client = new MongoClient(new MongoClientURI("mongodb://210.114.91.91:18832"));
+		database = client.getDatabase("trace");
+		
+		dao = new TraceGapsDao(database);
+	}
+	
 	@Test
-	public void test() {
+	public void findCursor() {
 		
-		MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost"));
-		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
-		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://210.114.91.91:18832"));
-		MongoDatabase database = client.getDatabase("trace");
+		String network = "UW";
+		String station = "ALCT";
+		String location = "";
+		String channel = "ENE";
+		String st = "2015-12-19";
 		
-		TraceGapsDao dao = new TraceGapsDao(database);
+		List<Document> docs = dao.getTraceGaps(network, station, location, channel, st);
+		
+		for(Document d : docs) {
+			System.out.println(d);
+		}
+		
+	}
+	
+	//@Test
+	public void upsert() {
 		
 		String network = "NET";
 		String station = "STA";
@@ -47,5 +76,7 @@ public class TraceGapsDaoTest {
 		
 		dao.upsertTraceGaps(key, doc);
 	}
+	
+	
 
 }
