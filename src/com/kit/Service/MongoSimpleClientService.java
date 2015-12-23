@@ -2,6 +2,7 @@ package com.kit.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.Document;
@@ -65,26 +66,6 @@ public class MongoSimpleClientService {
 		mics = new MongoInitialClientService(client, database, indexMap);
 		gm = new GenerateMiniSeed();
 	}
-
-	public UpdateResult upsertTraceRaw(Document d) throws ParseException {
-
-		String network = d.getString("network");
-		String station = d.getString("station");
-		String channel = d.getString("channel");
-		String location = d.getString("location");
-		String st = d.getString("st");
-		String et = d.getString("et");
-		
-		MongoCursor<Document> cursor = traceDao.getTraceCursor(network, station, location, channel, st, et);
-		
-		// not exist
-		if ( cursor == null ) insertTraceRaw(d);
-		
-		// if exist
-		
-		
-		return null;
-	}
 	
 	public UpdateResult insertTraceRaw(Document d) throws ParseException {
 
@@ -96,23 +77,18 @@ public class MongoSimpleClientService {
 		String location = d.getString("location");
 		String st = d.getString("st");
 		String et = d.getString("et");
-		Btime bst = (Btime) d.get("bst");
-		Btime bet = (Btime) d.get("bet");
 
 		d.remove("network");
 		d.remove("station");
 		d.remove("channel");
 		d.remove("location");
-		d.remove("bst");
-		d.remove("bet");
 
-		//String year = Helpers.getYearString(st, sdfToSecond);
-		String year = String.format("%04d", bst.getYear());
+		String year = Helpers.getYearString(st, sdfToSecond);
 		String month = Helpers.getMonthString(st, sdfToSecond);
 
-		//Btime stBtime = Helpers.getBtime(st, sdfToSecond);
-		String hour = String.format("%02d", bst.getHour());
-		String min = String.format("%02d", bst.getMin());
+		Btime stBtime = Helpers.getBtime(st, sdfToSecond);
+		String hour = Helpers.getStrHourBtime(stBtime);
+		String min = Helpers.getStrMinBtime(stBtime);
 
 		String collectionName = Helpers.getTraceCollectionName(network, station, location, channel, year, month);
 

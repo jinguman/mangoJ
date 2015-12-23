@@ -91,4 +91,15 @@ public class HelpersTest {
 		assertEquals("2015-10-31T12:24:00.0000", s3);
 				
 	}
+	
+	@Test
+	public void getBtime() {
+		
+		Btime bt = new Btime(1999, 57, 12, 49, 50, 8450);
+		
+		assertEquals("1999",Helpers.getStrYearBtime(bt));
+		assertEquals("057",Helpers.getStrJDayBtime(bt));
+		assertEquals("12",Helpers.getStrHourBtime(bt));
+		assertEquals("49",Helpers.getStrMinBtime(bt));
+	}
 }

@@ -205,6 +205,13 @@ public class Helpers {
 		return d;
 	}
 	
+	public static Btime getBtimeBeforeOneSample(Btime bt, float sampleRate) {
+		
+		double d = Helpers.getEpochTime(bt);
+		d = d - (1/sampleRate);
+		return new Btime(d);
+	}
+	
 	public static Btime getBtimeAddSamples(Btime bt, float sampleRate, int samples) {
 		
 		double d = getEpochTime(bt);
@@ -392,5 +399,35 @@ public class Helpers {
 		
 		return sb.toString();
 	}
+
+	public static String getStrYearBtime(Btime bt) {
+		return String.format("%04d", bt.getYear());
+	}
+	public static String getStrJDayBtime(Btime bt) {
+		return String.format("%03d", bt.getJDay());
+	}
+	public static String getStrJDayFirstCharBtime(Btime bt) {
+		return String.format("%03d", bt.getJDay()).substring(0, 1);
+	}
+	public static String getStrHourBtime(Btime bt) {
+		return String.format("%02d", bt.getHour());
+	}
+	public static String getStrMinBtime(Btime bt) {
+		return String.format("%02d", bt.getMin());
+	}
+
+	public static <T extends Comparable<? super T>> void shellsort(T[] a) {
+		int j;
+		for (int gap = a.length / 2; gap > 0; gap /= 2) {
+			for (int i = gap; i < a.length; i++) {
+				T tmp = a[i];
+				for (j = i; j >= gap && tmp.compareTo(a[j - gap]) < 0; j -= gap) {
+					a[j] = a[j - gap];
+				}
+				a[j] = tmp;
+			}
+		}
+	}
+	
 }
 

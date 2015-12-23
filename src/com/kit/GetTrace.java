@@ -26,7 +26,6 @@ import io.netty.buffer.Unpooled;
 public class GetTrace {
 
 	public static void main(String[] args) throws ParseException, SeedFormatException, IOException, UnsupportedCompressionType, CodecException {
-		// TODO Auto-generated method stub
 
 		//MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost"));
 		MongoClient client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
@@ -34,15 +33,15 @@ public class GetTrace {
 		MongoDatabase database = client.getDatabase("trace");
 		int totSample = 0;
 		
-		//PB_B013__EH2_2015-12-14
-		String network = "PB";
-		String station = "B013";
-		String location = "";
-		String channel = "EH2";
+		//UU.RCJ.01.EHZ 2015-12-23T01:56:16.7900
+		String network = "UU";
+		String station = "RCJ";
+		String location = "01";
+		String channel = "EHZ";
 		//String st = "2015-12-02T09:53:10.0000";
 		//String et = "2015-12-02T09:53:30.0000";
-		String st = "2015-12-14T23:52:00.0000";
-		String et = "2015-12-14T23:53:00.0000";
+		String st = "2015-12-23T04:40:00.0000";
+		String et = "2015-12-23T05:50:00.0000";
 
 		//{ "_id" : "AK_ANM__BHE", "it" : "2015-12-03T08:37:18", "net" : "AK", "sta" : "ANM", "loc" : "", "cha" : "BHE", "st" : "2015-12-02T01:38:22.2684", "et" : "2015-12-03T08:36:49.5284" }
 		
@@ -91,6 +90,7 @@ public class GetTrace {
 		System.out.println(">>>>>>>> total samples: " +totSample );
 		
 		dos.close();
+		client.close();
 	}
 
 }

@@ -1,8 +1,8 @@
 package com.kit.Monitor;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -10,9 +10,9 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.kit.Dao.TraceStatsDao;
 import com.kit.Service.MongoSimpleClientService;
 import com.kit.Service.ReadMiniSeed;
+import com.kit.Util.PropertyManager;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
@@ -25,9 +25,9 @@ public class RestoreWorker {
 	
 	final Logger logger = LoggerFactory.getLogger(RestoreWorker.class);
 	
-	public RestoreWorker(MongoClient client, MongoDatabase database) {
+	public RestoreWorker(MongoClient client, MongoDatabase database, PropertyManager pm, Map<String, Object> indexMap ) {
 		parser = new FileParser();
-		readMiniSeed = new ReadMiniSeed(client, database);
+		readMiniSeed = new ReadMiniSeed(client, database, pm, indexMap);
 	}
 	
 	public void service(File file) {
@@ -42,11 +42,7 @@ public class RestoreWorker {
 			List<File> files = (List<File>) FileUtils.listFiles(new File(dir), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
 
 			for(File f : files) {
-				List<Document> documents = readMiniSeed.read(f);
-
-				for(Document d : documents) {
-					System.out.println(d.toJson());
-				}
+				readMiniSeed.read(f);
 			}
 		}
 	}

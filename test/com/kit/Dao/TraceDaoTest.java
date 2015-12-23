@@ -30,8 +30,8 @@ public class TraceDaoTest {
 	
 	@Before
 	public void setup() {
-		//client = new MongoClient(new MongoClientURI("mongodb://localhost"));
-		client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
+		client = new MongoClient(new MongoClientURI("mongodb://localhost"));
+		//client = new MongoClient(new MongoClientURI("mongodb://192.168.5.40"));
 		//client = new MongoClient(new MongoClientURI("mongodb://210.114.91.91:18832"));
 		database = client.getDatabase("trace");
 		traceDao = new TraceDao(database);		
@@ -68,25 +68,22 @@ public class TraceDaoTest {
 	@Test
 	public void traceTime() {
 		
-		
-		String network = "CI";
-		String station = "MLAC";
+		String network = "PB";
+		String station = "B001";
 		String location = "";
-		String channel = "HHN";
+		String channel = "EH1";
 		//String st = "2015-12-02T09:53:10.0000";
 		//String et = "2015-12-02T09:53:30.0000";
-		String st = "2015-12-19T05:20:10.0000";
-		String et = "2015-12-19T05:20:15.0000";
-		
-		
-		long startTime = System.currentTimeMillis();
-		
+		String st = "2015-12-15T00:00:00.2000";
+		String et = "2015-12-15T00:00:14.4000";
+
+		long startTime = System.currentTimeMillis();		
 		List<Document> documents = traceDao.getTraceTime(network, station, location, channel, st, et);
-		
 		long estimatedTime = System.currentTimeMillis() - startTime;
-		
+
 		System.out.println("took " + estimatedTime + " ms");
 		
+		System.out.println("size: " + documents.size());
 		for(Document doc : documents) {
 			System.out.println(doc.toJson());
 		}

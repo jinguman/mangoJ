@@ -17,12 +17,14 @@ public class WriteMiniSeedTest {
 		MongoDatabase database = client.getDatabase("trace");
 		
 		String network = "PB";
-		String station = "B013";
+		String station = "B001";
 		String location = "";
-		String channel = "EH2";
-		String st = "2015-12-14T23:52:00.0000";
-		String et = "2015-12-14T23:53:00.0000";
+		String channel = "EH1";
+		String st = "2015-12-15T00:00:00.0000";
+		String et = "2015-12-15T00:01:00.0000";
 		String filename = "d:/test.mseed";
+		
+		//db.PB_E_2015.update({_id:'B001__2015-12-15T00:00'},{$pull:{'EH1':{'st':'2015-12-15T00:00:06.5184'}}})
 		
 		WriteMiniSeed wms = new WriteMiniSeed(client, database);
 		System.out.println(wms.write(network, station, location, channel, st, et, filename));
