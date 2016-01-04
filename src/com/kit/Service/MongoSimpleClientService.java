@@ -107,7 +107,8 @@ public class MongoSimpleClientService {
 
 		// add trace
 		Document key = new Document("_id", station + "_" + location + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
-		UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
+		//UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
+		UpdateResult result = addTrace(key, new Document("$set",new Document(channel+"."+Helpers.getEpochTimeLong(stBtime),d)));
 
 		// Update or Insert condition
 		if ( result.getModifiedCount() > 0 || result.getUpsertedId() != null ) {

@@ -80,8 +80,7 @@ public class MongoInitialClient implements Runnable {
 			if ( pm.getBooleanProperty("mi.index")) mics.doEtIndex(network, station, location, channel, shardYear, shardMonth, false);
 			if ( pm.getBooleanProperty("mi.shard")) mics.doShard(network, station, location, channel, shardYear, shardMonth);
 			logger.info("Execute initiate.({}).", queue.size());
-			
-		
+
 			if ( sleepSec > 0 ) Thread.sleep(sleepSec*1000);
 		}
 	}

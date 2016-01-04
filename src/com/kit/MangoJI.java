@@ -69,11 +69,11 @@ public class MangoJI {
     		threads.add(thdMsc);
     		thdMsc.start();
     	}
-    	
+
     	// SeedlinkShardClient Thread
     	int slinkThdCnt = pm.getIntegerProperty("sc.thread");
     	if ( pm.getBooleanProperty("mi.buildentirelist")) slinkThdCnt = 1;
-    	
+
     	for(int i=1; i<slinkThdCnt+1; i++) {
 
     		String[] networks = pm.getStringListProperty("sc." + i + ".network");
@@ -81,6 +81,8 @@ public class MangoJI {
     		ssc.setNetworks(networks);
     		String ip = pm.getStringProperty("sc." + i + ".ip");
     		if ( ip != null ) ssc.setHost(ip);
+    		int port = pm.getIntegerProperty("sc." + i + ".port");
+    		if ( port > 0 ) ssc.setPort(port);
 
     		Thread thdSlink = new Thread(ssc);
         	threads.add(thdSlink);

@@ -44,6 +44,8 @@ public class MongoSimpleClient implements Runnable {
 		// 에러처리를 정교하게 넣어야 함..
 		// ex. 몽고DB에 접속이 끊겼을시 들고있는 큐데이터 처리 등...
 		
+		// get station list
+
 		while(true) {
 
 			Document d = null;

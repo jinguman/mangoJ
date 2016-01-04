@@ -45,7 +45,7 @@ public class SeedlinkClientService {
 	private PropertyManager pm;
 
 	@Setter @Getter private String network;
-	@Setter @Getter private String station;
+	//@Setter @Getter private String station;
 	@Setter @Getter private String location;
 	@Setter @Getter private String channel;
 	@Setter @Getter private String host;
@@ -55,6 +55,7 @@ public class SeedlinkClientService {
 	@Setter @Getter private int timeoutSeconds;
 	@Setter @Getter private boolean verbose = false;
 	private boolean isSharpMinute = false;
+	@Setter @Getter private List<String> stations;
 
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy,DDD,HH:mm:ss");	//2015,306,00:49:01.7750
@@ -164,19 +165,15 @@ public class SeedlinkClientService {
 
             try {
 
-    			reader.select(network, station, location, channel);
-    			reader.sendCmd("DATA 00000000");
-
-            	//reader.select(network, "V2600", location, channel);
+    			//reader.select(network, station, location, channel);
     			//reader.sendCmd("DATA 00000000");
 
-    			//reader.select(network, "VBSM", location, channel);
-    			//reader.sendCmd("DATA 00000000");
+            	for(String sta : stations) {
+            		reader.select(network, sta, location, channel);
+        			reader.sendCmd("DATA 00000000");
+            	}
 
-    			//reader.select(network, "VSAB", location, channel);
-    			//reader.sendCmd("DATA 00000000");
-
-    			reader.endHandshake();
+            	reader.endHandshake();
     		} catch (SeedlinkException | IOException e) {
     			logger.error("{} {}","Failure during reading seedlink.",e);
     		}
@@ -229,5 +226,21 @@ public class SeedlinkClientService {
            
 	}
 	
+	public List<String> getStationListFromStreamsInfo(String network) throws UnknownHostException, SeedlinkException, SeedFormatException, IOException {
+		
+		List<String> stations = new ArrayList<>();
+		
+		Document doc = getStreamsInfo();
+		List<Document> stationListDoc = (List<Document>) doc.get(network);
+		if ( stationListDoc == null ) return stations;
+		
+		for(Document stationDoc : stationListDoc) {
+			for( String station : stationDoc.keySet() ){
+				stations.add(station);
+	        }
+		}
+		
+		return stations;
+	}
 
 }

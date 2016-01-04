@@ -205,6 +205,13 @@ public class Helpers {
 		return d;
 	}
 	
+	public static long getEpochTimeLong(Btime bt) {
+		
+		double d = getEpochTime(bt);
+		
+		return (long)d;
+	}
+	
 	public static Btime getBtimeBeforeOneSample(Btime bt, float sampleRate) {
 		
 		double d = Helpers.getEpochTime(bt);

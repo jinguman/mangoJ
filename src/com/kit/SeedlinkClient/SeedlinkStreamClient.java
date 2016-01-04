@@ -3,6 +3,7 @@ package com.kit.SeedlinkClient;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.kit.Service.SeedlinkClientService;
 import com.kit.Util.Helpers;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 
 import edu.iris.dmc.seedcodec.CodecException;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
@@ -62,7 +64,7 @@ public class SeedlinkStreamClient implements Runnable {
 			try {
 				streamsInfoDoc = scs.getStreamsInfo();
 				logger.debug("Get streamsInfoDoc.");
-				//Helpers.printJson(streamsInfoDoc);
+				Helpers.printJson(streamsInfoDoc);
 				break;
 			} catch (SeedlinkException | SeedFormatException | IOException e) {
 				logger.warn("{} {}", "Failure in Seedlink.", e);
@@ -149,9 +151,6 @@ public class SeedlinkStreamClient implements Runnable {
 			}
 			
 		}
-		
-		
-		
-	}
 
+	}
 }

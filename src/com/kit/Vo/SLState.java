@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bson.Document;
+
 import com.mysql.fabric.RangeShardMapping;
 
 import edu.sc.seis.seisFile.mseed.Btime;
+import lombok.Getter;
+import lombok.Setter;
 
 public class SLState {
 
@@ -24,6 +28,16 @@ public class SLState {
 	private Map<String, Boolean> shardMap = new ConcurrentHashMap<>();
 	private Map<String, Boolean> shardRangeMap = new ConcurrentHashMap<>();
 	private Map<String, SLNetStation> streamMap = new ConcurrentHashMap<>();
+	
+	// { NETWORK : [{
+	//			STATION: [{
+	//					LOCATION:CHANNEL
+	//					},{
+	//					LOCATION:CHANNEL
+	//			}]
+	//			
+	//Helpers.printJson(streamsInfoDoc);
+	@Setter @Getter private Document streamsInfoDoc;
 	
 	public void addIndex(String ns, String idxName) {
 		

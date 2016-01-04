@@ -2,6 +2,8 @@ package com.kit.SeedlinkClient;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import org.bson.Document;
@@ -45,7 +47,7 @@ public class SeedlinkClient implements Runnable {
 
 		SeedlinkClientService scs = new SeedlinkClientService(queue, pm);
 		scs.setNetwork(network);
-		scs.setStation(station);
+		//scs.setStation(station);
 		scs.setLocation(location);
 		scs.setChannel(channel);
 		scs.setHost(host);
@@ -54,11 +56,20 @@ public class SeedlinkClient implements Runnable {
 		scs.setPort(port);
 		scs.setTimeoutSeconds(timeoutSeconds);
 		//scs.setVerbose(verbose);
-		
+
 		while(true) {
 			try {
 				
 				logger.info("SeedlinkClient start. {}, {}:{}", network, host, port);
+				if ( station.equals("*") && !host.equals(SeedlinkReader.DEFAULT_HOST)) {
+					scs.setStations(scs.getStationListFromStreamsInfo(network));
+					logger.info("Get stations from streams. {}", scs.getStations().size());
+				}
+				else {
+					String[] stas = station.split(",");
+					scs.setStations(Arrays.asList(stas));
+					logger.info("Get stations from property. {}", scs.getStations().size());
+				}
 				
 				scs.getTraceRaw();
 			} catch (SeedlinkException | SeedFormatException | IOException | ParseException
