@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.kit.MseedClient.MseedSimpleClient;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 
 public class MangoJF {
 
@@ -16,12 +17,13 @@ public class MangoJF {
     	Logger logger = LoggerFactory.getLogger(MangoJF.class);
     	logger.info("{}","MangoJF start..");
     	
-    	Map<String, Object> indexMap = new ConcurrentHashMap<>();
+    	//Map<String, Object> indexMap = new ConcurrentHashMap<>();
+    	SLState state = new SLState();
     	PropertyManager pm = new PropertyManager();
 	
     	String filename = "d:/SEO.HHZ.2015.1204.00.00.00";
     	
-    	MseedSimpleClient msc = new MseedSimpleClient(pm, indexMap);
+    	MseedSimpleClient msc = new MseedSimpleClient(pm, state);
     	msc.read(filename);
     }
 }

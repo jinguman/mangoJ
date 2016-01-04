@@ -1,10 +1,6 @@
 package com.kit.MongoClient;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import org.bson.Document;
@@ -12,25 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.kit.Dao.ShardDao;
-import com.kit.Dao.TraceStatsDao;
 import com.kit.Service.MongoInitialClientService;
 import com.kit.Service.SeedlinkClientService;
-import com.kit.Util.Helpers;
-import com.kit.Util.MangoJCode;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.MongoCommandException;
 import com.mongodb.MongoSocketReadException;
-import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.client.result.UpdateResult;
-
-import edu.sc.seis.seisFile.mseed.SeedFormatException;
-import edu.sc.seis.seisFile.seedlink.SeedlinkException;
 
 public class MongoInitialClient implements Runnable {
 
@@ -52,7 +38,7 @@ public class MongoInitialClient implements Runnable {
 
 	final Logger logger = LoggerFactory.getLogger(MongoInitialClient.class);
 	
-	public MongoInitialClient(BlockingQueue<Document> queue, PropertyManager pm, String shardYear, String shardMonth, Map<String, Object> indexMap) {
+	public MongoInitialClient(BlockingQueue<Document> queue, PropertyManager pm, String shardYear, String shardMonth, SLState state) {
 		this.pm = pm;
 		
 		client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
@@ -64,7 +50,7 @@ public class MongoInitialClient implements Runnable {
 		this.shardYear = shardYear;
 		this.shardMonth = shardMonth;
 		this.queue = queue;
-		mics = new MongoInitialClientService(client, database, indexMap);
+		mics = new MongoInitialClientService(client, database, state);
 		sleepSec = pm.getIntegerProperty("mi.sleepsec");
 	}
 

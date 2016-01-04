@@ -239,11 +239,15 @@ public class Helpers {
 				.append("s", sampleRate)
 				.append("et", etStr)
 				.append("d", data)
+				
+				// additional
 				.append("network", networkCode)
 				.append("station", stationIdentifier)
 				.append("location", locationIdentifier)
-				.append("channel", channelIdentifier);
-		
+				.append("channel", channelIdentifier)
+				.append("seqnum", dr.getHeader().getSequenceNum())
+        		.append("sbtime", dr.getHeader().getStartBtime());
+
 		return d;
 	}
 	

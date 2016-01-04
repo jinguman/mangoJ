@@ -37,10 +37,13 @@ public class PropertyManager {
     
     public int getIntegerProperty(String key) {
     	String value = prop.getProperty(key);
+    	if ( value == null ) return -1;
     	return Integer.parseInt(value);
     }
     
     public String getStringProperty(String key) {
+    	String value = prop.getProperty(key);
+    	if ( value == null ) return null;
     	return prop.getProperty(key);
     }
     

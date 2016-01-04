@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.kit.Service.MongoSimpleClientService;
 import com.kit.Service.ReadMiniSeed;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
@@ -25,9 +26,9 @@ public class RestoreWorker {
 	
 	final Logger logger = LoggerFactory.getLogger(RestoreWorker.class);
 	
-	public RestoreWorker(MongoClient client, MongoDatabase database, PropertyManager pm, Map<String, Object> indexMap ) {
+	public RestoreWorker(MongoClient client, MongoDatabase database, PropertyManager pm, SLState state ) {
 		parser = new FileParser();
-		readMiniSeed = new ReadMiniSeed(client, database, pm, indexMap);
+		readMiniSeed = new ReadMiniSeed(client, database, pm, state);
 	}
 	
 	public void service(File file) {

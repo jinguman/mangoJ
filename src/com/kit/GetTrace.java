@@ -34,14 +34,16 @@ public class GetTrace {
 		int totSample = 0;
 		
 		//UU.RCJ.01.EHZ 2015-12-23T01:56:16.7900
-		String network = "UU";
-		String station = "RCJ";
-		String location = "01";
+		
+		String network = "NM";
+		String station = "BVAR";
+		String location = "00";
 		String channel = "EHZ";
+
 		//String st = "2015-12-02T09:53:10.0000";
 		//String et = "2015-12-02T09:53:30.0000";
-		String st = "2015-12-23T04:40:00.0000";
-		String et = "2015-12-23T05:50:00.0000";
+		String st = "2015-12-30T00:07:00.0000";
+		String et = "2015-12-30T00:07:59.9999";
 
 		//{ "_id" : "AK_ANM__BHE", "it" : "2015-12-03T08:37:18", "net" : "AK", "sta" : "ANM", "loc" : "", "cha" : "BHE", "st" : "2015-12-02T01:38:22.2684", "et" : "2015-12-03T08:36:49.5284" }
 		
@@ -68,22 +70,33 @@ public class GetTrace {
 			ByteBuf b = Unpooled.wrappedBuffer(binary.getData());
 			
 			DataRecord dr = (DataRecord)SeedRecord.read(b.array());
+			
+
+			if ( dr != null ) {
+				//System.out.println(">>>>>>>>" + dr2.getControlHeader().getSequenceNum());
+				//System.out.println(dr2.toString());
+				System.out.println(dr.getHeader().getStartTime() + "-" + dr.getHeader().getEndTime() + ", " + dr.getHeader().getNumSamples() + ", sample: " + dr.getHeader().getSampleRate());
+				totSample += dr.getHeader().getNumSamples();
+				dr.write(dos);
+			}
+			
 			//System.out.println(dr.toString());
 			
-			DataRecord dr2 = gm.trimPacket(st, et, dr, false);
+			//DataRecord dr2 = gm.trimPacket(st, et, dr, false);
 			//if ( dr2 != null ) dr2.write(dos);
 			
 			// Write to file
 			//String filename = "d:/trace" + n + ".mseed";
 			n++;
-			//DataOutputStream dos = new DataOutputStream(new FileOutputStream(filename));
+			//DataOutputStream dos = new DataOutputStream(new FileOutputStream(filename));\
+			/*
 			if ( dr2 != null ) {
 				//System.out.println(">>>>>>>>" + dr2.getControlHeader().getSequenceNum());
 				//System.out.println(dr2.toString());
 				System.out.println(dr2.getHeader().getStartTime() + "-" + dr2.getHeader().getEndTime() + ", " + dr2.getHeader().getNumSamples() + ", sample: " + dr2.getHeader().getSampleRate());
 				totSample += dr2.getHeader().getNumSamples();
 				dr2.write(dos);
-			}
+			}*/
 		
 		}
 		

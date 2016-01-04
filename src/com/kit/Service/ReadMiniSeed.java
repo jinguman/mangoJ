@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.kit.Dao.TraceDao;
 import com.kit.Util.Helpers;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
@@ -40,10 +40,10 @@ public class ReadMiniSeed {
 	
 	final Logger logger = LoggerFactory.getLogger(ReadMiniSeed.class);
 
-	public ReadMiniSeed(MongoClient client, MongoDatabase database, PropertyManager pm, Map<String, Object> indexMap ) {
+	public ReadMiniSeed(MongoClient client, MongoDatabase database, PropertyManager pm, SLState state ) {
 		traceDao = new TraceDao(database);
 		gm = new GenerateMiniSeed();
-		mscs = new MongoSimpleClientService(pm, indexMap);
+		mscs = new MongoSimpleClientService(pm, state);
 	}
 	
 	public void read(File file) {

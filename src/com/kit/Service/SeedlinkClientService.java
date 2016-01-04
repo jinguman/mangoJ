@@ -3,7 +3,6 @@ package com.kit.Service;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +16,6 @@ import java.util.concurrent.BlockingQueue;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Level;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +26,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.kit.Util.Helpers;
-import com.kit.Util.LoggingOutputStream;
 import com.kit.Util.PropertyManager;
 
-import edu.iris.dmc.seedcodec.CodecException;
-import edu.iris.dmc.seedcodec.DecompressedData;
-import edu.iris.dmc.seedcodec.UnsupportedCompressionType;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkException;
@@ -59,7 +53,7 @@ public class SeedlinkClientService {
 	@Setter @Getter private String end;
 	@Setter @Getter private int port;
 	@Setter @Getter private int timeoutSeconds;
-	@Setter @Getter private boolean verbose;
+	@Setter @Getter private boolean verbose = false;
 	private boolean isSharpMinute = false;
 
 	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -73,85 +67,23 @@ public class SeedlinkClientService {
 		gm = new GenerateMiniSeed();
 	}
 
-	@Deprecated
-	public void getTrace() throws SeedlinkException, SeedFormatException, UnsupportedCompressionType, IOException, CodecException, ParseException, InterruptedException, SocketTimeoutException {
-		// Get seedlink
-        SeedlinkReader reader = null;
-		reader = new SeedlinkReader(host, port, timeoutSeconds, verbose);
-		
-
-		// Seedlink verbose setting
-        LoggingOutputStream los = new LoggingOutputStream(logger, Level.DEBUG);
-        PrintWriter out = new PrintWriter(los, true);
-        if (verbose) reader.setVerboseWriter(out);
-        
-        try {
-			reader.select(network, station, location, channel);
-			reader.startData(start, end);
-		} catch (SeedlinkException | IOException e) {
-			logger.error("{} {}","Failure during reading seedlink.",e);
-		}
-        
-        // Seedlink stream reading
-        while (reader.hasNext()) {
-            SeedlinkPacket slp = reader.readPacket();
-            DataRecord dr = slp.getMiniSeed();
-
-            String networkCode = dr.getHeader().getNetworkCode().trim();
-            String stationIdentifier = dr.getHeader().getStationIdentifier().trim();
-            String channelIdentifier = dr.getHeader().getChannelIdentifier().trim();
-            String locationIdentifier = dr.getHeader().getLocationIdentifier().trim();
-
-            String startTime = dr.getHeader().getStartTime();
-            String endTime = dr.getHeader().getEndTime();
-
-            float sampleRate = dr.getHeader().getSampleRate();
-            int numSamples = dr.getHeader().getNumSamples();
-            int sampleRateFactor = dr.getHeader().getSampleRateFactor();
-            int sampleRateMultiplier = dr.getHeader().getSampleRateMultiplier();
-            byte activityFlags = dr.getHeader().getActivityFlags();
-            byte ioClockFlags = dr.getHeader().getActivityFlags();
-            byte dataQualityFlags = dr.getHeader().getDataQualityFlags();
-            int timeCorrection = dr.getHeader().getTimeCorrection();
-
-            DecompressedData decomData = dr.decompress();
-            int[] temp = decomData.getAsInt();
-
-            List<Integer> ints = new ArrayList<Integer>();
-            for(int i=0; i<temp.length; i++) 
-            	ints.add(temp[i]);
-
-            Document d = new Document()
-					.append("st", Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond))
-					.append("n", numSamples)
-					.append("c", sampleRateFactor)
-					.append("m", sampleRateMultiplier)
-					.append("s", sampleRate)
-					.append("et", Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond))
-					.append("f", activityFlags + "," + ioClockFlags + "," + dataQualityFlags + "," + timeCorrection)
-					.append("d", ints)
-					.append("network", networkCode)
-					.append("station", stationIdentifier)
-					.append("location", locationIdentifier)
-					.append("channel", channelIdentifier);
-
-            queue.put(d);
-        }
-        reader.close();    
-	}
-
 	public Document getStreamsInfo() throws UnknownHostException, IOException, SeedlinkException, SeedFormatException {
 		// Get seedlink
         SeedlinkReader reader = null;
-		reader = new SeedlinkReader(host, port, timeoutSeconds, verbose);
-		
 		Document doc = new Document();
-		
-		// get station information
-		//System.out.println(reader.getInfoString("STATIONS"));
-		//System.out.println(reader.getInfoString("STREAMS"));
-		String streams = reader.getInfoString("STREAMS");
-		
+		String streams;
+
+		try {
+	        reader = new SeedlinkReader(host, port, timeoutSeconds, verbose);
+			streams = reader.getInfoString("STREAMS");
+		} finally {
+			if ( reader != null ) reader.close();
+		}
+		if ( streams == null ) {
+			logger.warn("No info streams.");
+			return null;
+		}
+
 		InputSource is = new InputSource(new StringReader(streams)); 
 		try {
 			org.w3c.dom.Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
@@ -210,75 +142,91 @@ public class SeedlinkClientService {
 		return doc;
 	}
 	
-	public void getTraceRaw() throws SeedlinkException, SeedFormatException, UnsupportedCompressionType, IOException, CodecException, ParseException, InterruptedException, SocketTimeoutException {
-		// Get seedlink
-        SeedlinkReader reader = null;
-		reader = new SeedlinkReader(host, port, timeoutSeconds, verbose);
-
-		// queue limit
-		int queueLimit = pm.getIntegerProperty("sc.queuelimit");
+	public void getTraceRaw() throws UnknownHostException, IOException, SeedlinkException, SeedFormatException, ParseException, InterruptedException {
 		
-		// Seedlink verbose setting
-
-        //LoggingOutputStream los = new LoggingOutputStream(logger, Level.DEBUG);
-        //PrintWriter out = new PrintWriter(los, true);
-        PrintWriter out = new PrintWriter(System.out, true);
-        
-        if (verbose) {
-        	reader.setVerbose(true);
-        	reader.setVerboseWriter(out);
-        }
-
+        SeedlinkReader reader = null;
+		
         try {
+        	reader = new SeedlinkReader(host, port, timeoutSeconds, verbose);
 
-			reader.select(network, station, location, channel);
-			reader.startData(start, end);
-		} catch (SeedlinkException | IOException e) {
-			logger.error("{} {}","Failure during reading seedlink.",e);
-		}
-        
-        // Seedlink stream reading
-        while (reader.hasNext()) {
-            SeedlinkPacket slp = reader.readPacket();
-            DataRecord dr = slp.getMiniSeed();
+    		// queue limit
+    		int queueLimit = pm.getIntegerProperty("sc.queuelimit");
+    		
+    		// Seedlink verbose setting
+            //LoggingOutputStream los = new LoggingOutputStream(logger, Level.DEBUG);
+            //PrintWriter out = new PrintWriter(los, true);
+            //PrintWriter out = new PrintWriter(System.out, true);
             
-            if (isSharpMinute) {
-            	
-            	List<DataRecord> records = gm.splitPacketPerMinute(dr);
-            	for(DataRecord record : records) {
-            		
-            		String startTime = record.getHeader().getStartTime();
-                    String endTime = record.getHeader().getEndTime();
-                    Document d = Helpers.dRecordToDoc(record, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
+            //if (verbose) {
+            //	reader.setVerbose(true);
+            //	reader.setVerboseWriter(out);
+            //}
+
+            try {
+
+    			reader.select(network, station, location, channel);
+    			reader.sendCmd("DATA 00000000");
+
+            	//reader.select(network, "V2600", location, channel);
+    			//reader.sendCmd("DATA 00000000");
+
+    			//reader.select(network, "VBSM", location, channel);
+    			//reader.sendCmd("DATA 00000000");
+
+    			//reader.select(network, "VSAB", location, channel);
+    			//reader.sendCmd("DATA 00000000");
+
+    			reader.endHandshake();
+    		} catch (SeedlinkException | IOException e) {
+    			logger.error("{} {}","Failure during reading seedlink.",e);
+    		}
+
+            // Seedlink stream reading
+            while (reader.hasNext()) {
+                SeedlinkPacket slp = reader.readPacket();
+                DataRecord dr = slp.getMiniSeed();
+
+                if (isSharpMinute) {
+
+                	List<DataRecord> records = gm.splitPacketPerMinute(dr);
+                	for(DataRecord record : records) {
+                		
+                		String startTime = record.getHeader().getStartTime();
+                        String endTime = record.getHeader().getEndTime();
+                        Document d = Helpers.dRecordToDoc(record, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
+
+                        queue.put(d);
+                	}
+                	
+                } else {
+                	String startTime = dr.getHeader().getStartTime();
+                    String endTime = dr.getHeader().getEndTime();
+                    Document d = Helpers.dRecordToDoc(dr, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
 
                     queue.put(d);
-            	}
-            	
-            } else {
-            	String startTime = dr.getHeader().getStartTime();
-                String endTime = dr.getHeader().getEndTime();
-                Document d = Helpers.dRecordToDoc(dr, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
-
-                queue.put(d);
-            }
-            
-            if ( queueLimit > 0 ) {
-            	if ( queue.size() > queueLimit ) {
-                	logger.debug("Queue is full. size: {}, init..", queue.size());
-                	
-                	while(true) {
-                		try {
-                			queue.remove();
-                			
-                		} catch (NoSuchElementException e) {
-                			break;
-                		}
-                	}
                 }
+                
+                if ( queueLimit > 0 ) {
+                	if ( queue.size() > queueLimit ) {
+                    	logger.debug("Queue is full. size: {}, init..", queue.size());
+                    	
+                    	while(true) {
+                    		try {
+                    			queue.remove();
+                    			
+                    		} catch (NoSuchElementException e) {
+                    			break;
+                    		}
+                    	}
+                    }
+                }
+                
             }
-            
+             
+        } finally {
+        	if ( reader != null ) reader.close();
         }
-        reader.close();    
+           
 	}
 	
 

@@ -17,6 +17,7 @@ import com.kit.Service.GenerateMiniSeed;
 import com.kit.Service.MongoSimpleClientService;
 import com.kit.Util.Helpers;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 import com.mongodb.client.result.UpdateResult;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
@@ -34,8 +35,8 @@ public class MseedSimpleClient {
 	private MongoSimpleClientService mscs;
 	private GenerateMiniSeed gm;
 	
-	public MseedSimpleClient(PropertyManager pm, Map<String, Object> indexMap) {
-		this.mscs = new MongoSimpleClientService(pm, indexMap);
+	public MseedSimpleClient(PropertyManager pm, SLState state) {
+		this.mscs = new MongoSimpleClientService(pm, state);
 		this.gm = new GenerateMiniSeed();
 	}
 	

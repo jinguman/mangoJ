@@ -34,11 +34,11 @@ public class TraceGapsDaoTest {
 	@Test
 	public void findCursor() {
 		
-		String network = "UW";
-		String station = "ALCT";
+		String network = "OV";
+		String station = "LAFE";
 		String location = "";
-		String channel = "ENE";
-		String st = "2015-12-19";
+		String channel = "HNE";
+		String st = "2015-12-30";
 		
 		List<Document> docs = dao.getTraceGaps(network, station, location, channel, st);
 		
@@ -46,6 +46,22 @@ public class TraceGapsDaoTest {
 			System.out.println(d);
 		}
 		
+		Document m = (Document) docs.get(0).get("m");
+		
+		Document m00 = (Document) m.get("00");
+		
+		System.out.println(m00);
+		
+		int sum = 0;
+		for(int i = 0; i<60; i++) {
+			String key = String.format("%02d", i);
+			int a = m00.getInteger(key);
+			
+			sum += a;
+			System.out.println(a);
+		}
+		
+		System.out.println(sum);
 	}
 	
 	//@Test

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.kit.MongoClient.MongoSimpleClient;
 import com.kit.Service.GenerateTrace;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 
 /**
  * Hello world!
@@ -37,7 +38,8 @@ public class MangoJT {
     	BlockingQueue<Document> queue = new LinkedBlockingQueue<Document>();
     	
     	// index set
-    	Map<String, Object> indexMap = new ConcurrentHashMap();
+    	//Map<String, Object> indexMap = new ConcurrentHashMap();
+    	SLState state = new SLState();
     	
     	// get property
     	PropertyManager pm = new PropertyManager();
@@ -48,7 +50,7 @@ public class MangoJT {
     	// MongoClient Thread
     	int mcThreadCnt = pm.getIntegerProperty("mc.thread"); 
     	for (int i = 0; i < mcThreadCnt; i++) {
-    		MongoSimpleClient ip = new MongoSimpleClient(queue, pm, indexMap);
+    		MongoSimpleClient ip = new MongoSimpleClient(queue, pm, state);
     		Thread thdIp = new Thread(ip);
     		threads.add(thdIp);
     		thdIp.start();

@@ -7,6 +7,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERR
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,12 +64,20 @@ public class ApiNettyRequestHandler extends SimpleChannelInboundHandler<FullHttp
 	
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) {
-		logger.info("Request process complete.");
+		
+		String host = ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress();
+	    int port = ((InetSocketAddress)ctx.channel().remoteAddress()).getPort();
+		
+		logger.info("<<<<<<< Request process complete. {}:{}", host, port);
 		ctx.flush();
 	}
 	
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, FullHttpMessage msg) throws Exception {
+		
+		String host = ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress();
+	    int port = ((InetSocketAddress)ctx.channel().remoteAddress()).getPort();
+	    logger.info(">>>>>>> Request process start. {}:{}", host, port );
 		
 		// Request Decode test
         if (!msg.getDecoderResult().isSuccess()) {

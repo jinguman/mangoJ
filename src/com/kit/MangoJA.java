@@ -19,7 +19,6 @@ public class MangoJA {
     	// get property
     	PropertyManager pm = new PropertyManager();
     	
-		//ApiSparkController asc = new ApiSparkController();
 		ApiNettyController controller = new ApiNettyController(pm);
 		controller.run();
 		

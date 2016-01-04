@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.kit.Service.SeedlinkClientService;
 import com.kit.Util.PropertyManager;
 
-import edu.iris.dmc.seedcodec.CodecException;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkException;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
@@ -35,7 +34,7 @@ public class SeedlinkClient implements Runnable {
 	@Setter @Getter private String end = EMPTY;
 	@Setter @Getter private int port = SeedlinkReader.DEFAULT_PORT;
 	@Setter @Getter private int timeoutSeconds = SeedlinkReader.DEFAULT_TIMEOUT_SECOND;
-	@Setter @Getter private boolean verbose = false;
+	//@Setter @Getter private boolean verbose = false;
 
 	public SeedlinkClient(BlockingQueue<Document> queue, PropertyManager pm) {
 		this.queue = queue;
@@ -54,15 +53,15 @@ public class SeedlinkClient implements Runnable {
 		scs.setEnd(end);
 		scs.setPort(port);
 		scs.setTimeoutSeconds(timeoutSeconds);
-		scs.setVerbose(verbose);
+		//scs.setVerbose(verbose);
 		
 		while(true) {
 			try {
 				
-				logger.info("SeedlinkClient start. {}", network);
+				logger.info("SeedlinkClient start. {}, {}:{}", network, host, port);
 				
 				scs.getTraceRaw();
-			} catch (SeedlinkException | SeedFormatException | IOException | CodecException | ParseException
+			} catch (SeedlinkException | SeedFormatException | IOException | ParseException
 					| InterruptedException e) {
 				logger.warn("{} {}", "Failure in Seedlink. {}", network, e);
 			}
