@@ -14,6 +14,7 @@ import com.kit.Dao.TraceGapsDao;
 import com.kit.Dao.TraceStatsDao;
 import com.kit.Util.Helpers;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoWriteException;
@@ -49,7 +50,7 @@ public class MongoSimpleClientService {
 	private MongoInitialClientService mics;
 	private GenerateMiniSeed gm;
 
-	public MongoSimpleClientService(PropertyManager pm, Map<String, Object> indexMap) {
+	public MongoSimpleClientService(PropertyManager pm, SLState state) {
 
 		client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
 		database = client.getDatabase(pm.getStringProperty("mongo.database"));
@@ -63,7 +64,7 @@ public class MongoSimpleClientService {
 		restartSec = pm.getIntegerProperty("mc.restartsec");
 		isWriteGapStats = pm.getBooleanProperty("mc.writeGapStats");
 
-		mics = new MongoInitialClientService(client, database, indexMap);
+		mics = new MongoInitialClientService(client, database, state);
 		gm = new GenerateMiniSeed();
 	}
 	
@@ -82,6 +83,8 @@ public class MongoSimpleClientService {
 		d.remove("station");
 		d.remove("channel");
 		d.remove("location");
+		d.remove("seqnum");
+		d.remove("sbtime");
 
 		String year = Helpers.getYearString(st, sdfToSecond);
 		String month = Helpers.getMonthString(st, sdfToSecond);

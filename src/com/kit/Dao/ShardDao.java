@@ -58,7 +58,7 @@ public class ShardDao {
 			Document keyDoc = (Document) doc.get("key");
 			
 			for(String key : keyDoc.keySet()) {
-				list.add(ns + ".shardCollection." + key);
+				list.add(ns + key);
 			}
 		}
 		return list;
@@ -79,7 +79,7 @@ public class ShardDao {
 			
 			String ns = doc.getString("ns");
 			String tag = doc.getString("tag");
-			list.add(ns + ".shardRange." + tag);
+			list.add(ns + tag);
 		}
 		return list;
 	}

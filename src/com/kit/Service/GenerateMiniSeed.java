@@ -75,15 +75,15 @@ public class GenerateMiniSeed {
 				rTrimDelta = temp.length - (int)( Math.floor(tmp) ) -1;
 			}
 			
-			logger.debug("Calculate delta for cut. ltrim: {}, rtrim: {}", lTrimDelta, rTrimDelta);
+			//logger.debug("Calculate delta for cut. ltrim: {}, rtrim: {}", lTrimDelta, rTrimDelta);
 
 			// cut 
 			int[] temp2 = new int[temp.length - lTrimDelta - rTrimDelta]; 
 			System.arraycopy(temp, lTrimDelta, temp2, 0, temp2.length);
-			logger.debug("Data cut by request. req: {} - {}, packet: {} - {},  before: {}, after: {}, alpha: {}", stReqBtime.toString(), etReqBtime.toString(), 
-					stPacketBtime.toString(), etPacketBtime.toString(), temp.length, temp2.length);
+			//logger.debug("Data cut by request. req: {} - {}, packet: {} - {},  before: {}, after: {}, alpha: {}", stReqBtime.toString(), etReqBtime.toString(), 
+			//		stPacketBtime.toString(), etPacketBtime.toString(), temp.length, temp2.length);
 			
-			logger.debug("Original DataRecord. {}", dr.toString());
+			//logger.debug("Original DataRecord. {}", dr.toString());
 			
 			if ( temp2.length == 0 ) return null;
 			

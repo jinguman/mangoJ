@@ -76,9 +76,11 @@ public class ApiRequestStations extends ApiRequestTemplate {
 			res.append("message", OK.toString());
 			res.append("stations", documents);
 			
+			/*
 			for(Document d : documents) {
 				System.out.println(d.get("sta"));
 			}
+			*/
 		}
 		
 		

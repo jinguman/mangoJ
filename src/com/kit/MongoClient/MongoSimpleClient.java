@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.kit.Service.MongoSimpleClientService;
 import com.kit.Util.PropertyManager;
+import com.kit.Vo.SLState;
 import com.mongodb.MongoSocketReadException;
 import com.mongodb.client.result.UpdateResult;
 
@@ -25,12 +26,12 @@ public class MongoSimpleClient implements Runnable {
 	
 	final Logger logger = LoggerFactory.getLogger(MongoSimpleClient.class);
 	
-	public MongoSimpleClient(BlockingQueue<Document> queue, PropertyManager pm, Map<String, Object> indexMap) {
+	public MongoSimpleClient(BlockingQueue<Document> queue, PropertyManager pm, SLState state) {
 		this.queue = queue;
 
 		logThreshold = pm.getIntegerProperty("mc.logthreshold");
 		restartSec = pm.getIntegerProperty("mc.restartsec");
-		mscs = new MongoSimpleClientService(pm, indexMap);
+		mscs = new MongoSimpleClientService(pm, state);
 		
 		// get random start cnt
 		Random random = new Random();
