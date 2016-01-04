@@ -52,6 +52,7 @@ public class MongoInitialClientService {
 			while(c.hasNext()) {
 				Document d = c.next();
 				state.addIndex(d.getString("ns"), d.getString("name"));
+
 			}
 		}
 	}
