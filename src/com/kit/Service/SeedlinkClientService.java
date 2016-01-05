@@ -16,6 +16,7 @@ import java.util.concurrent.BlockingQueue;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Level;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.kit.Util.Helpers;
+import com.kit.Util.LoggingOutputStream;
 import com.kit.Util.PropertyManager;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
@@ -41,7 +43,7 @@ public class SeedlinkClientService {
 	final Logger logger = LoggerFactory.getLogger(SeedlinkClientService.class);
 	final String EMPTY = SeedlinkReader.EMPTY;
 
-	private BlockingQueue<Document> queue;
+	private BlockingQueue<List<Document>> queue;
 	private PropertyManager pm;
 
 	@Setter @Getter private String network;
@@ -61,7 +63,7 @@ public class SeedlinkClientService {
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy,DDD,HH:mm:ss");	//2015,306,00:49:01.7750
 	private GenerateMiniSeed gm;
 
-	public SeedlinkClientService(BlockingQueue<Document> queue, PropertyManager pm) {
+	public SeedlinkClientService(BlockingQueue<List<Document>> queue, PropertyManager pm) {
 		this.queue = queue;
 		this.pm = pm;
 		isSharpMinute = pm.getBooleanProperty("mc.sharpMinute");
@@ -159,8 +161,8 @@ public class SeedlinkClientService {
             //PrintWriter out = new PrintWriter(System.out, true);
             
             //if (verbose) {
-            //	reader.setVerbose(true);
-            //	reader.setVerboseWriter(out);
+            	//reader.setVerbose(true);
+            	//reader.setVerboseWriter(out);
             //}
 
             try {
@@ -179,7 +181,9 @@ public class SeedlinkClientService {
     		}
 
             // Seedlink stream reading
+            List<Document> documents = new ArrayList<Document>();
             while (reader.hasNext()) {
+            	
                 SeedlinkPacket slp = reader.readPacket();
                 DataRecord dr = slp.getMiniSeed();
 
@@ -192,7 +196,8 @@ public class SeedlinkClientService {
                         String endTime = record.getHeader().getEndTime();
                         Document d = Helpers.dRecordToDoc(record, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
 
-                        queue.put(d);
+                        documents.add(d);
+                        //queue.put(d);
                 	}
                 	
                 } else {
@@ -200,8 +205,21 @@ public class SeedlinkClientService {
                     String endTime = dr.getHeader().getEndTime();
                     Document d = Helpers.dRecordToDoc(dr, Helpers.convertDatePerfectly(startTime, sdf, sdfToSecond), Helpers.convertDatePerfectly(endTime, sdf, sdfToSecond));
 
-                    queue.put(d);
+                    documents.add(d);
+                    //queue.put(d);
                 }
+                
+            	if ( reader.availableBytes() == 0 ) {
+            		queue.put(documents);
+            		documents = new ArrayList<>();
+            	}
+            	
+            	// forced
+            	if ( documents.size() > 50000 ) {
+            		queue.put(documents);
+            		documents = new ArrayList<>();
+            		logger.warn("Documents size > 100. put the queue forced.");
+            	}
                 
                 if ( queueLimit > 0 ) {
                 	if ( queue.size() > queueLimit ) {

@@ -1,10 +1,13 @@
 package com.kit.Vo;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 
 import com.mysql.fabric.RangeShardMapping;
@@ -112,6 +115,23 @@ public class SLState {
 		}
 	}
 	
+	public void addStream(SLNetStation slnetStation) {
+		
+		String network = slnetStation.getNetwork();
+		String station = slnetStation.getStation();
+		int seqnum = slnetStation.getSeqnum();
+		String stime = slnetStation.getStime();
+		
+		String key = network + "_" + station;
+		if ( !streamMap.containsKey(key)) {
+			streamMap.put(key, slnetStation);
+		} else {
+			SLNetStation value = streamMap.get(key);
+			value.setSeqnum(seqnum);
+			value.setStime(stime);
+		}
+	}
+	
 	public List<String> getAllStreamStr() {
 		
 		List<String> lists = new ArrayList<>();
@@ -127,5 +147,21 @@ public class SLState {
 		
 		String[] words = line.split(" ");
 		return new SLNetStation(words[0], words[1], Integer.parseInt(words[2]), words[3]); 
+	}
+	
+	public void saveStreams(File file) throws IOException {
+
+		List<String> streams = getAllStreamStr();
+		FileUtils.writeLines(file, streams);
+		
+	}
+	
+	public void restoreStreams(File file) throws IOException {
+		
+		List<String> streams = FileUtils.readLines(file);
+		for(String line : streams) {
+			SLNetStation slnetStation = toParse(line);
+			addStream(slnetStation);
+		}
 	}
 }

@@ -2,6 +2,7 @@ package com.kit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -29,7 +30,7 @@ public class MangoJC {
     	logger.info("{}","MangoJC start..");
 	
     	// queue
-    	BlockingQueue<Document> queue = new LinkedBlockingQueue<Document>();
+    	BlockingQueue<List<Document>> queue = new LinkedBlockingQueue<List<Document>>();
     	
     	// index map
     	// 1. INDEX(ns.index.indexName : boolean)
@@ -56,6 +57,21 @@ public class MangoJC {
     	logger.debug("getShardcollections from mongodb");
     	mics.getShardRange();
     	logger.debug("getShardRange from mongodb");
+    	
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				try {
+					stopEngine();
+				} catch (Exception e) {
+					logger.error("There is error in Server.",e);
+				}
+			}
+
+			private void stopEngine() {
+				logger.error("STOP ENGINE~~~");
+				
+			}
+		});
     	
     	// therad array
     	ArrayList<Thread> threads = new ArrayList<Thread>();
@@ -100,6 +116,7 @@ public class MangoJC {
 			} catch (Exception e) {
 			}
 		}
+		
 
     }
 }

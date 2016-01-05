@@ -1,14 +1,15 @@
 package com.kit.Vo;
 
 import edu.sc.seis.seisFile.mseed.Btime;
+import lombok.Getter;
 import lombok.Setter;
 
 public class SLNetStation {
 
-    public String network = null;
-    public String station = null;
-    @Setter public int seqnum = -1;
-    @Setter public String stime = null;
+    @Setter @Getter private String network = null;
+    @Setter @Getter private String station = null;
+    @Setter @Getter public int seqnum = -1;
+    @Setter @Getter public String stime = null;
 
     public SLNetStation(String network, String station, int seqnum, String stime) {
 

@@ -90,8 +90,7 @@ public class MongoSimpleClientService {
 		String month = Helpers.getMonthString(st, sdfToSecond);
 
 		Btime stBtime = Helpers.getBtime(st, sdfToSecond);
-		String hour = Helpers.getStrHourBtime(stBtime);
-		String min = Helpers.getStrMinBtime(stBtime);
+		
 
 		String collectionName = Helpers.getTraceCollectionName(network, station, location, channel, year, month);
 
@@ -107,8 +106,8 @@ public class MongoSimpleClientService {
 
 		// add trace
 		Document key = new Document("_id", station + "_" + location + "_" + Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToMinute));
-		//UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
-		UpdateResult result = addTrace(key, new Document("$set",new Document(channel+"."+Helpers.getEpochTimeLong(stBtime),d)));
+		UpdateResult result = addTrace(key, new Document("$addToSet",new Document(channel,d)));		
+		//UpdateResult result = addTrace(key, new Document("$set",new Document(channel+"."+Helpers.getEpochTimeLong(stBtime),d)));
 
 		// Update or Insert condition
 		if ( result.getModifiedCount() > 0 || result.getUpsertedId() != null ) {
@@ -137,6 +136,8 @@ public class MongoSimpleClientService {
 				Document keyTraceGapsDoc = new Document()
 						.append("_id", Helpers.getTraceGapsKey(network, station, location, channel, Helpers.convertDate(d.getString("st"), sdfToSecond, sdfToDay))); 
 				
+				String hour = Helpers.getStrHourBtime(stBtime);
+				String min = Helpers.getStrMinBtime(stBtime);
 				Document traceGapsDoc = new Document()
 						.append("$set", new Document("s", d.get("s")))
 						.append("$inc", new Document("m." + hour + "." + min, d.get("n"))
@@ -164,6 +165,7 @@ public class MongoSimpleClientService {
 				// Duplicate Key Exception
 				options.upsert(false);
 				result = collection.updateOne(key, doc, options);
+				
 			} else {
 				logger.warn("Error during write. key: {}, doc: {}", key.toJson(), doc.toJson());
 				logger.warn("{}", e);

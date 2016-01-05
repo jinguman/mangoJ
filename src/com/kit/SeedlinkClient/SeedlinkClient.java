@@ -24,7 +24,7 @@ public class SeedlinkClient implements Runnable {
 	final Logger logger = LoggerFactory.getLogger(SeedlinkClient.class);
 	final String EMPTY = SeedlinkReader.EMPTY;
 	
-	private BlockingQueue<Document> queue;
+	private BlockingQueue<List<Document>> queue;
 	private PropertyManager pm;
 	
 	@Setter @Getter private String network;
@@ -38,7 +38,7 @@ public class SeedlinkClient implements Runnable {
 	@Setter @Getter private int timeoutSeconds = SeedlinkReader.DEFAULT_TIMEOUT_SECOND;
 	//@Setter @Getter private boolean verbose = false;
 
-	public SeedlinkClient(BlockingQueue<Document> queue, PropertyManager pm) {
+	public SeedlinkClient(BlockingQueue<List<Document>> queue, PropertyManager pm) {
 		this.queue = queue;
 		this.pm = pm;
 	}

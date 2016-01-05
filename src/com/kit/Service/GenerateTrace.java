@@ -11,6 +11,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.kit.Util.Helpers;
 import com.kit.Util.PropertyManager;
 
 import lombok.Setter;
@@ -18,7 +19,7 @@ import lombok.Setter;
 
 public class GenerateTrace implements Runnable{
 
-	private BlockingQueue<Document> queue;
+	private BlockingQueue<List<Document>> queue;
 
 	private Calendar startTime = Calendar.getInstance();
 	private Calendar endTime = Calendar.getInstance();
@@ -36,12 +37,12 @@ public class GenerateTrace implements Runnable{
 
 	final Logger logger = LoggerFactory.getLogger(GenerateTrace.class);
 
-	public GenerateTrace(BlockingQueue<Document> queue) {
+	public GenerateTrace(BlockingQueue<List<Document>> queue) {
 		this.queue = queue;
 		//initMongoClient();
 	}
 	
-	public GenerateTrace(BlockingQueue<Document> queue, PropertyManager pm) {
+	public GenerateTrace(BlockingQueue<List<Document>> queue, PropertyManager pm) {
 		this.queue = queue;
 		this.pm = pm;
 		//initMongoClient();
@@ -54,35 +55,38 @@ public class GenerateTrace implements Runnable{
 			
 			startTime.setTime(formatter.parse(pm.getStringProperty("gt.starttime")));
 			endTime.setTime(formatter.parse(pm.getStringProperty("gt.endtime")));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
+		
 
-		int cnt = 0;
-		int logThreshold = pm.getIntegerProperty("gt.logthreshold");
-		while(true) {
-			
-			for(String station : stations) {
-				for (String channel : channels) {
+			int cnt = 0;
+			int logThreshold = pm.getIntegerProperty("gt.logthreshold");
+			while(true) {
+				
+				List<Document> documents = new ArrayList<>();
+				for(String station : stations) {
+					for (String channel : channels) {
+						
+						Document d = new Document()
+										.append("st", formatter.format(startTime.getTime()))
+										.append("n", nsamp * plusTime )
+										.append("c", 1)
+										.append("s", nsamp);
+	
+						Calendar ca = (Calendar) startTime.clone();
+						ca.add(Calendar.SECOND, plusTime);
+	
+						//d.append("d", getRandomList(nsamp * plusTime))
+								d.append("et", formatter.format(ca.getTime()))
+								.append("network", network)
+								.append("station", station)
+								.append("location", location)
+								.append("channel", channel)
+								.append("seqnum", 0)
+				        		.append("sbtime", Helpers.getBtime(formatter.format(startTime.getTime()), formatter));
+	
+						
+						documents.add(d);
+					}
 					
-					Document d = new Document()
-									.append("st", formatter.format(startTime.getTime()))
-									.append("n", nsamp * plusTime )
-									.append("c", 1)
-									.append("s", nsamp);
-
-					Calendar ca = (Calendar) startTime.clone();
-					ca.add(Calendar.SECOND, plusTime);
-
-					//d.append("d", getRandomList(nsamp * plusTime))
-							d.append("et", formatter.format(ca.getTime()))
-							.append("network", network)
-							.append("station", station)
-							.append("location", location)
-							.append("channel", channel);
-
 					//Helpers.printJson(d);
 					int queueThreshold = pm.getIntegerProperty("gt.queuethreshold");
 					while(queue.size() > queueThreshold) {
@@ -96,7 +100,8 @@ public class GenerateTrace implements Runnable{
 					}
 					
 					try {
-						queue.put(d);
+						queue.put(documents);
+						documents.clear();
 						if ( cnt > logThreshold ) {
 							logger.debug("< Put queue: {}", queue.size());
 							cnt = 0;
@@ -107,12 +112,18 @@ public class GenerateTrace implements Runnable{
 						e.printStackTrace();
 						return;
 					}
+					
 				}
+				startTime.add(Calendar.SECOND, plusTime);
+				
+				
+				if ( endTime.compareTo(startTime) < 0 ) break;
 			}
-			startTime.add(Calendar.SECOND, plusTime);
-			
-			
-			if ( endTime.compareTo(startTime) < 0 ) break;
+		
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
 		}
 	}
 	

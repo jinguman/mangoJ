@@ -35,7 +35,7 @@ public class MangoJT {
     	logger.info("{}","MangoJT start..");
     	
     	// queue
-    	BlockingQueue<Document> queue = new LinkedBlockingQueue<Document>();
+    	BlockingQueue<List<Document>> queue = new LinkedBlockingQueue<List<Document>>();
     	
     	// index set
     	//Map<String, Object> indexMap = new ConcurrentHashMap();

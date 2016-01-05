@@ -1,6 +1,7 @@
 package com.kit;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +28,7 @@ public class MangoJI {
     	logger.info("{}","MangoJI start..");
 
     	// queue
-    	BlockingQueue<Document> queue = new LinkedBlockingQueue<Document>();
+    	BlockingQueue<List<Document>> queue = new LinkedBlockingQueue<List<Document>>();
 
     	// index map
     	//Map<String, Object> indexMap = new ConcurrentHashMap<>();

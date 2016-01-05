@@ -1,5 +1,6 @@
 package com.kit.MongoClient;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -21,7 +22,7 @@ import com.mongodb.client.MongoDatabase;
 public class MongoInitialClient implements Runnable {
 
 	private PropertyManager pm;
-	private BlockingQueue<Document> queue;
+	private BlockingQueue<List<Document>> queue;
 
 	private MongoClient client = null;
 	private MongoDatabase database = null;
@@ -38,7 +39,7 @@ public class MongoInitialClient implements Runnable {
 
 	final Logger logger = LoggerFactory.getLogger(MongoInitialClient.class);
 	
-	public MongoInitialClient(BlockingQueue<Document> queue, PropertyManager pm, String shardYear, String shardMonth, SLState state) {
+	public MongoInitialClient(BlockingQueue<List<Document>> queue, PropertyManager pm, String shardYear, String shardMonth, SLState state) {
 		this.pm = pm;
 		
 		client = new MongoClient(new MongoClientURI(pm.getStringProperty("mongo.uri")));
@@ -70,15 +71,21 @@ public class MongoInitialClient implements Runnable {
 
 	private void addInitial() throws InterruptedException {
 		while(true) {
-			Document doc = queue.take();
+			//Document doc = queue.take();
+			List<Document> documents = queue.take();
 			
-			String network = doc.getString("network");
-			String station = doc.getString("station");
-			String location = doc.getString("location");
-			String channel = doc.getString("channel");
-			
-			if ( pm.getBooleanProperty("mi.index")) mics.doEtIndex(network, station, location, channel, shardYear, shardMonth, false);
-			if ( pm.getBooleanProperty("mi.shard")) mics.doShard(network, station, location, channel, shardYear, shardMonth);
+			for(Document doc : documents) {
+				String network = doc.getString("network");
+				String station = doc.getString("station");
+				String location = doc.getString("location");
+				String channel = doc.getString("channel");
+				
+				if ( pm.getBooleanProperty("mi.index")) mics.doEtIndex(network, station, location, channel, shardYear, shardMonth, false);
+				if ( pm.getBooleanProperty("mi.shard")) mics.doShard(network, station, location, channel, shardYear, shardMonth);
+				
+				doc.clear();
+			}
+			documents.clear();
 			logger.info("Execute initiate.({}).", queue.size());
 
 			if ( sleepSec > 0 ) Thread.sleep(sleepSec*1000);

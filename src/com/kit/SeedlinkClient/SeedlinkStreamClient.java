@@ -30,7 +30,7 @@ public class SeedlinkStreamClient implements Runnable {
 	final Logger logger = LoggerFactory.getLogger(SeedlinkStreamClient.class);
 	final String EMPTY = SeedlinkReader.EMPTY;
 	
-	private BlockingQueue<Document> queue;
+	private BlockingQueue<List<Document>> queue;
 	private PropertyManager pm;
 	
 	@Setter private String[] networks;
@@ -43,7 +43,7 @@ public class SeedlinkStreamClient implements Runnable {
 	private Document streamsInfoDoc = null;
 	private boolean isBuildEntireList = false;
 
-	public SeedlinkStreamClient(BlockingQueue<Document> queue, PropertyManager pm) {
+	public SeedlinkStreamClient(BlockingQueue<List<Document>> queue, PropertyManager pm) {
 		this.queue = queue;
 		this.pm = pm;
 		
@@ -63,8 +63,8 @@ public class SeedlinkStreamClient implements Runnable {
 		while(true) {
 			try {
 				streamsInfoDoc = scs.getStreamsInfo();
-				logger.debug("Get streamsInfoDoc.");
-				Helpers.printJson(streamsInfoDoc);
+				//logger.debug("Get streamsInfoDoc.");
+				//Helpers.printJson(streamsInfoDoc);
 				break;
 			} catch (SeedlinkException | SeedFormatException | IOException e) {
 				logger.warn("{} {}", "Failure in Seedlink.", e);
@@ -93,6 +93,7 @@ public class SeedlinkStreamClient implements Runnable {
 		//			}]
 		//			
 		//Helpers.printJson(streamsInfoDoc);
+		
 		if ( isBuildEntireList ) {
 			
 			for(String network : streamsInfoDoc.keySet()) {
@@ -111,7 +112,10 @@ public class SeedlinkStreamClient implements Runnable {
 											.append("channel", channel);
 
 								try {
-									queue.put(doc);
+									//queue.put(doc);
+									List<Document> documents = new ArrayList<>();
+									documents.add(doc);
+									queue.put(documents);
 								} catch (InterruptedException e) {
 									logger.error("{}", e);
 								}
@@ -140,7 +144,10 @@ public class SeedlinkStreamClient implements Runnable {
 											.append("channel", channel);
 
 								try {
-									queue.put(doc);
+									//queue.put(doc);
+									List<Document> documents = new ArrayList<>();
+									documents.add(doc);
+									queue.put(documents);
 								} catch (InterruptedException e) {
 									logger.error("{}", e);
 								}
@@ -151,6 +158,5 @@ public class SeedlinkStreamClient implements Runnable {
 			}
 			
 		}
-
 	}
 }

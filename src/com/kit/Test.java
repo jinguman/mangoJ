@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import org.bson.Document;
+
 import com.kit.Util.Helpers;
 
 import edu.sc.seis.seisFile.mseed.Btime;
@@ -31,12 +33,21 @@ public class Test {
 		
 		System.out.println(str + ", " + bt.toString() + ", " + d);
 		
+		/*
 		try {
 			callDriver();
 		} finally {
 			System.out.println("EXIUT");
-		}
+		}*/
 		
+		Document doc = new Document();
+		doc.append("test", "test");
+		
+		doc.clear();
+		
+		String test = (String) doc.get("test");
+		
+		System.out.println(test);
 
 	}
 	
