@@ -77,6 +77,7 @@ public class MangoJC {
     	ArrayList<Thread> threads = new ArrayList<Thread>();
     	
     	// MongoSimpleClient Thread
+    	logger.info("MongoDB thread start...");
     	int threadCnt = pm.getIntegerProperty("mc.thread");
     	for (int i = 0; i < threadCnt; i++) {
     		MongoSimpleClient msc = new MongoSimpleClient(queue, pm, state);
@@ -86,6 +87,7 @@ public class MangoJC {
     	}
 
     	// SeedlinkClient Thread
+    	logger.info("Seedlink thread start...");
     	int slinkThdCnt = pm.getIntegerProperty("sc.thread");
     	for(int i=1; i<slinkThdCnt+1; i++) {
 
