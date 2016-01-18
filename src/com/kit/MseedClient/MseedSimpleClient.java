@@ -1,30 +1,7 @@
 package com.kit.MseedClient;
 
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
-
-import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.kit.SeedlinkClient.SeedlinkClient;
-import com.kit.Service.GenerateMiniSeed;
-import com.kit.Service.MongoSimpleClientService;
-import com.kit.Util.Helpers;
-import com.kit.Util.PropertyManager;
-import com.kit.Vo.SLState;
-import com.mongodb.client.result.UpdateResult;
-
-import edu.sc.seis.seisFile.mseed.DataRecord;
-import edu.sc.seis.seisFile.mseed.SeedRecord;
-
 public class MseedSimpleClient {
-
+/*
 	// 기존 데이터가 존재시 
 	// 1. full-overwrite: 무조건 덮어씌운다.
 	// 2. gap-overwrite: 빈곳만 채운다.
@@ -84,6 +61,6 @@ public class MseedSimpleClient {
 
 	}
 	
-		
+*/		
 	
 }

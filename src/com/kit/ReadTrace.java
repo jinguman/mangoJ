@@ -9,8 +9,7 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import com.kit.Service.GenerateMiniSeed;
-
+import app.kit.service.seedlink.GenerateMiniSeed;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
 

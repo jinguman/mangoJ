@@ -11,11 +11,12 @@ import org.bson.types.Binary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.kit.Dao.TraceDao;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
+import app.kit.service.mongo.TraceDao;
+import app.kit.service.seedlink.GenerateMiniSeed;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
@@ -30,13 +31,11 @@ public class WriteMiniSeed {
 	final Logger logger = LoggerFactory.getLogger(WriteMiniSeed.class);
 
 	public WriteMiniSeed(MongoClient client, MongoDatabase database) {
-		traceDao = new TraceDao(database);
-		gm = new GenerateMiniSeed();
 	}
 	
 	public boolean write(String network, String station, String location, String channel, String st, String et, String filename) {
 		
-		MongoCursor<Document> cursor = traceDao.getTraceCursor(network, station, location, channel, st, et);
+		MongoCursor<Document> cursor = traceDao.getTraceCursorByAggregate(network, station, location, channel, st, et);
 		
 		int totSample = 0;
 		DataOutputStream dos = null;

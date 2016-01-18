@@ -5,11 +5,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import com.kit.Dao.TraceStatsDao;
 import com.kit.Service.WriteMiniSeed;
-import com.kit.Util.Helpers;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+
+import app.kit.com.util.Helpers;
+import app.kit.service.mongo.TraceStatsDao;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class BckupWorker {
 	public BckupWorker(MongoClient client, MongoDatabase database) {
 		parser = new FileParser();
 		writeMiniSeed = new WriteMiniSeed(client, database);
-		traceStatsDao = new TraceStatsDao(database);
+		//traceStatsDao = new TraceStatsDao(database);
 	}
 	
 	public void service(File file) {

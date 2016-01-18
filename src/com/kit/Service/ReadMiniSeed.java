@@ -1,36 +1,7 @@
 package com.kit.Service;
 
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
-
-import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.kit.Dao.TraceDao;
-import com.kit.Util.Helpers;
-import com.kit.Util.PropertyManager;
-import com.kit.Vo.SLState;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.UpdateResult;
-
-import edu.sc.seis.seisFile.mseed.Btime;
-import edu.sc.seis.seisFile.mseed.DataRecord;
-import edu.sc.seis.seisFile.mseed.SeedFormatException;
-import edu.sc.seis.seisFile.mseed.SeedRecord;
-
 public class ReadMiniSeed {
-
+/*
 	private TraceDao traceDao;
 	private GenerateMiniSeed gm;
 	
@@ -138,6 +109,6 @@ public class ReadMiniSeed {
 			logger.debug("Case 4. {}", result);
 		}
 	}
-	
+*/	
 }
 

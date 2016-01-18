@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import app.kit.service.seedlink.GenerateMiniSeed;
 import edu.iris.dmc.seedcodec.B1000Types;
 import edu.iris.dmc.seedcodec.CodecException;
 import edu.iris.dmc.seedcodec.DecompressedData;

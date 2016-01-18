@@ -48,8 +48,8 @@
 				</fileset>
 			</copy>
 			
-			<copy todir="${target.dir}/config" overwrite="true">
-				<fileset dir="${config.dir}/config" casesensitive="yes" >
+			<copy todir="${target.dir}/conf" overwrite="true">
+				<fileset dir="${config.dir}/conf" casesensitive="yes" >
 					<include name="**/**"/>
 					<exclude name="test*/**"/>
 				</fileset>

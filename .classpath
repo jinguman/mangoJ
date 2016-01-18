@@ -5,36 +5,39 @@
 	<classpathentry kind="src" path="home"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jetty-http-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jetty-io-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jetty-security-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jetty-server-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jetty-servlet-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jetty-util-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jetty-webapp-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jetty-xml-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/JSAP-2.1.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jsch-0.1.53.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/lombok.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/mongo-java-driver-3.1.0.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/mysql-connector-java-5.1.34.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/netty-all-4.0.32.Final.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/rxtx-2.1.7.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/netty-all-4.0.32.Final.jar" sourcepath="C:/Users/jman/.m2/repository/io/netty/netty-all/4.0.32.Final/netty-all-4.0.32.Final-sources.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/seedCodec-1.0.11.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/seisFile-1.6.6.jar" sourcepath="D:/workspace/JAVA_LIB/seisFile/seisFile-1.6.6-sources.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/servlet-api-3.1.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/slf4j-api-1.7.12.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/slf4j-log4j12-1.7.12.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spark-core-2.4-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/stax2-api-3.1.1.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/stax-api-1.0-2.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/websocket-api-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/websocket-client-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/websocket-common-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/websocket-server-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/websocket-servlet-9.3.5.v20151012.jar"/>
-	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/woodstox-core-lgpl-4.2.0.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/seisFile-1.6.6.jar" sourcepath="D:/workspace/JAVA_LIB/seisFIle/seisFile-1.6.6-sources.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/slf4j-api-1.7.12.jar" sourcepath="C:/Users/jman/.m2/repository/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12-sources.jar"/>
 	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/commons-configuration-1.10.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/commons-dbcp-1.4.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/commons-pool-1.6.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/logback-access-1.1.3.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/logback-classic-1.1.3.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/logback-core-1.1.3.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-aop-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-aspects-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-beans-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-context-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-context-support-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-core-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-expression-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-instrument-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-jdbc-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-test-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/spring-tx-4.2.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jackson-annotations-2.7.0.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jackson-core-2.7.0.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jackson-databind-2.6.4.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jackson-dataformat-xml-2.5.1.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/jackson-module-jaxb-annotations-2.7.0.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/stax2-api-4.0.0.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/mangoJ/library/mongo-java-driver-3.2.1.jar" sourcepath="D:/workspace/JAVA_LIB/mongo-java-driver-3.2.1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

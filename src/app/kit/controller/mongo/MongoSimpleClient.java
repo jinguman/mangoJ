@@ -1,0 +1,104 @@
+package app.kit.controller.mongo;
+
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import com.mongodb.MongoSocketReadException;
+import com.mongodb.client.result.UpdateResult;
+
+import app.kit.com.conf.MangoConf;
+import app.kit.com.queue.BlockingMessageQueue;
+import app.kit.service.mongo.MongoSimpleClientService;
+import app.kit.vo.Gaps;
+import app.kit.vo.SLState;
+import app.kit.vo.Stats;
+import app.kit.vo.Trace;
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Scope("prototype")
+@Slf4j
+public class MongoSimpleClient implements Runnable {
+
+	@Autowired private BlockingMessageQueue queue;
+	@Autowired private MongoSimpleClientService service;
+	@Autowired private MangoConf conf;
+	@Autowired private SLState slState;
+	private Stats stats = new Stats();
+	private Gaps gaps = new Gaps();
+	
+	int logCnt = 0; // log print count
+
+	public void run() {
+		
+		// 에러처리를 정교하게 넣어야 함..
+		// ex. 몽고DB에 접속이 끊겼을시 들고있는 큐데이터 처리 등...
+		
+		Random random = new Random();
+		if ( conf.getMcLogThreshold() > 0 ) logCnt = random.nextInt(conf.getMcLogThreshold());
+		
+		while(true) {
+
+			try {
+
+				List<Trace> traces = queue.take();
+				
+				int traceCnt = 1;
+				int traceSize = traces.size();
+				for(Trace trace : traces) {
+
+					UpdateResult result = service.insertTrace(trace);
+
+					// print log
+					String logStr = "[" + (traceCnt++) + "/" + traceSize + "] " + trace.getNetwork() + "." + trace.getStation() + "." + trace.getLocation() + "." + trace.getChannel() + " " + trace.getStStr();
+					if ( logCnt > conf.getMcLogThreshold() ) {
+						if ( result.getModifiedCount() > 0 ) log.debug("Update trace({}). {}", queue.size(), logStr); 
+						else if ( result.getUpsertedId() != null ) log.debug("Insert trace({}). {}", queue.size(), logStr);
+						logCnt = 1;
+					}
+					logCnt++;
+					
+					// Update or Insert condition
+					if ( result.getModifiedCount() > 0 || result.getUpsertedId() != null ) {
+						slState.addStream(trace.getNetwork(), trace.getStation(), trace.getSeqnum(), trace.getStBtime());
+						
+						// Trace에 대한 Stats, Gaps 정리작업
+						stats.put(trace);
+						gaps.put(trace);
+					}
+					trace.clear();
+				}
+				service.insertStats(stats);
+				service.insertGaps(gaps);
+				
+				stats.clear();
+				gaps.clear();
+				traces.clear();
+
+			} catch (MongoSocketReadException | InterruptedException e) {
+				log.error("{}", e);
+				log.info("MongoClient restart after {} seconds.", conf.getMcRestartSec());
+				try {
+					Thread.sleep(conf.getMcRestartSec()*1000);
+				} catch (InterruptedException e1) {
+					log.error("{}",e1);
+				}
+			}
+			//} catch ( MongoSocketReadException e) {
+				
+				// 나중에 처리하자..
+				//d.append("network", network);
+				//d.remove("station");
+				//d.remove("channel");
+				//d.remove("location");
+				//queue.add(d);
+
+		}	
+		
+	}
+
+}

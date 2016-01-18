@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import app.kit.vo.SLNetStation;
+import app.kit.vo.SLState;
 import edu.sc.seis.seisFile.mseed.Btime;
 
 public class SLStateTest {

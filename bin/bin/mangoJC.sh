@@ -10,28 +10,44 @@ usage() {
 
 ### MAIN ###
 
-#PID=`ps -ef | grep java | grep spis |  grep -v grep | grep -v CassandraDaemon | awk '{print $2}'`
 PID=`jps | grep MangoJC | awk '{print $1}'`
 export JAVA=/usr/local/java/bin/java
-export JAVAOPTION='-Dlog4j.configuration=file:../config/log4j.xml -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+HeapDumpOnOutOfMemoryError -Xloggc:./gc.log -Dsun.reflect.inflationThreshold=30'
+export JAVAOPTION='-Dlogback.configurationFile=file:../conf/logback.xml -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+HeapDumpOnOutOfMemoryError -Xloggc:./gc.log -Dsun.reflect.inflationThreshold=30'
 
-
-export CLASSPATH=$CLASSPATH:../lib/JSAP-2.1.jar
-export CLASSPATH=$CLASSPATH:../lib/log4j-1.2.17.jar
 export CLASSPATH=$CLASSPATH:../lib/mangoJ-0.1.jar
-export CLASSPATH=$CLASSPATH:../lib/mongo-java-driver-3.1.0.jar
-export CLASSPATH=$CLASSPATH:../lib/mysql-connector-java-5.1.34.jar
-export CLASSPATH=$CLASSPATH:../lib/rxtx-2.1.7.jar
+export CLASSPATH=$CLASSPATH:../lib/mongo-java-driver-3.2.1.jar
 export CLASSPATH=$CLASSPATH:../lib/seedCodec-1.0.11.jar
 export CLASSPATH=$CLASSPATH:../lib/seisFile-1.6.6.jar
 export CLASSPATH=$CLASSPATH:../lib/slf4j-api-1.7.12.jar
-export CLASSPATH=$CLASSPATH:../lib/slf4j-log4j12-1.7.12.jar
-export CLASSPATH=$CLASSPATH:../lib/stax2-api-3.1.1.jar
-export CLASSPATH=$CLASSPATH:../lib/stax-api-1.0-2.jar
-export CLASSPATH=$CLASSPATH:../lib/woodstox-core-lgpl-4.2.0.jar
 export CLASSPATH=$CLASSPATH:../lib/lombok.jar
 export CLASSPATH=$CLASSPATH:../lib/netty-all-4.0.32.Final.jar
 export CLASSPATH=$CLASSPATH:../lib/commons-io-2.4.jar
+export CLASSPATH=$CLASSPATH:../lib/commons-configuration-1.10.jar
+export CLASSPATH=$CLASSPATH:../lib/commons-lang-2.6.jar
+export CLASSPATH=$CLASSPATH:../lib/commons-logging-1.2.jar
+export CLASSPATH=$CLASSPATH:../lib/commons-pool-1.6.jar
+export CLASSPATH=$CLASSPATH:../lib/commons-dbcp-1.4.jar
+export CLASSPATH=$CLASSPATH:../lib/mysql-connector-java-5.1.34.jar
+export CLASSPATH=$CLASSPATH:../lib/logback-access-1.1.3.jar
+export CLASSPATH=$CLASSPATH:../lib/logback-classic-1.1.3.jar
+export CLASSPATH=$CLASSPATH:../lib/logback-core-1.1.3.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-aop-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-aspects-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-beans-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-context-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-context-support-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-core-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-expression-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-instrument-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-jdbc-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-test-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/spring-tx-4.2.4.RELEASE.jar
+export CLASSPATH=$CLASSPATH:../lib/jackson-annotations-2.7.0.jar
+export CLASSPATH=$CLASSPATH:../lib/jackson-core-2.7.0.jar
+export CLASSPATH=$CLASSPATH:../lib/jackson-databind-2.6.4.jar
+export CLASSPATH=$CLASSPATH:../lib/jackson-dataformat-xml-2.5.1.jar
+export CLASSPATH=$CLASSPATH:../lib/jackson-module-jaxb-annotations-2.7.0.jar
+export CLASSPATH=$CLASSPATH:../lib/stax2-api-4.0.0.jar
 export CLASSPATH=$CLASSPATH:../
 
 case "$1" in
@@ -40,13 +56,12 @@ case "$1" in
            echo "mangoJC already started.($PID)"
            exit 1
        fi 
-      nohup $JAVA -classpath $CLASSPATH $JAVAOPTION $JAVA_OPTS com.kit.MangoJC &
-#      $JAVA -classpath $CLASSPATH $JAVAOPTION $JAVA_OPTS com.kit.MangoJC
+      nohup $JAVA -classpath $CLASSPATH $JAVAOPTION $JAVA_OPTS app.kit.MangoJC &
+#      $JAVA -classpath $CLASSPATH $JAVAOPTION $JAVA_OPTS app.kit.MangoJC
       echo "mangoJC Server are started."
   ;;
 
   stop)
-      #PID=`ps -ef | grep java | grep daps | grep -v grep | grep -v CassandraDaemon | awk '{print $2}'`
       kill -15 $PID
       echo "mangoJC process are finish.($PID)"
       ;;

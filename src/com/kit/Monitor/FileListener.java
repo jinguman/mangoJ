@@ -58,7 +58,7 @@ public class FileListener implements FileAlterationListener {
 		// restore
 		idx = jdate.indexOf(".restore");
 		if ( idx > 0 ) {
-			restoreWorker.service(file);
+			//restoreWorker.service(file);
 			FileUtils.deleteQuietly(file);
 		}
 	}
