@@ -1,5 +1,9 @@
 package app.kit.service.mongo;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lte;
+
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.Binary;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,11 +23,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 
 import app.kit.com.conf.MangoConf;
 import app.kit.com.util.Helpers;
 import app.kit.service.seedlink.GenerateMiniSeed;
+import app.kit.vo.Trace;
+import edu.sc.seis.seisFile.mseed.Btime;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
@@ -36,16 +48,62 @@ public class TraceDaoTest {
 	@Autowired private TraceDao dao;
 	@Autowired private GenerateMiniSeed gm;
 	
+	//@Test
+	public void unset() throws ParseException {
+		
+		String network = "AK";
+		String station = "ATKA";
+		String location = "";
+		String channel = "BHN";
+
+		Btime stBtime = Helpers.getBtime("2016-01-22T00:00:00.0000", null); 
+		Btime etBtime = Helpers.getBtime("2016-01-22T00:02:59.9999", null);
+		
+		UpdateResult r = dao.unsetTrace(network, station, location, channel, stBtime, etBtime);
+		System.out.println(r);
+	}
+	
+	//@Test
+	// db.AK_B_2016.find({_id:/ATKA/},{'BHN.st':1}).limit(200).pretty()
+	public void test2() throws ParseException {
+		
+		MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost"));
+		MongoDatabase db = client.getDatabase("trace");
+		
+		String network = "AK";
+		String station = "ATKA";
+		String location = "";
+		String channel = "BHN";
+		Btime stBtime = Helpers.getBtime("2016-01-22T00:00:00.0000", null); 
+		Btime etBtime = Helpers.getBtime("2016-01-22T00:02:59.9999", null);
+		
+		String year, month;
+		year = Trace.getBtimeToStringY(stBtime);
+		month = Trace.getBtimeToStringH(stBtime);
+		MongoCollection<Document> collection = db.getCollection(Helpers.getTraceCollectionName(network, station, location, channel, year, month));
+		
+		//String gteCond = station + "_" + location + "_" + Trace.getBtimeToStringYMDHM(stBtime);
+		//String lteCond = station + "_" + location + "_" + Trace.getBtimeToStringYMDHM(etBtime);
+		//Bson filter = and( gte("_id", gteCond), lte("_id", lteCond));
+		Bson filter = new Document("_id", station + "_" + location + "_" + Trace.getBtimeToStringYMDHM(stBtime));
+		Bson update = new Document("$unset", new Document(channel,""));
+		
+		UpdateResult r = collection.updateOne(filter, update);
+		System.out.println(r);
+		
+		client.close();
+	}
+	
 	@Test
 	public void test() throws SeedFormatException, IOException, ParseException {
 	
 		String network = "AK";
-		String station = "BCP";
+		String station = "ATKA";
 		String location = "";
-		String channel = "BHE";
+		String channel = "BHZ";
 
-		String st = "2016-01-16T13:00:00.0000";
-		String et = "2016-01-16T13:59:59.9999";
+		String st = "2016-01-22T00:01:00.0000";
+		String et = "2016-01-22T00:02:00.0000";
 		
 		int totSamples = 0;
 

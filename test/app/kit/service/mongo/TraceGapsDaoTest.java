@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import app.kit.com.conf.MangoConf;
+import edu.sc.seis.seisFile.mseed.Btime;
 
 @RunWith(SpringJUnit4ClassRunner.class) 
 @ContextConfiguration(classes={MangoConf.class})
@@ -17,7 +18,7 @@ public class TraceGapsDaoTest {
 
 	@Autowired private TraceGapsDao dao;
 	
-	@Test
+	//@Test
 	public void findCursor() {
 		
 		String network = "N4";
@@ -50,5 +51,20 @@ public class TraceGapsDaoTest {
 		System.out.println(sum);
 	}
 
+	@Test
+	public void findGapValue() {
+		
+		String network = "AK";
+		String station = "ATKA";
+		String location = "";
+		String channel = "BHN";
+		String st = "2016-01-22";
+		Btime bt = new Btime(2016, 22, 0, 0, 0, 0);
+		
+		System.out.println(dao.getTraceGapsValueD(network, station, location, channel, bt));
+		System.out.println(dao.getTraceGapsValueH(network, station, location, channel, bt));
+		System.out.println(dao.getTraceGapsValueM(network, station, location, channel, bt));
 
+	}
+	
 }

@@ -2,6 +2,8 @@ package app.kit.exception;
 
 public class RequestParamException extends Exception {
 
+	private static final long serialVersionUID = -2476448914586209086L;
+
 	public RequestParamException() {
 		super();
 	}

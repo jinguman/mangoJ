@@ -3,18 +3,17 @@ package app.kit.handler.http;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class ServiceDispatcher {
 
-	private static final Logger logger = LoggerFactory.getLogger(ServiceDispatcher.class);	
 	private static ApplicationContext context;
 	private static HttpServerSession session;
 
@@ -46,7 +45,7 @@ public class ServiceDispatcher {
 		try {
 			service = (HttpServerRequest) context.getBean(beanName, ctx, requestMap);
 		} catch (Exception e) {
-			logger.error("{}", e);
+			log.info("{}", e.getMessage());
 			service = (HttpServerRequest) context.getBean("notFound", ctx, requestMap);
 		}
 		

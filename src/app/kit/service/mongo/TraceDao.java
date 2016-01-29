@@ -19,12 +19,13 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.stereotype.Component;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 
 import app.kit.com.util.Helpers;
+import app.kit.vo.Trace;
 import edu.sc.seis.seisFile.mseed.Btime;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,13 +33,33 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class TraceDao {
 
-	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
-	private SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	@Resource(name="mongoDatabaseBean") private MongoDatabase database;
 
-	// ¹üÀ§°Ë»öÀÌ ¹®Á¨°¡..? ±×·³ Á÷Á¢ ÇÏ³ª¾¿ ÄİÇÏ´Â°Ç???????
+	public MongoCursor<Document> getTraceCursor(String network, String station, String location, String channel, Btime stBtime, Btime etBtime) {
+		
+		String year, month;
+		MongoCursor<Document> cursor = null;
+
+		year = Trace.getBtimeToStringY(stBtime);
+		month = Trace.getBtimeToStringH(stBtime);
+		MongoCollection<Document> collection = database.getCollection(Helpers.getTraceCollectionName(network, station, location, channel, year, month));
+		
+		String gteCond = station + "_" + location + "_" + Trace.getBtimeToStringYMDHM(stBtime);
+		String lteCond = station + "_" + location + "_" + Trace.getBtimeToStringYMDHM(etBtime);
+		
+		Bson find = and( gte("_id", gteCond), lte("_id", lteCond));
+		Bson project = new Document("_id",0).append(channel + ".d", 1).append(channel+".st", 1);
+		Bson sort = new Document("_id",1);
+		
+		cursor = collection.find(find).projection(project).sort(sort).iterator();
+
+		return cursor;
+	}
 	
 	public MongoCursor<Document> getTraceCursor(String network, String station, String location, String channel, String startStr, String endStr) {
+		
+		SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
+		SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 		
 		String year, month;
 		MongoCursor<Document> cursor = null;
@@ -66,8 +87,26 @@ public class TraceDao {
 		return cursor;
 	}
 	
+	public UpdateResult unsetTrace(String network, String station, String location, String channel, Btime stBtime, Btime etBtime) {
+		
+		String year, month;
+		year = Trace.getBtimeToStringY(stBtime);
+		month = Trace.getBtimeToStringH(stBtime);
+		MongoCollection<Document> collection = database.getCollection(Helpers.getTraceCollectionName(network, station, location, channel, year, month));
+		
+		String gteCond = station + "_" + location + "_" + Trace.getBtimeToStringYMDHM(stBtime);
+		String lteCond = station + "_" + location + "_" + Trace.getBtimeToStringYMDHM(etBtime);
+		Bson find = and( gte("_id", gteCond), lte("_id", lteCond));
+		Bson unset = new Document("$unset", new Document(channel,""));
+		
+		return collection.updateOne(find, unset);
+	}
+	
 	@Deprecated
 	public MongoCursor<Document> getTraceCursorByAggregate(String network, String station, String location, String channel, String startStr, String endStr) {
+		
+		SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
+		SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 		
 		String year, month;
 		MongoCursor<Document> cursor = null;
@@ -103,7 +142,7 @@ public class TraceDao {
 			aggregateParams.add(unwind);
 			aggregateParams.add(project);
 			aggregateParams.add(sort);
-
+			
 			cursor = collection.aggregate(aggregateParams).iterator();
 			
 		} catch (ParseException e) {
@@ -119,9 +158,15 @@ public class TraceDao {
 		String year, month;
 		List<Document> documents = new ArrayList<>();
 		
+		SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
+		SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+
+		
 		try {
+			System.out.println(">> " + network + "." + station + "." + location + "." + channel + " " + startStr + " - " + endStr);
 			year = Helpers.getYearString(startStr, sdfToSecond); 
 			month = Helpers.getMonthString(startStr, sdfToSecond);
+			System.out.println(">>> " + network + "." + station + "." + location + "." + channel + " " + startStr + " - " + endStr);
 
 			MongoCollection<Document> collection = database.getCollection(Helpers.getTraceCollectionName(network, station, location, channel, year, month));
 			
@@ -164,29 +209,29 @@ public class TraceDao {
 				Btime stPacketBtime = Helpers.getBtime(sub.getString("st"), sdfToSecond);
 				Btime etPacketBtime = Helpers.getBtime(sub.getString("et"), sdfToSecond);
 				
-				// ÆĞÅ¶½ÃÀÛ½Ã°£ÀÌ ¿äÃ»Á¾·á½Ã°£ÀÇ µÚ¿¡ ÀÖÀ» °æ¿ì
+				// íŒ¨í‚·ì‹œì‘ì‹œê°„ì´ ìš”ì²­ì¢…ë£Œì‹œê°„ì˜ ë’¤ì— ìˆì„ ê²½ìš°
 				if ( stPacketBtime.afterOrEquals(etReqBtime) ) continue;
 					
-				// ¿äÃ»½ÃÀÛ½Ã°£ÀÌ ÆĞÅ¶Á¾·á½Ã°£ÀÇ µÚ¿¡ ÀÖÀ» °æ¿ì
+				// ìš”ì²­ì‹œì‘ì‹œê°„ì´ íŒ¨í‚·ì¢…ë£Œì‹œê°„ì˜ ë’¤ì— ìˆì„ ê²½ìš°
 				if ( stReqBtime.afterOrEquals(etPacketBtime)) continue;
 				
-				// ÆĞÅ¶Á¾·á½Ã°£ÀÌ ¿äÃ»Á¾·á½Ã°£º¸´Ù µÚ¿¡ ÀÖ´Â °æ¿ì
+				// íŒ¨í‚·ì¢…ë£Œì‹œê°„ì´ ìš”ì²­ì¢…ë£Œì‹œê°„ë³´ë‹¤ ë’¤ì— ìˆëŠ” ê²½ìš°
 				if ( etPacketBtime.after(etReqBtime)) {
 					sub.put("et", endStr);
 				}
 				
-				// ÆĞÅ¶½ÃÀÛ½Ã°£ÀÌ ¿äÃ»½ÃÀÛ½Ã°£º¸´Ù ¾Õ¿¡ ÀÖ´Â °æ¿ì
+				// íŒ¨í‚·ì‹œì‘ì‹œê°„ì´ ìš”ì²­ì‹œì‘ì‹œê°„ë³´ë‹¤ ì•ì— ìˆëŠ” ê²½ìš°
 				if ( stPacketBtime.before(stReqBtime)) {
 					sub.put("st", startStr);
 				}
 				
-				// ºñ±³´ë»óÀÌ ¾ø´Â °æ¿ì¿¡´Â ÀÌÀü¹®¼­·Î ÁöÁ¤
+				// ë¹„êµëŒ€ìƒì´ ì—†ëŠ” ê²½ìš°ì—ëŠ” ì´ì „ë¬¸ì„œë¡œ ì§€ì •
 				if ( before == null ) {
 					before = sub;
 					continue;
 				}
 					
-				// ÀÌÀü¹®¼­¿Í ½Ã°£ÀÌ ¿¬°áµÇ´Â °æ¿ì¿¡´Â ÀÌÀü¹®¼­ÀÇ ½Ã°£À» ¿¬Àå
+				// ì´ì „ë¬¸ì„œì™€ ì‹œê°„ì´ ì—°ê²°ë˜ëŠ” ê²½ìš°ì—ëŠ” ì´ì „ë¬¸ì„œì˜ ì‹œê°„ì„ ì—°ì¥
 				if ( before.get("et").equals(sub.get("st"))) {
 					before.put("et", sub.getString("et"));
 				} else {

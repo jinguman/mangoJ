@@ -13,7 +13,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
 
 /**
- * Trace collection에 관련된 DAO
+ * Trace collection
  * @author jman
  *
  */
@@ -40,8 +40,8 @@ public class TraceStatsDao {
     	if ( !location.equals("*") ) doc.append("loc", location);
     	if ( !channel.equals("*") ) doc.append("cha", channel);
     	
-    	doc.append("st", new Document("$gte",st));
-    	doc.append("et", new Document("$lte",et));
+    	if ( st != null && !st.isEmpty() ) doc.append("st", new Document("$gte",st));
+    	if ( et != null && !et.isEmpty() ) doc.append("et", new Document("$lte",et));
     	
     	return findTraceStats(doc);
     }

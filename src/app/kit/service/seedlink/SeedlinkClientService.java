@@ -16,6 +16,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import app.kit.com.conf.MangoConf;
 import app.kit.com.queue.BlockingMessageQueue;
 import app.kit.vo.InfoSeedlink;
+import app.kit.vo.SLState;
 import app.kit.vo.Trace;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
@@ -36,6 +37,7 @@ public class SeedlinkClientService {
 	@Setter private String channel;
 	@Setter private String host;
 	@Setter private int port;
+	@Autowired private SLState slState;
 	private String location = SeedlinkReader.EMPTY;
 	
 	@Autowired private GenerateMiniSeed gm;
@@ -89,7 +91,17 @@ public class SeedlinkClientService {
         		
         		for(String sta : stationList) {
             		reader.select(net, sta, location, channel);
-        			reader.sendCmd("DATA 00000000");
+        			
+            		int seqnum = slState.findStreamSeqnum(net, sta); 
+            		String seqnumStr = Integer.toHexString(seqnum + 1);
+            		
+            		if ( seqnum > 0 && conf.isScResume() ) {
+            			reader.sendCmd("DATA " + seqnumStr);
+            			log.info("{}.{} requesting resume data from 0x {}(decimal: {})",net, sta, seqnumStr, seqnum);
+            		} else {
+            			reader.sendCmd("DATA");
+            			log.info("{}.{} requesting data from current time",net, sta);
+            		}
             	}
         		reader.endHandshake();
         	}

@@ -37,4 +37,18 @@ public class Stats {
 		sb.append(trace.getChannel());
 		return sb.toString();
 	}
+	
+	@Override
+	public String toString() {
+	
+		StringBuffer sb = new StringBuffer();
+		
+		for(String key : map.keySet()) {
+			StatsVo vo = map.get(key);
+			sb.append(key).append(":").append(vo.toString()).append(" / ");
+		}
+		
+		return "Stats(" + sb.toString() + ")";
+
+	}
 }

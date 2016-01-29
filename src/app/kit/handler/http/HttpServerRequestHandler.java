@@ -4,7 +4,6 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static io.netty.handler.codec.http.HttpResponseStatus.SERVICE_UNAVAILABLE;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -15,9 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.mongodb.util.JSON;
 

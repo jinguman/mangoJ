@@ -13,7 +13,8 @@
 	<appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>../log/mango.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>mango.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<fileNamePattern>../log/mango.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 
 		<encoder>

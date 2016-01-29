@@ -93,7 +93,7 @@ public class Trace implements Serializable {
 		return twoZero.format(month);
 	}
 	
-	public String getStartYYYYMMDDHHMMSS() {
+	public String getStartYYYYMMDDHHMM() {
 		
 		int month = stCalc.get(Calendar.MONTH) + 1;
 		int day = stCalc.get(Calendar.DAY_OF_MONTH);
@@ -141,6 +141,30 @@ public class Trace implements Serializable {
                 + fourZero.format(btime.tenthMilli));
 	}
 	
+	//yyyy-MM-dd'T'HH:mm
+	public static String getBtimeToStringYMDHM(Btime btime) {
+		
+		Calendar ca = btime.convertToCalendar();
+		int month = ca.get(Calendar.MONTH) + 1;
+		int day = ca.get(Calendar.DAY_OF_MONTH);
+        
+		DecimalFormat twoZero = new DecimalFormat("00");
+	    DecimalFormat fourZero = new DecimalFormat("0000");
+		
+        // return string in standard jday format
+        return new String(fourZero.format(btime.year) + "-"
+                + twoZero.format(month) + "-"
+                + twoZero.format(day)
+                + "T"
+                + twoZero.format(btime.hour) + ":"
+                + twoZero.format(btime.min));
+	}
+	
+	public static String getBtimeToStringY(Btime btime) {
+		DecimalFormat fourZero = new DecimalFormat("0000");
+		return new String(fourZero.format(btime.year));
+	}
+	
 	public static String getBtimeToStringH(Btime btime) {
 		DecimalFormat twoZero = new DecimalFormat("00");
 		return new String(twoZero.format(btime.hour));
@@ -157,6 +181,19 @@ public class Trace implements Serializable {
         double numTenThousandths = (((double)getNumSamples() / getSampleRate()) * 10000.0);
         return projectTime(btime, numTenThousandths);
     }
+	
+	public static Btime getAddBtime(Btime bt, int field, int amount) {
+		Calendar ca = bt.convertToCalendar();
+		ca.add(field, amount);
+		
+		bt.year = ca.get(Calendar.YEAR);
+		bt.jday = ca.get(Calendar.DAY_OF_YEAR);
+		bt.hour = ca.get(Calendar.HOUR_OF_DAY);
+		bt.min = ca.get(Calendar.MINUTE);
+		bt.sec = ca.get(Calendar.SECOND);
+		
+		return bt;
+	}
 	
 	private Btime projectTime(Btime bTime, double tenThousandths) {
         int offset = 0; // leap year offset

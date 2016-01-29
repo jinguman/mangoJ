@@ -69,7 +69,6 @@ public class SeedlinkClient implements Runnable {
 			}
 		} catch (InterruptedException e) {	
 		} finally {
-			// Thread종료시 수행 작성
 			service.close();
 		}
 	}

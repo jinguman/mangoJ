@@ -20,7 +20,7 @@
 		<mkdir dir="${build.dir}" />   
 		<mkdir dir="${build.dir}/mangoJ" />   
 
-		<javac destdir="${build.dir}/mangoJ" encoding="euc-kr" debug="on" debuglevel="lines,vars,source" nowarn="true" includeantruntime="false">
+		<javac destdir="${build.dir}/mangoJ" encoding="utf-8" debug="on" debuglevel="lines,vars,source" nowarn="true" includeantruntime="false">
 			<src path="${mango.src.dir}" />
 			<classpath refid="mango-compile.classpath" />
 		</javac>	

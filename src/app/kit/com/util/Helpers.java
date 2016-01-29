@@ -16,6 +16,7 @@ import org.bson.json.JsonWriter;
 import org.bson.json.JsonWriterSettings;
 import org.bson.types.Binary;
 
+import app.kit.vo.Trace;
 import edu.sc.seis.seisFile.mseed.Btime;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 
@@ -161,7 +162,16 @@ public class Helpers {
 		return sb.toString();
 	}
 
+	public static String getTraceGapsKey(String network, String station, String location, String channel, Btime bt) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(network).append("_").append(station).append("_").append(location).append("_").append(channel)
+			.append("_").append(Trace.getBtimeToStringYMD(bt));
+		return sb.toString();
+	}
+	
 	public static Btime getBtime(String strDate, SimpleDateFormat format) throws ParseException {
+		
+		if ( format == null ) format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		
 		Calendar ca = Calendar.getInstance();
 		ca.setTime(format.parse(strDate));

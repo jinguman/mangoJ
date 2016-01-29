@@ -1,6 +1,7 @@
 package app.kit.com.daemon;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.AbstractApplicationContext;
 
 import app.kit.com.conf.MangoConf;
-import app.kit.com.queue.BlockingMessageQueue;
 import app.kit.controller.mongo.MongoSimpleClient;
 import app.kit.controller.seedlink.SeedlinkClient;
 import app.kit.service.mongo.MongoInitialClientService;
@@ -28,10 +28,8 @@ public class MangoCollectorLoader implements IMangoLoader{
 	private AbstractApplicationContext ctx;
 	private MangoConf conf;
 	private SLState slState;
-	private BlockingMessageQueue queue;
 	private MongoInitialClientService initialService;
 	ExecutorService exec = Executors.newCachedThreadPool();
-	
 	int cnt = 0;
 
 	@Override
@@ -44,7 +42,6 @@ public class MangoCollectorLoader implements IMangoLoader{
 		conf = ctx.getBean(MangoConf.class);
 		slState = ctx.getBean(SLState.class);
 		initialService = ctx.getBean(MongoInitialClientService.class);
-		queue = ctx.getBean(BlockingMessageQueue.class);
 				
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
@@ -56,11 +53,19 @@ public class MangoCollectorLoader implements IMangoLoader{
 			}
 		});
 
-		if ( conf.isMfResumeQueue() ) {
-			log.info("Loading queue...");
-			File file = new File(conf.getMfQueue());
-			queue.load(file);
-			log.info("Read from file. size: {}, file: {}", queue.size(), file.getAbsolutePath());
+		// stream에 기록하고 이어받기 하는 것으로 대체함.
+		//if ( conf.isMfResumeQueue() ) {
+		//	log.info("Loading queue...");
+		//	File file = new File(conf.getMfQueue());
+		//	queue.load(file);
+		//	log.info("Read from file. size: {}, file: {}", queue.size(), file.getAbsolutePath());
+		//}
+		
+		// loading stream
+		try {
+			slState.restoreStreams(new File(conf.getScState()));
+		} catch(IOException e) {
+			log.info("Nothing to load from file. {}", conf.getScState());
 		}
 		
 		log.info("MongoDB initiate ---------------------------------------");
@@ -94,6 +99,7 @@ public class MangoCollectorLoader implements IMangoLoader{
 	public void stopEngine() throws Exception {
 		log.info("Stop Mango collector server.");
 		
+        // Mongo shutdown
 		exec.shutdown();
         if (!exec.awaitTermination(5, TimeUnit.SECONDS)) { 
         	log.info("Executor did not terminate in the specified time."); 
@@ -102,12 +108,17 @@ public class MangoCollectorLoader implements IMangoLoader{
             log.info("Executor was abruptly shut down. " + droppedTasks.size() + " tasks will not be executed.");
         }
 		
+        // write state
+        slState.saveStreams(new File(conf.getScState()));
+        log.info("Write stream state.");
+        
+        // stream에 기록하고 이어받기 하는 것으로 대체함.
 		// Write contents of queue to file
-		if ( queue.size() > 0 ) {
-			File file = new File(conf.getMfQueue());
-			queue.save(file);
-			log.info("Write contents of queue to file. size: {}, file: {}", queue.size(), file.getAbsolutePath());
-		}
+		//if ( queue.size() > 0 ) {
+		//	File file = new File(conf.getMfQueue());
+		//	queue.save(file);
+		//	log.info("Write contents of queue to file. size: {}, file: {}", queue.size(), file.getAbsolutePath());
+		//}
 		
         if ( ctx != null ) ctx.close();
 	}

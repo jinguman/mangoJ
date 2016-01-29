@@ -27,7 +27,7 @@ public class TraceStatsDaoTest {
 		String st = "2014-12-15T00:00:00.0000";
 		String et = "2016-12-15T00:00:00.0000";
 		
-		List<Document> docs = dao.findTraceStats(network, station, location, channel, st, et);
+		List<Document> docs = dao.findTraceStats(network, station, location, channel, null, null);
 		//List<Document> docs = dao.findTraceStats(new Document());
 		
 		

@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.MongoCommandException;
@@ -19,7 +18,7 @@ import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * shard¿Í °ü·ÃµÈ ¸í·ÉÀ» Ã³¸®ÇÏ´Â DAO
+ * shardì™€ ê´€ë ¨ëœ ëª…ë ¹ì„ ì²˜ë¦¬í•˜ëŠ” DAO
  * @author jman
  *
  */
@@ -32,8 +31,8 @@ public class ShardDao {
 	@Resource(name="mongoDatabaseConfig") private MongoDatabase config;
 	
 	/**
-	 * mongodb¿¡¼­ shardCollectionµÈ collection¸®½ºÆ®¸¦ °¡Á®¿Â´Ù.
-	 * @return shardCollectionµÈ collectionÀÇ ¸®½ºÆ®
+	 * mongodbì—ì„œ shardCollectionëœ collectionë¦¬ìŠ¤íŠ¸ë¥¼ ê°€ì ¸ì˜¨ë‹¤.
+	 * @return shardCollectionëœ collectionì˜ ë¦¬ìŠ¤íŠ¸
 	 */
 	public List<String> getShardCollections() {
 		
@@ -55,8 +54,8 @@ public class ShardDao {
 	}
 	
 	/**
-	 * mongodb¿¡¼­ shardRangeµÈ collection¸®½ºÆ®¸¦ °¡Á®¿Â´Ù.
-	 * @return shardRangeµÈ collectionÀÇ ¸®½ºÆ®
+	 * mongodbì—ì„œ shardRangeëœ collectionë¦¬ìŠ¤íŠ¸ë¥¼ ê°€ì ¸ì˜¨ë‹¤.
+	 * @return shardRangeëœ collectionì˜ ë¦¬ìŠ¤íŠ¸
 	 */
 	public List<String> getShardRange() {
 		
@@ -75,9 +74,9 @@ public class ShardDao {
 	}
 	
 	/**
-	 * shardCollection¸í·ÉÀ» ¼öÇàÇÑ´Ù.
-	 * @param collectionName collection¸í
-	 * @param key collection Å°
+	 * shardCollectionëª…ë ¹ì„ ìˆ˜í–‰í•œë‹¤.
+	 * @param collectionName collectionëª…
+	 * @param key collection í‚¤
 	 */
 	public void shardCollection(String collectionName, Document key) {
 		
@@ -95,11 +94,11 @@ public class ShardDao {
 	}
 	
 	/**
-	 * TagRange¸í·ÉÀ» ¼öÇàÇÑ´Ù.
+	 * TagRangeëª…ë ¹ì„ ìˆ˜í–‰í•œë‹¤.
 	 * @param ns mongodb namespace
-	 * @param min range Áß ÃÖ¼Ò°ª
-	 * @param max range Áß ÃÖ´ë°ª
-	 * @param tag ÅÂ±×¸í
+	 * @param min range ì¤‘ ìµœì†Œê°’
+	 * @param max range ì¤‘ ìµœëŒ€ê°’
+	 * @param tag íƒœê·¸ëª…
 	 */
 	public void addTagRange(String ns, Document min, Document max, String tag) {
 

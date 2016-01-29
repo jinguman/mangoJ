@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 import edu.sc.seis.seisFile.mseed.Btime;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Component
 @Qualifier("slState")
@@ -136,6 +134,16 @@ public class SLState {
 		}
 	}
 	
+	public int findStreamSeqnum(String network, String station) {
+		
+		String key = network + "_" + station;
+		if ( streamMap.containsKey(key) ) {
+			SLNetStation value = streamMap.get(key);
+			return value.getSeqnum();
+		} else 
+			return -1;
+	}
+	
 	public List<String> getAllStreamStr() {
 		
 		List<String> lists = new ArrayList<>();
@@ -157,7 +165,6 @@ public class SLState {
 
 		List<String> streams = getAllStreamStr();
 		FileUtils.writeLines(file, streams);
-		
 	}
 	
 	public void restoreStreams(File file) throws IOException {

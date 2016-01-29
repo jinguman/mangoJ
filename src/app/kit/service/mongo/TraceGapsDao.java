@@ -20,10 +20,12 @@ import com.mongodb.client.model.UpdateOptions;
 
 import app.kit.com.util.Helpers;
 import app.kit.com.util.MangoJCode;
+import app.kit.vo.Trace;
+import edu.sc.seis.seisFile.mseed.Btime;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Trace collection에 관련된 DAO
+ * Trace collection
  * @author jman
  *
  */
@@ -36,9 +38,6 @@ public class TraceGapsDao {
 	@Resource(name="updateOptionsTrue") private UpdateOptions optionsUpsertTrue;
 	@Resource(name="updateOptionsFalse") private UpdateOptions optionsUpsertFalse;
 	
-	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
-	private SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-	private SimpleDateFormat sdfToDay = new SimpleDateFormat("yyyy-MM-dd");
 
     public List<Document> findTraceGaps(Document doc) {
 
@@ -75,6 +74,52 @@ public class TraceGapsDao {
 			}
 		}
     }
+
+    public int getTraceGapsValueD(String network, String station, String location, String channel, Btime bt) {
+    	String key = Helpers.getTraceGapsKey(network, station, location, channel, bt);
+    	
+    	Document doc = new Document("_id", key);
+    	Document proj = new Document("d", 1);
+    	List<Document> docs = findTraceGaps(doc, proj);
+    	
+    	if ( docs.size() > 0 ) {
+    		return docs.get(0).getInteger("d");
+    	} else {
+    		return 0;
+    	}
+    }
+
+    public int getTraceGapsValueH(String network, String station, String location, String channel, Btime bt) {
+    	String key = Helpers.getTraceGapsKey(network, station, location, channel, bt);
+    	
+    	Document doc = new Document("_id", key);
+    	Document proj = new Document("h." + Trace.getBtimeToStringM(bt), 1);
+    	List<Document> docs = findTraceGaps(doc, proj);
+    	
+    	if ( docs.size() > 0 ) {
+    		Document hourDoc = (Document) docs.get(0).get("h");
+    		
+    		return hourDoc.getInteger(Trace.getBtimeToStringH(bt));
+    	} else {
+    		return 0;
+    	}
+    }
+    
+    public int getTraceGapsValueM(String network, String station, String location, String channel, Btime bt) {
+    	String key = Helpers.getTraceGapsKey(network, station, location, channel, bt);
+    	
+    	Document doc = new Document("_id", key);
+    	Document proj = new Document("m." + Trace.getBtimeToStringH(bt) + "." + Trace.getBtimeToStringM(bt), 1);
+    	List<Document> docs = findTraceGaps(doc, proj);
+    	
+    	if ( docs.size() > 0 ) {
+    		Document mDoc = (Document) docs.get(0).get("m");
+    		Document hourDoc = (Document) mDoc.get(Trace.getBtimeToStringH(bt));
+    		return hourDoc.getInteger(Trace.getBtimeToStringM(bt));
+    	} else {
+    		return 0;
+    	}
+    }
     
 	public List<Document> getTraceGaps(String network, String station, String location, String channel, String st) {
 		
@@ -94,6 +139,10 @@ public class TraceGapsDao {
 
 	private String convertDate(String st) throws ParseException {
 		String key = null;
+		
+		SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
+		SimpleDateFormat sdfToMinute = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+		SimpleDateFormat sdfToDay = new SimpleDateFormat("yyyy-MM-dd");
 		
 		if ( st.length() == 10 ) {
 			// yyyy-MM-dd

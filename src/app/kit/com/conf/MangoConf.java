@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
@@ -84,6 +85,18 @@ public class MangoConf {
 		return prop.getInt("mi.restartsec", 5);
 	}
 	
+	public String getScState() {
+		return prop.getString("sc.state", "../conf/mango.state");
+	}
+	
+	public int getScStateThreshold() {
+		return prop.getInt("sc.statethreshold", 100);
+	}
+	
+	public boolean isScResume() {
+		return prop.getBoolean("sc.resume", true);
+	}
+	
 	public boolean isMcShard() {
 		return prop.getBoolean("mc.shard", false);
 	}
@@ -145,7 +158,7 @@ public class MangoConf {
 	}
 	
 	public int getAcSession() {
-		return prop.getInt("ac.session", 10);
+		return prop.getInt("ac.session", 100);
 	}
 	
 	@Bean(name="mongoClientBean")
@@ -155,7 +168,7 @@ public class MangoConf {
 	
 	@Bean(name="mongoDatabaseBean")
 	public MongoDatabase getMongoDatabaseBean() {
-		return getMongoClientBean().getDatabase(getMongoDatabase());
+		return getMongoClientBean().getDatabase(getMongoDatabase()).withWriteConcern(WriteConcern.W1);
 	}
 	
 	@Bean(name="mongoDatabaseAdmin")

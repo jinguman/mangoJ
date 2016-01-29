@@ -1,21 +1,20 @@
-package com.kit.Monitor;
+package app.kit.monitor;
 
 import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
+@Component
 public class FileListener implements FileAlterationListener {
 
-	final Logger logger = LoggerFactory.getLogger(FileListener.class);
-	@Setter private BckupWorker bckupWorker;
-	@Setter private RestoreWorker restoreWorker;
-
+	@Autowired private BckupWorker bckupWorker;
 	
 	@Override
 	public void onStart(FileAlterationObserver observer) {
@@ -44,7 +43,7 @@ public class FileListener implements FileAlterationListener {
 	@Override
 	public void onFileCreate(File file) {
 		
-		logger.debug("New File Created : " + file.getAbsolutePath());
+		log.debug("New file created. " + file.getAbsolutePath());
 
 		String jdate = file.getName();
 		

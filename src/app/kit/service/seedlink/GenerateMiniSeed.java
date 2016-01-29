@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GenerateMiniSeed {
 
-	private SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
+	 
 
 
 	/**
@@ -70,7 +70,7 @@ public class GenerateMiniSeed {
             
 			// case1.       |stPacketBtime         |etPacketBtime
 			//                    |stReqBtime
-			// ¿äÃ»½ÃÀÛ½Ã°£ÀÌ ½ÃÀÛÆĞÅ¶½Ã°£º¸´Ù µÚ¿¡ ÀÖ°í
+			// ìš”ì²­ì‹œì‘ì‹œê°„ì´ ì‹œì‘íŒ¨í‚·ì‹œê°„ë³´ë‹¤ ë’¤ì— ìˆê³ 
 			if ( stReqBtime.after(stPacketBtime) ) {
 				double tmp = (Helpers.getEpochTime(stReqBtime) - Helpers.getEpochTime(stPacketBtime)) * sampleRate;
 				tmp = Math.round(tmp * 10000000)/10000000;
@@ -79,7 +79,7 @@ public class GenerateMiniSeed {
 			
 			// case2.       |stPacketBtime         |etPacketBtime
 			//                                 |etReqBtime      
-			// ÆĞÅ¶Á¾·á½Ã°£ÀÌ ¿äÃ»Á¾·á½Ã°£º¸´Ù µÚ¿¡ ÀÖ°í
+			// íŒ¨í‚·ì¢…ë£Œì‹œê°„ì´ ìš”ì²­ì¢…ë£Œì‹œê°„ë³´ë‹¤ ë’¤ì— ìˆê³ 
 			if ( etPacketBtime.after(etReqBtime) ) {
 				double tmp = (Helpers.getEpochTime(etReqBtime) - Helpers.getEpochTime(stPacketBtime)) * sampleRate;
 				tmp = Math.round(tmp * 10000000)/10000000;
@@ -185,6 +185,8 @@ public class GenerateMiniSeed {
 	
 	public DataRecord trimPacket(String stStr, String etStr, DataRecord dr, boolean isForceNew) {
 
+		SimpleDateFormat sdfToSecond = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		
 		try {
 
 			// Get request Btime
@@ -205,11 +207,11 @@ public class GenerateMiniSeed {
 	 * @param etReqBtime
 	 * @param stPacketBtime
 	 * @param etPacketBtime
-	 * @return 0(¹üÀ§³»¿¡ Á¸ÀçÇÏÁö ¾ÊÀ½), 1(¹üÀ§³»¿¡ Á¸ÀçÇÔ), 2(ÀÏºÎ°¡ ¹üÀ§¼Ó¿¡ Á¸ÀçÇÔ)
+	 * @return 0(ë²”ìœ„ë‚´ì— ì¡´ì¬í•˜ì§€ ì•ŠìŒ), 1(ë²”ìœ„ë‚´ì— ì¡´ì¬í•¨), 2(ì¼ë¶€ê°€ ë²”ìœ„ì†ì— ì¡´ì¬í•¨)
 	 */
 	public int checkRangePacket(Btime stReqBtime, Btime etReqBtime, Btime stPacketBtime, Btime etPacketBtime) {
 		
-		// ¿äÃ»½ÃÀÛ½Ã°£ÀÌ ¿äÃ»Á¾·á½Ã°£ÀÇ µÚ¿¡ ÀÖÀ» °æ¿ì
+		// ìš”ì²­ì‹œì‘ì‹œê°„ì´ ìš”ì²­ì¢…ë£Œì‹œê°„ì˜ ë’¤ì— ìˆì„ ê²½ìš°
 		if ( stReqBtime.afterOrEquals(etReqBtime) ) {
 			//logger.warn("Range invalid. start time must be before endtime. stReq: " + stReqBtime.toString() + ", etReq: " + etReqBtime.toString());
 			return 0;
@@ -217,14 +219,14 @@ public class GenerateMiniSeed {
 
 		//                                       |stPacketBtime         |etPacketBtime
 		//       |stReqBtime            |etReqBtime
-		// ÆĞÅ¶½ÃÀÛ½Ã°£ÀÌ ¿äÃ»Á¾·á½Ã°£ÀÇ µÚ¿¡ ÀÖÀ» °æ¿ì
+		// íŒ¨í‚·ì‹œì‘ì‹œê°„ì´ ìš”ì²­ì¢…ë£Œì‹œê°„ì˜ ë’¤ì— ìˆì„ ê²½ìš°
 		if ( stPacketBtime.afterOrEquals(etReqBtime) ) {
 			//logger.debug("Range invalid. request time within miniseed packet time. Req: " + stReqBtime.toString() + " ~ " + etReqBtime.toString() 
 			//				+ ", packet: " + stPacketBtime.toString() + " ~ " + etPacketBtime.toString()
 			//		);
 			return 0;
 		}
-		// ¿äÃ»½ÃÀÛ½Ã°£ÀÌ ÆĞÅ¶Á¾·á½Ã°£ÀÇ µÚ¿¡ ÀÖÀ» °æ¿ì
+		// ìš”ì²­ì‹œì‘ì‹œê°„ì´ íŒ¨í‚·ì¢…ë£Œì‹œê°„ì˜ ë’¤ì— ìˆì„ ê²½ìš°
 		if ( stReqBtime.afterOrEquals(etPacketBtime)) {
 			//logger.debug("Range invalid. request time within miniseed packet time. Req: " + stReqBtime.toString() + " ~ " + etReqBtime.toString() 
 			//+ ", packet: " + stPacketBtime.toString() + " ~ " + etPacketBtime.toString()
@@ -232,7 +234,7 @@ public class GenerateMiniSeed {
 			return 0;
 		}
 
-		// check range. ½ÃÀÛÆĞÅ¶½Ã°£ÀÌ ¿äÃ»½ÃÀÛ½Ã°£º¸´Ù µÚ¿¡ ÀÖ°í, ¿äÃ»Á¾·á½Ã°£ÀÌ Á¾·áÆĞÅ¶½Ã°£º¸´Ù µÚ¿¡ ÀÖÀ» °æ¿ì
+		// check range. ì‹œì‘íŒ¨í‚·ì‹œê°„ì´ ìš”ì²­ì‹œì‘ì‹œê°„ë³´ë‹¤ ë’¤ì— ìˆê³ , ìš”ì²­ì¢…ë£Œì‹œê°„ì´ ì¢…ë£ŒíŒ¨í‚·ì‹œê°„ë³´ë‹¤ ë’¤ì— ìˆì„ ê²½ìš°
 		//              |stPacketBtime         |etPacketBtime
 		//       |stReqBtime                           |etReqBtime
 		if ( stPacketBtime.afterOrEquals(stReqBtime) && etReqBtime.afterOrEquals(etPacketBtime)) {

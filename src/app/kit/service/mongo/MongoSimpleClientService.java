@@ -20,7 +20,6 @@ import app.kit.com.conf.MangoConf;
 import app.kit.com.util.Helpers;
 import app.kit.vo.Gaps;
 import app.kit.vo.GapsVo;
-import app.kit.vo.SLState;
 import app.kit.vo.Stats;
 import app.kit.vo.StatsVo;
 import app.kit.vo.Trace;
@@ -43,7 +42,7 @@ public class MongoSimpleClientService {
 	@Autowired private MongoInitialClientService initialService;
 
 	/**
-	 * ¶È°°Àº ÆÐÅ¶ÀÌ ¼ö½ÅµÇ´Â °æ¿ì¿¡¸¸ Áßº¹¼º Ã¼Å©°¡ º¸ÀåµÊ
+	 * ë˜‘ê°™ì€ íŒ¨í‚·ì´ ìˆ˜ì‹ ë˜ëŠ” ê²½ìš°ì—ë§Œ ì¤‘ë³µì„± ì²´í¬ê°€ ë³´ìž¥ë¨
 	 * @param trace
 	 * @return
 	 */
@@ -68,8 +67,8 @@ public class MongoSimpleClientService {
 		}
 
 		// add trace
-		Document key = new Document("_id", station + "_" + location + "_" + trace.getStartYYYYMMDDHHMMSS());
-		UpdateResult result = addTrace(key, new Document("$addToSet", new Document(channel, trace.toDocument())));		
+		Document key = new Document("_id", station + "_" + location + "_" + trace.getStartYYYYMMDDHHMM());
+		UpdateResult result = addTrace(key, new Document("$addToSet", new Document(channel, trace.toDocument())));			
 
 		return result;
 	}
@@ -79,6 +78,7 @@ public class MongoSimpleClientService {
 		UpdateResult result = null;
 		try {
 			result = collection.updateOne(key, doc, optionsUpsertTrue);
+			
 		} catch (MongoWriteException e) {
 
 			if (e.getCode() == 11000) {
@@ -92,6 +92,28 @@ public class MongoSimpleClientService {
 		return result;
 	}
 
+	public UpdateResult unsetTrace(Trace trace)  {
+
+		String year = trace.getStartYear();
+		String month = trace.getStartMonth();
+		String network = trace.getNetwork();
+		String station = trace.getStation();
+		String location = trace.getLocation();
+		String channel = trace.getChannel();
+		String collectionName = Helpers.getTraceCollectionName(network, station, location, channel, year, month);
+
+		// get collection
+		collection = database.getCollection(collectionName);
+		//collection.find(filter);
+		
+		// add trace
+		Document key = new Document("_id", station + "_" + location + "_" + trace.getStartYYYYMMDDHHMM());
+		UpdateResult result = addTrace(key, new Document("$unset", new Document(channel, "")));			
+
+		return result;
+	}
+
+	
 	public void insertStats(Stats stats) {
 
 		for(String key : stats.getMap().keySet()) {
@@ -122,6 +144,10 @@ public class MongoSimpleClientService {
 			statsDao.upsertTraceStats(idDoc, valueDoc);
 		}
 	}
+
+	public void removeStats(Stats stats) {
+		// Not implemented
+	}
 	
 	public void insertGaps(Gaps gaps) {
 		
@@ -135,10 +161,7 @@ public class MongoSimpleClientService {
 			
 			Document idDoc = new Document() 
 					.append("_id", key);  
-
-			
 			Document setDoc = new Document("s", sampleRate);
-			
 			Document incDoc = new Document("d", vo.getDay());
 			for(String k : hour.keySet()) {
 				incDoc.append("h." + k, hour.get(k));
@@ -147,8 +170,9 @@ public class MongoSimpleClientService {
 				incDoc.append("m." + k, minute.get(k));
 			}
 						
-			Document valueDoc = new Document("$set", setDoc).append("$inc", incDoc);
-			
+			Document valueDoc = new Document();
+			if ( sampleRate > 0 ) valueDoc.append("$set", setDoc);
+			valueDoc.append("$inc", incDoc);
 			gapsDao.upsertTraceGaps(idDoc, valueDoc);
 		}
 	}

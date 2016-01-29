@@ -1,5 +1,7 @@
 package app.kit.controller.mongo;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
@@ -30,13 +32,14 @@ public class MongoSimpleClient implements Runnable {
 	@Autowired private SLState slState;
 	private Stats stats = new Stats();
 	private Gaps gaps = new Gaps();
+	private File slStateFile;
 	
 	int logCnt = 0; // log print count
+	int streamCnt = 0; // stream write count
 
 	public void run() {
 		
-		// ¿¡·¯Ã³¸®¸¦ Á¤±³ÇÏ°Ô ³Ö¾î¾ß ÇÔ..
-		// ex. ¸ù°íDB¿¡ Á¢¼ÓÀÌ ²÷°åÀ»½Ã µé°íÀÖ´Â Å¥µ¥ÀÌÅÍ Ã³¸® µî...
+		slStateFile = new File(conf.getScState());
 		
 		Random random = new Random();
 		if ( conf.getMcLogThreshold() > 0 ) logCnt = random.nextInt(conf.getMcLogThreshold());
@@ -66,7 +69,6 @@ public class MongoSimpleClient implements Runnable {
 					if ( result.getModifiedCount() > 0 || result.getUpsertedId() != null ) {
 						slState.addStream(trace.getNetwork(), trace.getStation(), trace.getSeqnum(), trace.getStBtime());
 						
-						// Trace¿¡ ´ëÇÑ Stats, Gaps Á¤¸®ÀÛ¾÷
 						stats.put(trace);
 						gaps.put(trace);
 					}
@@ -74,6 +76,16 @@ public class MongoSimpleClient implements Runnable {
 				}
 				service.insertStats(stats);
 				service.insertGaps(gaps);
+				
+				if ( streamCnt > conf.getScStateThreshold()) {
+					try {
+						slState.saveStreams(slStateFile);
+					} catch (IOException e) { log.warn("Failed to save slState. file: {}, {}", slStateFile.getAbsolutePath(), e.getMessage());
+					}
+					streamCnt = 0;
+				} else {
+					streamCnt++;
+				}
 				
 				stats.clear();
 				gaps.clear();
@@ -90,7 +102,7 @@ public class MongoSimpleClient implements Runnable {
 			}
 			//} catch ( MongoSocketReadException e) {
 				
-				// ³ªÁß¿¡ Ã³¸®ÇÏÀÚ..
+				// ï¿½ï¿½ï¿½ß¿ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½..
 				//d.append("network", network);
 				//d.remove("station");
 				//d.remove("channel");
