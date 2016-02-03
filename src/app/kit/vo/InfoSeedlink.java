@@ -47,6 +47,8 @@ public class InfoSeedlink {
 				String location = infoStream.getLocation();
 				String channel = infoStream.getChannel();
 				
+				if ( infoStation.getStream() == null ) continue;
+				
 				Trace trace = new Trace(network, station, location, channel, btime);
 				traces.add(trace);
 			}
@@ -63,6 +65,8 @@ public class InfoSeedlink {
 				
 				String network = infoStation.getNetwork();
 				String station = infoStation.getStation();
+				
+				if ( infoStation.getStream() == null ) continue;
 				
 				for(InfoStream infoStream : infoStation.getStream()) {
 					

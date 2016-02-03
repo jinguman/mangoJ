@@ -144,6 +144,22 @@ public class SLState {
 			return -1;
 	}
 	
+	public String findStreamStimeStr(String network, String station) {
+		
+		String key = network + "_" + station;
+		if ( streamMap.containsKey(key) ) {
+			SLNetStation value = streamMap.get(key);
+			
+			String[] values = value.getStime().split(",");
+			Btime bt = new Btime(Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2])
+					, Integer.parseInt(values[3]), Integer.parseInt(values[4]), 0);
+			
+			return Trace.getBtimeToStringYMDHMSComma(bt);
+		} else 
+			return "";
+	}
+	
+	
 	public List<String> getAllStreamStr() {
 		
 		List<String> lists = new ArrayList<>();

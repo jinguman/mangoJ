@@ -66,6 +66,7 @@ public class SeedlinkClientService {
 		}
 
 		XmlMapper mapper = new XmlMapper();
+		//mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		InfoSeedlink info = mapper.readValue(streamsStr, InfoSeedlink.class);
 		
 		return info;
@@ -94,10 +95,11 @@ public class SeedlinkClientService {
         			
             		int seqnum = slState.findStreamSeqnum(net, sta); 
             		String seqnumStr = Integer.toHexString(seqnum + 1);
+            		String stimeStr = slState.findStreamStimeStr(net, sta);
             		
             		if ( seqnum > 0 && conf.isScResume() ) {
-            			reader.sendCmd("DATA " + seqnumStr);
-            			log.info("{}.{} requesting resume data from 0x {}(decimal: {})",net, sta, seqnumStr, seqnum);
+            			reader.sendCmd("DATA " + seqnumStr + " " + stimeStr);
+            			log.info("{}.{} requesting resume data from 0x {}(decimal: {}), {}",net, sta, seqnumStr, seqnum, stimeStr);
             		} else {
             			reader.sendCmd("DATA");
             			log.info("{}.{} requesting data from current time",net, sta);

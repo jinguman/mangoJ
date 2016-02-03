@@ -141,6 +141,21 @@ public class Trace implements Serializable {
                 + fourZero.format(btime.tenthMilli));
 	}
 	
+	public static String getBtimeToStringYMDHMSComma(Btime btime) {
+		
+		Calendar ca = btime.convertToCalendar();
+		int month = ca.get(Calendar.MONTH) + 1;
+		int day = ca.get(Calendar.DAY_OF_MONTH);
+        
+        return new String(btime.year + ","
+                + month + ","
+                + day
+                + ","
+                + btime.hour + ","
+                + btime.min + ","
+                + btime.sec);
+	}
+	
 	//yyyy-MM-dd'T'HH:mm
 	public static String getBtimeToStringYMDHM(Btime btime) {
 		
