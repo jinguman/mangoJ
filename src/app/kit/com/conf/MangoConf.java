@@ -18,6 +18,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
+import app.kit.com.queue.BlockingBigQueue;
 import app.kit.com.util.MangoJCode;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 
@@ -160,6 +161,14 @@ public class MangoConf {
 	public int getAcSession() {
 		return prop.getInt("ac.session", 100);
 	}
+
+	public String getQueueDir() {
+		return prop.getString("queue.dir");
+	}
+	
+	public String getQueueName() {
+		return prop.getString("queue.name");
+	}
 	
 	@Bean(name="mongoClientBean")
 	public MongoClient getMongoClientBean() {
@@ -204,4 +213,10 @@ public class MangoConf {
 		options.upsert(false);
 		return options;
 	}
+	
+	@Bean(name="blockingBigQueue")
+	public BlockingBigQueue getBlockingBigQueue() {
+		return new BlockingBigQueue(getQueueDir(),getQueueName());
+	}
+
 }

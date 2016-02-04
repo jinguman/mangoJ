@@ -13,6 +13,7 @@ import com.mongodb.MongoSocketReadException;
 import com.mongodb.client.result.UpdateResult;
 
 import app.kit.com.conf.MangoConf;
+import app.kit.com.queue.BlockingBigQueue;
 import app.kit.com.queue.BlockingMessageQueue;
 import app.kit.service.mongo.MongoSimpleClientService;
 import app.kit.vo.Gaps;
@@ -26,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MongoSimpleClient implements Runnable {
 
-	@Autowired private BlockingMessageQueue queue;
+	@Autowired private BlockingBigQueue queue;
 	@Autowired private MongoSimpleClientService service;
 	@Autowired private MangoConf conf;
 	@Autowired private SLState slState;
@@ -49,6 +50,14 @@ public class MongoSimpleClient implements Runnable {
 			try {
 
 				List<Trace> traces = queue.take();
+				if ( traces == null ) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						log.error("{}", e);
+					}
+					continue;
+				}
 				
 				int traceCnt = 1;
 				int traceSize = traces.size();
@@ -91,7 +100,7 @@ public class MongoSimpleClient implements Runnable {
 				gaps.clear();
 				traces.clear();
 
-			} catch (MongoSocketReadException | InterruptedException e) {
+			} catch (MongoSocketReadException e) {
 				log.error("{}", e);
 				log.info("MongoClient restart after {} seconds.", conf.getMcRestartSec());
 				try {

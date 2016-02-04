@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import app.kit.com.conf.MangoConf;
-import app.kit.com.queue.BlockingMessageQueue;
+import app.kit.com.queue.BlockingBigQueue;
 import app.kit.vo.InfoSeedlink;
 import app.kit.vo.SLState;
 import app.kit.vo.Trace;
@@ -41,7 +40,7 @@ public class SeedlinkClientService {
 	private String location = SeedlinkReader.EMPTY;
 	
 	@Autowired private GenerateMiniSeed gm;
-	@Autowired BlockingMessageQueue queue;
+	@Autowired BlockingBigQueue queue;
 	@Autowired MangoConf conf;
 
 	private SeedlinkReader reader;
@@ -137,16 +136,6 @@ public class SeedlinkClientService {
             		log.warn("Traces size > 50000. put the queue by force.");
             	}
                 
-                if ( conf.getScQueueLimit() > 0 ) {
-                	if ( queue.size() > conf.getScQueueLimit() ) {
-                    	log.info("Queue is full. size: {}, init..", queue.size());
-                    	
-                    	while(true) {
-                    		try { queue.remove();
-                    		} catch (NoSuchElementException e) { break;}
-                    	}
-                    }
-                }
             } // end of while
              
         } finally {

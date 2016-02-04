@@ -53,7 +53,7 @@ public class MangoCollectorLoader implements IMangoLoader{
 			}
 		});
 
-		// stream에 기록하고 이어받기 하는 것으로 대체함.
+		// stream�� 湲곕���怨� �댁�대�湲� ���� 寃��쇰� ��泥댄��.
 		//if ( conf.isMfResumeQueue() ) {
 		//	log.info("Loading queue...");
 		//	File file = new File(conf.getMfQueue());
@@ -77,6 +77,7 @@ public class MangoCollectorLoader implements IMangoLoader{
 		log.info("Get shardRange info. {}", slState.getShardRangeMap().toString());
 
     	// MongoSimpleClient Thread
+		
 		log.info("MongoDB thread execute --------------------------------");
     	int threadCnt = conf.getMcThread();
     	for (int i = 0; i < threadCnt; i++) {
@@ -112,7 +113,7 @@ public class MangoCollectorLoader implements IMangoLoader{
         slState.saveStreams(new File(conf.getScState()));
         log.info("Write stream state.");
         
-        // stream에 기록하고 이어받기 하는 것으로 대체함.
+        // stream�� 湲곕���怨� �댁�대�湲� ���� 寃��쇰� ��泥댄��.
 		// Write contents of queue to file
 		//if ( queue.size() > 0 ) {
 		//	File file = new File(conf.getMfQueue());

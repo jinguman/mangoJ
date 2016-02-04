@@ -14,7 +14,7 @@ public class MangoJC {
 	
     public static void main( String[] args ) {
 
-		// vm argument: -Dlogback.configurationFile="file:./home/config/logback.xml"
+		// vm argument: -Dlogback.configurationFile="file:./home/conf/logback.xml"
     	//Logger logger = LoggerFactory.getLogger(MangoJC.class);
     	
     	MangoJC main = new MangoJC();
