@@ -16,7 +16,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * Simple and thread-safe LRU cache implementation, 
@@ -30,9 +31,8 @@ import org.apache.log4j.Logger;
  * @param <K> key
  * @param <V> value
  */
+@Slf4j
 public class LRUCacheImpl<K, V extends Closeable> implements ILRUCache<K, V> {
-	
-	private final static Logger logger = Logger.getLogger(LRUCacheImpl.class);
 	
 	public static final long DEFAULT_TTL = 10 * 1000; // milliseconds
 	
@@ -68,9 +68,9 @@ public class LRUCacheImpl<K, V extends Closeable> implements ILRUCache<K, V> {
 			writeLock.unlock();
 		}
 		if (valuesToClose != null && valuesToClose.size() > 0) {
-			if (logger.isDebugEnabled()) { 
+			if (log.isDebugEnabled()) { 
 				int size = valuesToClose.size();
-				logger.info("Mark&Sweep found " + size + (size > 1 ? " resources":" resource")  + " to close.");
+				log.info("Mark&Sweep found " + size + (size > 1 ? " resources":" resource")  + " to close.");
 			}
 			// close resource asynchronously
 			executorService.execute(new ValueCloser<V>(valuesToClose));
@@ -155,8 +155,8 @@ public class LRUCacheImpl<K, V extends Closeable> implements ILRUCache<K, V> {
 					// close quietly
 				}
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("ResourceCloser closed " + size + (size > 1 ? " resources.":" resource."));
+			if (log.isDebugEnabled()) {
+				log.debug("ResourceCloser closed " + size + (size > 1 ? " resources.":" resource."));
 			}
 		}
 	}
