@@ -11,6 +11,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.AbstractApplicationContext;
 
 import app.kit.com.conf.MangoConf;
+import app.kit.com.queue.BlockingBigQueue;
 import app.kit.controller.mongo.MongoSimpleClient;
 import app.kit.controller.seedlink.SeedlinkClient;
 import app.kit.service.mongo.MongoInitialClientService;
@@ -29,6 +30,7 @@ public class MangoCollectorLoader implements IMangoLoader{
 	private MangoConf conf;
 	private SLState slState;
 	private MongoInitialClientService initialService;
+	private BlockingBigQueue queue;
 	ExecutorService exec = Executors.newCachedThreadPool();
 	int cnt = 0;
 
@@ -42,6 +44,7 @@ public class MangoCollectorLoader implements IMangoLoader{
 		conf = ctx.getBean(MangoConf.class);
 		slState = ctx.getBean(SLState.class);
 		initialService = ctx.getBean(MongoInitialClientService.class);
+		queue = ctx.getBean(BlockingBigQueue.class);
 				
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
@@ -77,7 +80,6 @@ public class MangoCollectorLoader implements IMangoLoader{
 		log.info("Get shardRange info. {}", slState.getShardRangeMap().toString());
 
     	// MongoSimpleClient Thread
-		
 		log.info("MongoDB thread execute --------------------------------");
     	int threadCnt = conf.getMcThread();
     	for (int i = 0; i < threadCnt; i++) {
@@ -85,6 +87,14 @@ public class MangoCollectorLoader implements IMangoLoader{
     		exec.execute(client);
     	}
 
+    	// Queue state
+   		while(queue.size() > 0 ) {
+   			log.debug("Waiting queue... size: {}", queue.size());
+   			Thread.sleep(1000);
+   		}
+   		slState.saveStreams(new File(conf.getScState()));
+   		log.debug("Waiting state..");
+    	 
     	// SeedlinkClient Thread
 		log.info("Seedlink thread execute --------------------------------");
 

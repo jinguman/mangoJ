@@ -133,7 +133,7 @@ public class SeedlinkClientService {
             	if ( traces.size() > 50000 ) {
             		queue.put(traces);
             		traces = new ArrayList<>();
-            		log.warn("Traces size > 50000. put the queue by force.");
+            		log.warn("Traces size > 50000. put the queue by forced.");
             	}
                 
             } // end of while
