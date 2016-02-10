@@ -48,6 +48,7 @@ export CLASSPATH=$CLASSPATH:../lib/jackson-databind-2.6.4.jar
 export CLASSPATH=$CLASSPATH:../lib/jackson-dataformat-xml-2.5.1.jar
 export CLASSPATH=$CLASSPATH:../lib/jackson-module-jaxb-annotations-2.7.0.jar
 export CLASSPATH=$CLASSPATH:../lib/stax2-api-4.0.0.jar
+export CLASSPATH=$CLASSPATH:../lib/guava-18.0.jar
 export CLASSPATH=$CLASSPATH:../
 
 case "$1" in
