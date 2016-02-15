@@ -81,6 +81,7 @@ public class HttpServerRequestHandler extends SimpleChannelInboundHandler<FullHt
 					reqData.put(h.getKey(), h.getValue());
 					
 					if ( h.getKey().equals(HttpHeaders.Names.AUTHORIZATION) ) decodeAuthorization(h.getValue());
+					else putAuthorization();
 					log.debug("Request get param. {}: {}", h.getKey(), h.getValue());
 				}
 			}
@@ -149,6 +150,11 @@ public class HttpServerRequestHandler extends SimpleChannelInboundHandler<FullHt
 				reqData.put("REQUEST_PASSWORD", strings[1]);
 			}
 		}
+	}
+	
+	private void putAuthorization() {
+		reqData.put("REQUEST_USERNAME", "anonymous");
+		reqData.put("REQUEST_PASSWORD", "anonymous");
 	}
 	
 	private void readPostData() {

@@ -12,5 +12,6 @@ public class MangoJCode {
 	public static final String PARAM_CONTENTS_VALUE_RAW = "raw";
 	public static final String PARAM_CONTENTS_VALUE_RAWMERGE = "rawmerge";
 	
+	public static final String PROTOCOL_VERSION = "1.0";
 }
 

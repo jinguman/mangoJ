@@ -27,8 +27,16 @@ public class BlockingBigQueue {
 		} 
 	}
 
+	public void gc() {
+		try {
+			cache.gc();
+		} catch(IOException e) {
+			log.error("{}", e);
+		}
+	}
+	
 	public List<Trace> take() {
-		
+
 		List<Trace> traces = null;
 		byte[] bytes = null;
 		try {

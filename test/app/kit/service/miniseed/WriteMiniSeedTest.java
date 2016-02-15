@@ -41,15 +41,15 @@ public class WriteMiniSeedTest {
 		String station = "ANM";
 		String location = "";
 		String channel = "BHE";
-		String st = "2016-01-22T00:00:00.0000";
-		String et = "2016-01-22T00:03:00.0000";
-		String rootDir = "d:/temp";
+		String st = "2016-02-11T05:00:00.0000";
+		String et = "2016-02-11T05:01:00.0000";
+		String rootDir = "d:/temp3";
 		Btime stBtime = Helpers.getBtime(st, null);
 		Btime etBtime = Helpers.getBtime(et, null);
 		
 		FileContentVo vo = new FileContentVo(network, station, location, channel, rootDir, stBtime, etBtime);
 
-		wms = context.getBean(WriteMiniSeed.class, vo);
+		wms = context.getBean(WriteMiniSeed.class, vo, 1, 1);
 		wms.run();
 	}
 

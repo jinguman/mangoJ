@@ -20,7 +20,7 @@ public class ReadTrace {
 		DataInputStream ls = null;
 		DataOutputStream dos = null;
 		
-		String filename = "d:/SEO.HHZ.2015.1204.00.00.00";
+		String filename = "d:/temp3/ttt.mseed";
 		String filename2 = "d:/ANM.HGZ.2015.337.00.00.00.ccc";
 
 		String stStr = "2015-12-03T14:00:10.0000";
