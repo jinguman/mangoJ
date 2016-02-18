@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FileListener implements FileAlterationListener {
 
 	@Autowired private BckupWorker bckupWorker;
+	@Autowired private RestoreWorker restoreWorker;
 	
 	@Override
 	public void onStart(FileAlterationObserver observer) {
@@ -57,7 +58,7 @@ public class FileListener implements FileAlterationListener {
 		// restore
 		idx = jdate.indexOf(".restore");
 		if ( idx > 0 ) {
-			//restoreWorker.service(file);
+			restoreWorker.service(file);
 			FileUtils.deleteQuietly(file);
 		}
 	}

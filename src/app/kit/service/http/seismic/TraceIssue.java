@@ -11,6 +11,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.Document;
@@ -21,12 +24,14 @@ import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoCursor;
 
+import app.kit.com.util.Helpers;
 import app.kit.com.util.MangoJCode;
 import app.kit.exception.HttpServiceException;
 import app.kit.exception.RequestParamException;
 import app.kit.handler.http.HttpServerTemplate;
 import app.kit.service.mongo.TraceDao;
 import app.kit.service.seedlink.GenerateMiniSeed;
+import edu.sc.seis.seisFile.mseed.Btime;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
@@ -63,23 +68,28 @@ public class TraceIssue extends HttpServerTemplate {
 			throw new RequestParamException("There is no username, password parameter.");
 		}
 		
-		if ( this.reqData.get("net").isEmpty()) {
+		if ( this.reqData.get("net") == null || this.reqData.get("net").isEmpty()) {
 			throw new RequestParamException("There is no net parameter.");
-		} else if ( this.reqData.get("sta").isEmpty()) {
+		} else if (this.reqData.get("sta") == null ||  this.reqData.get("sta").isEmpty()) {
 			throw new RequestParamException("There is no sta parameter.");
-		} else if ( this.reqData.get("cha").isEmpty()) {
+		} else if ( this.reqData.get("cha") == null || this.reqData.get("cha").isEmpty()) {
 				throw new RequestParamException("There is no cha parameter.");
-		} else if ( this.reqData.get("st").isEmpty()) {
+		} else if ( this.reqData.get("st") == null || this.reqData.get("st").isEmpty()) {
 			throw new RequestParamException("There is no st parameter.");
-		} else if ( this.reqData.get("et").isEmpty()) {
+		} else if ( this.reqData.get("et") == null || this.reqData.get("et").isEmpty()) {
 			throw new RequestParamException("There is no et parameter.");
-		} else if ( this.reqData.get("content").isEmpty()) {
+		} else if ( this.reqData.get("content") == null || this.reqData.get("content").isEmpty()) {
 			throw new RequestParamException("There is no content(raw,...) parameter.");
 		}
 
 		// format
 		try {
-			sdf.parse(this.reqData.get("st"));
+			String st = this.reqData.get("st");
+			sdf.parse(st);
+			//if ( st.length() == 19 ) {
+			//	st += ".0000";
+			//	this.reqData.put("st", st);
+			//}
 		} catch (ParseException e) {
 			throw new RequestParamException("st parameter's format 'yyyy-MM-dd'T'HH:mm:ss.SSSS'");
 		}
@@ -113,7 +123,8 @@ public class TraceIssue extends HttpServerTemplate {
 		String stStr = this.reqData.get("st");
 		String etStr = this.reqData.get("et");
 
-    	MongoCursor<Document> cursor = traceDao.getTraceCursorByAggregate(network, station, location, channel, stStr, etStr);
+    	//MongoCursor<Document> cursor = traceDao.getTraceCursorByAggregate(network, station, location, channel, stStr, etStr);
+    	MongoCursor<Document> cursor = traceDao.getTraceCursor(network, station, location, channel, stStr, etStr);
     	if ( cursor == null ) {
     		log.warn("Cursor is null.");
     		apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found.");
@@ -129,11 +140,14 @@ public class TraceIssue extends HttpServerTemplate {
 		HttpResponse response;
         ChannelFuture sendFileFuture = null;
         try {
+        	Btime stBtime = Helpers.getBtime(stStr, null);
+    		String fileName = Helpers.getFileName(network, station, location, channel, stBtime);
     		
     		response = new DefaultHttpResponse(HTTP_1_1, OK);
     		response.headers().add("Content-Disposition", "inline; filename=myfile.txt");
     		response.headers().set(CONTENT_TYPE, "application/octet-stream");
-            response.headers().set(TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
+            response.headers().set(TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);            
+            response.headers().set("content-disposition", "attachment; filename=\"" + fileName +"\"");
             
             if (reqData.get("Connection").equals("keep-alive")) {
             	response.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
@@ -172,24 +186,55 @@ public class TraceIssue extends HttpServerTemplate {
 
 			Document d = cursor.next();
 			
-			Binary bytes = (Binary) ((Document)d.get(channel)).get("d");
-			ByteBuf b = Unpooled.wrappedBuffer(bytes.getData());
-			
-			DataRecord dr = (DataRecord)SeedRecord.read(b.array());
-			DataRecord dr2 = gm.trimPacket(stStr, etStr, dr, false);
-			
-			if ( dr2 != null ) {
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				DataOutputStream dos = new DataOutputStream(baos);
-				dr2.write(dos);
-				ByteBuf b2 = Unpooled.wrappedBuffer(baos.toByteArray());
+			Object o = d.get(channel);
+			if (o instanceof Document ) {
+				Document sub = (Document) o;
 				
-				totSize += bytes.length();
+				Binary bytes = (Binary) ((Document)sub.get(channel)).get("d");
+				ByteBuf b = Unpooled.wrappedBuffer(bytes.getData());
 				
-		        // Write the content.
-				DefaultHttpContent httpContent = new DefaultHttpContent(b2);
-				sendFileFuture = ctx.write(httpContent);
+				DataRecord dr = (DataRecord)SeedRecord.read(b.array());
+				DataRecord dr2 = gm.trimPacket(stStr, etStr, dr, false);
+				
+				if ( dr2 != null ) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					DataOutputStream dos = new DataOutputStream(baos);
+					dr2.write(dos);
+					ByteBuf b2 = Unpooled.wrappedBuffer(baos.toByteArray());
+					
+					totSize += bytes.length();
+					
+			        // Write the content.
+					DefaultHttpContent httpContent = new DefaultHttpContent(b2);
+					sendFileFuture = ctx.write(httpContent);
+				}
+				
+			} else if ( o instanceof ArrayList<?>) {
+				List<Document> subs = (List<Document>) o;
+				Collections.sort(subs, Helpers.traceCompare);
+				for(Document sub : subs) {
+					Binary bytes = (Binary) sub.get("d");
+					ByteBuf b = Unpooled.wrappedBuffer(bytes.getData());
+					
+					DataRecord dr = (DataRecord)SeedRecord.read(b.array());
+					DataRecord dr2 = gm.trimPacket(stStr, etStr, dr, false);
+					
+					if ( dr2 != null ) {
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						DataOutputStream dos = new DataOutputStream(baos);
+						dr2.write(dos);
+						ByteBuf b2 = Unpooled.wrappedBuffer(baos.toByteArray());
+						
+						totSize += bytes.length();
+						
+				        // Write the content.
+						DefaultHttpContent httpContent = new DefaultHttpContent(b2);
+						sendFileFuture = ctx.write(httpContent);
+					}
+				}
 			}
+			
+			
 		}
 		
 		log.debug("Seismic TraceIssue send data(byte/kb/mb). {}/{}", totSize, totSize/1024, totSize/1024/1024);

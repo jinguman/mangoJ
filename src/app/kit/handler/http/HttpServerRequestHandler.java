@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bson.Document;
 
@@ -32,6 +34,8 @@ import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.QueryStringEncoder;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpDataFactory;
@@ -97,6 +101,9 @@ public class HttpServerRequestHandler extends SimpleChannelInboundHandler<FullHt
 			LastHttpContent trailer = msg;
 			readPostData();
 
+			//
+			readGetData();
+			
 			HttpServerRequest service = ServiceDispatcher.dispatch(ctx, reqData);
 
 			try {
@@ -184,6 +191,20 @@ public class HttpServerRequestHandler extends SimpleChannelInboundHandler<FullHt
 		}
 	}
 
+	private void readGetData() {
+		
+		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+		Map<String, List<String>> uriAttributes = queryStringDecoder.parameters(); 
+		
+		for(Entry<String, List<String>> attr: uriAttributes.entrySet()) {
+			for(String attrVal : attr.getValue() ) {
+				//System.out.println(">>>>>>>>> " + attr.getKey() + ", " + attrVal);
+				reqData.put(attr.getKey(), attrVal);
+				log.debug("Request get param. {}: {}", attr.getKey(), attrVal);
+			}
+		} 
+	}
+	
 	private void send100Continue(ChannelHandlerContext ctx) {
 		FullHttpResponse response = new DefaultFullHttpResponse(
 				HTTP_1_1, CONTINUE);
