@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.MongoSocketReadException;
+import com.mongodb.MongoTimeoutException;
 import com.mongodb.client.result.UpdateResult;
 
 import app.kit.com.conf.MangoConf;
@@ -46,24 +47,30 @@ public class MongoSimpleClient implements Runnable {
 		
 		while(true) {
 
-			try {
-
-				List<Trace> traces = queue.take();
-				if ( traces == null ) {
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						log.error("{}", e);
-					}
-					continue;
+			List<Trace> traces = queue.take();
+			if ( traces == null ) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					log.error("{}", e);
 				}
-				
+				continue;
+			}
+
+			putTraceSafety(traces);
+		}	
+	}
+
+	private void putTraceSafety(List<Trace> traces) {
+
+		while(true) {
+	 		try {
 				int traceCnt = 1;
 				int traceSize = traces.size();
 				for(Trace trace : traces) {
 
 					UpdateResult result = service.insertTrace(trace);
-
+		
 					// print log
 					String logStr = "[" + (traceCnt++) + "/" + traceSize + "] " + trace.getNetwork() + "." + trace.getStation() + "." + trace.getLocation() + "." + trace.getChannel() + " " + trace.getStStr();
 					if ( logCnt > conf.getMcLogThreshold() ) {
@@ -98,8 +105,9 @@ public class MongoSimpleClient implements Runnable {
 				stats.clear();
 				gaps.clear();
 				traces.clear();
-
-			} catch (MongoSocketReadException e) {
+				return;
+				
+			} catch (MongoSocketReadException | MongoTimeoutException e) {
 				log.error("{}", e);
 				log.info("MongoClient restart after {} seconds.", conf.getMcRestartSec());
 				try {
@@ -108,17 +116,6 @@ public class MongoSimpleClient implements Runnable {
 					log.error("{}",e1);
 				}
 			}
-			//} catch ( MongoSocketReadException e) {
-				
-				// ���߿� ó������..
-				//d.append("network", network);
-				//d.remove("station");
-				//d.remove("channel");
-				//d.remove("location");
-				//queue.add(d);
-
-		}	
-		
+		}
 	}
-
 }
