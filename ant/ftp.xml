@@ -11,8 +11,8 @@
 		<echo message="copying package" />
 	
 		<!--scp todir="mango:mango1!@192.168.5.41:/home/mango/mangoJ" trust="yes"-->
-		<scp todir="niauser:nianiauser@210.114.91.91:/home/niauser/mangoJ" trust="yes" port="18826"> <!-- kbig2 -->
-		<!--scp todir="niauser:nianiauser@210.114.91.91:/home/niauser/mangoJ" trust="yes" port="18830"--> <!-- kbig -->
+		<!--scp todir="niauser:nianiauser@210.114.91.91:/home/niauser/mangoJ" trust="yes" port="18826"--> <!-- kbig2 -->
+		<scp todir="niauser:nianiauser@210.114.91.91:/home/niauser/mangoJ" trust="yes" port="18830"> <!-- kbig -->
 			<fileset dir="${target.dir}"/>
 		</scp>
 		
