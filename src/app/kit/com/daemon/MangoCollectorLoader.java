@@ -56,7 +56,7 @@ public class MangoCollectorLoader implements IMangoLoader{
 			}
 		});
 
-		// stream�� 湲곕���怨� �댁�대�湲� ���� 寃��쇰� ��泥댄��.
+		// 저장된 queue 데이터를 로드.
 		//if ( conf.isMfResumeQueue() ) {
 		//	log.info("Loading queue...");
 		//	File file = new File(conf.getMfQueue());
@@ -104,6 +104,8 @@ public class MangoCollectorLoader implements IMangoLoader{
     				conf.getScNetwork(i), conf.getScStation(i), conf.getScChannel(i), conf.getScHost(i), conf.getScPort(i));
     		exec.execute(client);
     	}
+    	
+    	// Periodically call gc
 	}
 
 	@Override
@@ -123,7 +125,7 @@ public class MangoCollectorLoader implements IMangoLoader{
         slState.saveStreams(new File(conf.getScState()));
         log.info("Write stream state.");
         
-        // stream�� 湲곕���怨� �댁�대�湲� ���� 寃��쇰� ��泥댄��.
+        // stream을 큐에 저장.
 		// Write contents of queue to file
 		//if ( queue.size() > 0 ) {
 		//	File file = new File(conf.getMfQueue());

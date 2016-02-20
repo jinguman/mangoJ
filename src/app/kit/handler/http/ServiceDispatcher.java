@@ -38,6 +38,8 @@ public class ServiceDispatcher {
 				beanName = "stationIssue";
 			} else if ( serviceUri.startsWith("/seismic/trace")) {
 				beanName = "traceIssue";
+			} else if ( serviceUri.startsWith("/seismic/version")) {
+				beanName = "versionIssue";
 			}
 	    }
 

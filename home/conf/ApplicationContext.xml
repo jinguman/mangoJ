@@ -6,8 +6,11 @@
 						http://www.springframework.org/schema/util
 						http://www.springframework.org/schema/util/spring-util-3.0.xsd 
 						http://www.springframework.org/schema/task 
-						http://www.springframework.org/schema/task/spring-task-3.0.xsd"
+						http://www.springframework.org/schema/task/spring-task-3.0.xsd
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context.xsd"
 	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:util="http://www.springframework.org/schema/util">
 
 	<bean id="prop" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">    
@@ -20,5 +23,5 @@
       	<property name="reloadingStrategy" ref="reloadingStrategy" />
 	</bean>
     <bean id="reloadingStrategy" class="org.apache.commons.configuration.reloading.FileChangedReloadingStrategy" />  
-
+	
 </beans>

@@ -32,13 +32,13 @@ public class StationIssue extends HttpServerTemplate {
 	@Override
 	public void requestParamValidation() throws RequestParamException {
 		
-		if ( this.reqData.get("REQUEST_USERNAME").isEmpty() ) {
+		if ( !this.reqData.containsKey("REQUEST_USERNAME") ) {
 			apiResult.append("resultCode", HttpResponseStatus.NOT_ACCEPTABLE)
 				.append("message", "Username, password is empty");
 			return;
 		} 
 		
-		if ( this.reqData.get("contents").isEmpty()) throw new RequestParamException("contents parameter is mandatory.");
+		if ( !this.reqData.containsKey("contents")) throw new RequestParamException("contents parameter is mandatory.");
 		String value = this.reqData.get("contents");
 		if ( !(value.equals(MangoJCode.PARAM_CONTENTS_VALUE_STATIONS) 
 				|| value.equals(MangoJCode.PARAM_CONTENTS_VALUE_COUNT)) ) {
@@ -65,8 +65,24 @@ public class StationIssue extends HttpServerTemplate {
 			apiResult.append("count", cnt);
 			
 		} else if ( reqData.get(MangoJCode.PARAM_CONTENTS).equals(MangoJCode.PARAM_CONTENTS_VALUE_STATIONS) ) {
-			List<Document> documents = dao.findTraceStats(new Document());
-			log.debug("Seismic Station contents. {}", documents.size());
+			List<Document> documents = null;
+			
+			if ( reqData.containsKey("net") || reqData.containsKey("sta") || reqData.containsKey("loc") || reqData.containsKey("cha") ) {
+				String net = "*";
+				String sta = "*";
+				String loc = "*";
+				String cha = "*";
+				if ( reqData.containsKey("net") ) net = reqData.get("net");
+				if ( reqData.containsKey("sta") ) sta = reqData.get("sta");
+				if ( reqData.containsKey("loc") ) loc = reqData.get("loc");
+				if ( reqData.containsKey("cha") ) cha = reqData.get("cha");
+				documents = dao.findTraceStats(net, sta, loc, cha, null, null);
+			} else {
+				documents = dao.findTraceStats(new Document());
+			}
+			
+
+			log.debug("Get seismic Station contents. size: {}", documents.size());
 			
 			apiResult.append("resultCode", HttpResponseStatus.OK.code());
 			apiResult.append("message", HttpResponseStatus.OK.toString());

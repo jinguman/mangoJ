@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.MongoClient;
@@ -33,6 +34,7 @@ import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
 @PropertySource("classpath:/conf/mango.properties")
 @ComponentScan("app.kit, app.kit.controller, app.kit.service, app.kit.vo, app.kit.handler")
 @ImportResource("classpath:/conf/ApplicationContext.xml")
+@EnableScheduling
 public class MangoConf {
 
 	@Autowired

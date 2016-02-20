@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author jman
  *
  */
+@Slf4j
 @Component
 public class RestoreWorker {
 
@@ -46,6 +47,12 @@ public class RestoreWorker {
 			int i=0, totSize=files.size();
 			for(File f : files) {
 				exec.execute(context.getBean(ReadMiniSeed.class, f, content.isDbCheck(), ++i, totSize));
+			}
+			
+			try {
+				Thread.sleep(60*1000);
+			} catch (InterruptedException e) {
+				log.error("{}", e);
 			}
 		}
 	}
