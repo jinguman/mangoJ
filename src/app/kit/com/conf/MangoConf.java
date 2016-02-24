@@ -1,8 +1,5 @@
 package app.kit.com.conf;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +48,7 @@ public class MangoConf {
 		return prop.getString("mongo.database", "trace");
 	}
 	
+	// Seedlink thread's number
 	public int getScThread() {
 		return prop.getInt("sc.thread", 1);
 	}
@@ -79,10 +77,12 @@ public class MangoConf {
 		return prop.getInt("sc.port", SeedlinkReader.DEFAULT_PORT);
 	}
 	
+	// record in minutes
 	public boolean isMcSharpMinute() {
 		return prop.getBoolean("mc.sharpMinute", true);
 	}
 	
+	// limit of queue size(count)
 	public int getScQueueLimit() {
 		return prop.getInt("sc.queuelimit", 50000);
 	}
@@ -91,10 +91,12 @@ public class MangoConf {
 		return prop.getInt("mi.restartsec", 5);
 	}
 	
+	// Record receiving state
 	public String getScState() {
 		return prop.getString("sc.state", "../conf/mango.state");
 	}
 	
+	// How frequently record state
 	public int getScStateThreshold() {
 		return prop.getInt("sc.statethreshold", 100);
 	}
@@ -103,14 +105,17 @@ public class MangoConf {
 		return prop.getBoolean("sc.resume", true);
 	}
 	
+	// Use Mongodb sharding
 	public boolean isMcShard() {
 		return prop.getBoolean("mc.shard", false);
 	}
 	
+	// Use Mongodb index
 	public boolean isMcIndex() {
 		return prop.getBoolean("mc.index", false);
 	}
 	
+	// Write gap states
 	public boolean isMcWriteGapStats() {
 		return prop.getBoolean("mc.writeGapStats", false);
 	}
@@ -119,6 +124,7 @@ public class MangoConf {
 		return prop.getInt("mc.restartsec", 5);
 	}
 	
+	// How frequently write log
 	public int getMcLogThreshold() {
 		return prop.getInt("mc.logthreshold", 500);
 	}
@@ -131,6 +137,7 @@ public class MangoConf {
 		return prop.getInt("mi.thread", 10);
 	}
 	
+	// Use entire list of seedlink information, Ignore network lists
 	public boolean isMiBuildEntireList() {
 		return prop.getBoolean("mi.buildentirelist", false);
 	}
@@ -139,18 +146,22 @@ public class MangoConf {
 		return prop.getInt("mi.restartsec", 5);
 	}
 	
+	// Use Mongodb sharding
 	public boolean isMiShard() {
 		return prop.getBoolean("mi.shard", false);
 	}
 	
+	// Use Mongodb index
 	public boolean isMiIndex() {
 		return prop.getBoolean("mi.index", false);
 	}
 	
+	@Deprecated
 	public String getMfQueue() {
 		return prop.getString("mf.queue", "../conf/mango.queue");
 	}
 	
+	@Deprecated
 	public boolean isMfResumeQueue() {
 		return prop.getBoolean("mf.resumeQueue", false);
 	}
@@ -163,26 +174,32 @@ public class MangoConf {
 		return prop.getInt("ac.port", 8080);
 	}
 	
+	// Limit session counts
 	public int getAcSession() {
 		return prop.getInt("ac.session", 100);
 	}
 
+	// Reject by network_station
 	public String[] getAcRejectStringArray() {
 		return prop.getStringArray("ac.rejectObj");
 	}
 	
+	// Reject from now
 	public long getAcRejectNow() {
 		return prop.getInt("ac.rejectNow", 60);	// minutes
 	}
 	
+	// Reject by time length
 	public long getAcRejectTimeLength() {
 		return prop.getInt("ac.rejectRequestTimeLength", 4320);	// 3 days
 	}
 	
+	// Location of file queue
 	public String getQueueDir() {
 		return prop.getString("queue.dir");
 	}
 	
+	// Location of file queue name
 	public String getQueueName() {
 		return prop.getString("queue.name");
 	}
