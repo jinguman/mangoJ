@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import app.kit.com.conf.MangoConf;
 import app.kit.com.util.MangoJCode;
 import app.kit.exception.HttpServiceException;
 import app.kit.exception.RequestParamException;
@@ -24,6 +25,8 @@ public class StationIssue extends HttpServerTemplate {
 
 
 	@Autowired private TraceStatsDao dao;
+	@Autowired private MangoConf conf;
+	private String[] filteringWord;
 	
 	public StationIssue(ChannelHandlerContext ctx, Map<String, String> reqData) {
 		super(ctx, reqData);
@@ -81,6 +84,17 @@ public class StationIssue extends HttpServerTemplate {
 				documents = dao.findTraceStats(new Document());
 			}
 			
+			// filtering
+			filteringWord = conf.getAcRejectStringArray();
+			int docLen = documents.size()-1;
+			for(int i = docLen; i>=0; i--) {
+				for(String word : filteringWord) {
+					if ( documents.get(i).getString("_id").startsWith(word) ) {
+						documents.remove(i);
+						break;
+					}
+				}
+			}
 
 			log.debug("Get seismic Station contents. size: {}", documents.size());
 			

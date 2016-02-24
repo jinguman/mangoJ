@@ -134,7 +134,7 @@ public class MongoSimpleClientService {
 					.append("$set", new Document("cha", channel))
 					.append("$min", new Document("st",st))
 					.append("$max", new Document("et",et))
-					.append("$set", new Document("it",Helpers.getCurrentUTC()) 
+					.append("$set", new Document("it",Helpers.getCurrentUTCString()) 
 					.append("net", network)
 					.append("sta", station)
 					.append("loc", location)

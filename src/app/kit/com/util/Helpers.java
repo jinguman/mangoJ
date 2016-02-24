@@ -31,13 +31,17 @@ public class Helpers {
 		System.out.flush();
 	}
 	
-	public static String getCurrentUTC() {
+	public static String getCurrentUTCString() {
 
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		Date date = new Date();
 		date.setTime(date.getTime() - (long)(60*60*9*1000));
 		
 		return format.format(date);
+	}
+	
+	public static Btime getCurrentUTCBtime() {
+		return new Btime(new Date());
 	}
 
 	/**
@@ -246,7 +250,7 @@ public class Helpers {
 		Calendar ca1 = st.convertToCalendar();
 		Calendar ca2 = et.convertToCalendar();
 		
-		return getDiffByMinute(ca2, ca1);
+		return getDiffByMinute(ca1, ca2);
 	}
 	
 	public static long getDiffByMinute(Calendar caSt, Calendar caEt) {

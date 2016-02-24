@@ -9,6 +9,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,11 +25,13 @@ import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoCursor;
 
+import app.kit.com.conf.MangoConf;
 import app.kit.com.util.Helpers;
 import app.kit.com.util.MangoJCode;
 import app.kit.exception.HttpServiceException;
 import app.kit.exception.RequestParamException;
 import app.kit.handler.http.HttpServerTemplate;
+import app.kit.service.TrafficLogService;
 import app.kit.service.mongo.TraceDao;
 import app.kit.service.seedlink.GenerateMiniSeed;
 import edu.sc.seis.seisFile.mseed.Btime;
@@ -56,6 +59,9 @@ public class TraceIssue extends HttpServerTemplate {
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
 	@Autowired private TraceDao traceDao;
 	@Autowired private GenerateMiniSeed gm;
+	@Autowired private MangoConf conf;
+	private String[] filteringWord;
+	@Autowired private TrafficLogService logService;
 	
 	public TraceIssue(ChannelHandlerContext ctx, Map<String, String> reqData) {
 		super(ctx, reqData);
@@ -123,6 +129,37 @@ public class TraceIssue extends HttpServerTemplate {
 		String stStr = this.reqData.get("st");
 		String etStr = this.reqData.get("et");
 
+		// filtering network
+		filteringWord = conf.getAcRejectStringArray();
+		for(String word : filteringWord) {
+			String key = network + "_" + station;
+			if ( key.startsWith(word) ) {
+				apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted network, station code");
+				return true;
+			}
+		}
+		
+		try {
+			Btime stBtime = Helpers.getBtime(stStr, null);
+			Btime etBtime = Helpers.getBtime(etStr, null);
+			
+			// filtering time length
+			if ( Helpers.getDiffByMinute(stBtime, etBtime) > conf.getAcRejectTimeLength() ) {
+				apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted timelength. Not allowed more than " + conf.getAcRejectTimeLength() + " minutes." );
+				return true;
+			}
+			
+			// filtering time 
+			if ( Helpers.getDiffByMinute(etBtime, Helpers.getCurrentUTCBtime()) < conf.getAcRejectNow() ) {
+				apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted time. Not allowed " + conf.getAcRejectNow() + " minutes from now" );
+				return true;
+			}
+		} catch(ParseException e) {
+			log.warn("{}", e);
+        	apiResult.append("resultCode", HttpResponseStatus.NOT_FOUND.code()).append("message", "Not found. time format is yyyy-MM-ddTHH:mm:ss");
+            return true;
+		}
+		
     	//MongoCursor<Document> cursor = traceDao.getTraceCursorByAggregate(network, station, location, channel, stStr, etStr);
     	MongoCursor<Document> cursor = traceDao.getTraceCursor(network, station, location, channel, stStr, etStr);
     	if ( cursor == null ) {
@@ -136,12 +173,12 @@ public class TraceIssue extends HttpServerTemplate {
 			return true;
 		}
 		
-		log.warn("Cursor found.");
+		log.info("Cursor found.");
 		HttpResponse response;
         ChannelFuture sendFileFuture = null;
         try {
         	Btime stBtime = Helpers.getBtime(stStr, null);
-    		String fileName = Helpers.getFileName(network, station, location, channel, stBtime);
+        	String fileName = Helpers.getFileName(network, station, location, channel, stBtime);
     		
     		response = new DefaultHttpResponse(HTTP_1_1, OK);
     		response.headers().add("Content-Disposition", "inline; filename=myfile.txt");
@@ -237,7 +274,11 @@ public class TraceIssue extends HttpServerTemplate {
 			
 		}
 		
-		log.debug("Seismic TraceIssue send data(byte/kb/mb). {}/{}", totSize, totSize/1024, totSize/1024/1024);
+		String host = ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress();
+	    int port = ((InetSocketAddress)ctx.channel().remoteAddress()).getPort();
+		
+		log.info("Seismic TraceIssue send data(byte/kb/mb). {}:{} {}/{}/{}", host, port, totSize, totSize/1024, totSize/1024/1024);
+		logService.write("seismic", host+":"+port, totSize);
 		return sendFileFuture;
 	}
 }

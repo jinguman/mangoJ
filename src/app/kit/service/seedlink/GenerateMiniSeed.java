@@ -267,7 +267,7 @@ public class GenerateMiniSeed {
 		Btime et = dr.getHeader().getPredictedNextStartBtime();
 		
 		try {
-			long l = Helpers.getDiffByMinute(et, st);
+			long l = Helpers.getDiffByMinute(st, et);
 			
 			if ( l > 0 ) {
 				

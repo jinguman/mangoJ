@@ -14,6 +14,15 @@ import edu.sc.seis.seisFile.mseed.Btime;
 public class HelpersTest {
 
 	@Test
+	public void now() throws InterruptedException {
+		
+		while(true) {
+			System.out.println(Helpers.getCurrentUTCBtime());
+			Thread.sleep(1000);
+		}
+	}
+	
+	@Test
 	public void getEpochTime() {
 		
 		Btime bt = new Btime(1970, 1, 0, 1, 1, 8450);

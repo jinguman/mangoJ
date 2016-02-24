@@ -1,5 +1,8 @@
 package app.kit.com.conf;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,6 +167,18 @@ public class MangoConf {
 		return prop.getInt("ac.session", 100);
 	}
 
+	public String[] getAcRejectStringArray() {
+		return prop.getStringArray("ac.rejectObj");
+	}
+	
+	public long getAcRejectNow() {
+		return prop.getInt("ac.rejectNow", 60);	// minutes
+	}
+	
+	public long getAcRejectTimeLength() {
+		return prop.getInt("ac.rejectRequestTimeLength", 4320);	// 3 days
+	}
+	
 	public String getQueueDir() {
 		return prop.getString("queue.dir");
 	}
