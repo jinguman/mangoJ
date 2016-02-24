@@ -1,4 +1,4 @@
-package com.kit.Vo;
+package app.kit.vo;
 
 import static org.junit.Assert.*;
 
