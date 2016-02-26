@@ -44,6 +44,9 @@ public class RestoreWorker {
 		for(FileContentVo content: contents) {
 			
 			Collection<File> files = FileUtils.listFiles(new File(content.getRootDir()), null, true);
+			
+			// 역순으로 정렬해야 함...
+			
 			int i=0, totSize=files.size();
 			for(File f : files) {
 				exec.execute(context.getBean(ReadMiniSeed.class, f, content.isDbCheck(), ++i, totSize));
