@@ -3,9 +3,12 @@ package app.kit.monitor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.comparator.PathFileComparator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +23,7 @@ public class RestoreWorkerTest {
 
 	@Autowired private RestoreWorker worker;
 	
-	@Test
+	//@Test
 	public void parsing() throws IOException {
 
 		File file = new File("d:/test.restore");
@@ -32,6 +35,26 @@ public class RestoreWorkerTest {
 		worker.service(file);
 
 		while(true) {}
+	}
+	
+	@Test
+	public void sort() {
+		
+		String dir = "d:/ttt";
+		List<File> files = (List<File>) FileUtils.listFiles(new File(dir), null, true);
+		
+		// sorting
+		Collections.sort(files, new Comparator<File>() {
+
+			@Override
+			public int compare(File o1, File o2) {
+				return PathFileComparator.PATH_REVERSE.compare(o1, o2);
+			}
+		});
+		
+		for(File f : files) {
+			System.out.println(f.getAbsolutePath());
+		}
 	}
 }
 

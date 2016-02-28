@@ -2,11 +2,14 @@ package app.kit.monitor;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.comparator.PathFileComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -43,9 +46,15 @@ public class RestoreWorker {
 
 		for(FileContentVo content: contents) {
 			
-			Collection<File> files = FileUtils.listFiles(new File(content.getRootDir()), null, true);
+			List<File> files = (List<File>) FileUtils.listFiles(new File(content.getRootDir()), null, true);
 			
-			// 역순으로 정렬해야 함...
+			// sorting
+			Collections.sort(files, new Comparator<File>() {
+				@Override
+				public int compare(File o1, File o2) {
+					return PathFileComparator.PATH_REVERSE.compare(o1, o2);
+				}
+			});
 			
 			int i=0, totSize=files.size();
 			for(File f : files) {
