@@ -11,7 +11,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service("notFound")
 @Scope("prototype")
 public class NotfoundIssue extends HttpServerTemplate {

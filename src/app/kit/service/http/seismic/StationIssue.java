@@ -1,7 +1,10 @@
 package app.kit.service.http.seismic;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Resource;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import app.kit.com.conf.MangoConf;
+import app.kit.com.ipfilter.IpFilter;
 import app.kit.com.util.MangoJCode;
 import app.kit.exception.HttpServiceException;
 import app.kit.exception.RequestParamException;
@@ -23,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Scope("prototype")
 public class StationIssue extends HttpServerTemplate {
 
-
+	@Resource(name="trustIpFilterBean") private IpFilter ipFilter;
 	@Autowired private TraceStatsDao dao;
 	@Autowired private MangoConf conf;
 	private String[] filteringWord;
@@ -34,12 +38,6 @@ public class StationIssue extends HttpServerTemplate {
 
 	@Override
 	public void requestParamValidation() throws RequestParamException {
-		
-		if ( !this.reqData.containsKey("REQUEST_USERNAME") ) {
-			apiResult.append("resultCode", HttpResponseStatus.NOT_ACCEPTABLE)
-				.append("message", "Username, password is empty");
-			return;
-		} 
 		
 		if ( !this.reqData.containsKey("contents")) throw new RequestParamException("contents parameter is mandatory.");
 		String value = this.reqData.get("contents");
@@ -84,16 +82,23 @@ public class StationIssue extends HttpServerTemplate {
 				documents = dao.findTraceStats(new Document());
 			}
 			
-			// filtering
-			filteringWord = conf.getAcRejectStringArray();
-			int docLen = documents.size()-1;
-			for(int i = docLen; i>=0; i--) {
-				for(String word : filteringWord) {
-					if ( documents.get(i).getString("_id").startsWith(word) ) {
-						documents.remove(i);
-						break;
+			// trust id
+			String host = ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress();
+			if ( !ipFilter.accept(host)) {
+			
+				// filtering
+				filteringWord = conf.getAcRejectStringArray();
+				int docLen = documents.size()-1;
+				for(int i = docLen; i>=0; i--) {
+					for(String word : filteringWord) {
+						if ( documents.get(i).getString("_id").startsWith(word) ) {
+							documents.remove(i);
+							break;
+						}
 					}
 				}
+			} else {
+				log.info("Request from trust IP. No filtering. {}", host);
 			}
 
 			log.debug("Get seismic Station contents. size: {}", documents.size());

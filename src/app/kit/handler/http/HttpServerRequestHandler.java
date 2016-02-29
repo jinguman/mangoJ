@@ -35,7 +35,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.http.QueryStringEncoder;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpDataFactory;
@@ -84,13 +83,13 @@ public class HttpServerRequestHandler extends SimpleChannelInboundHandler<FullHt
 				for (Map.Entry<String, String> h : headers ) {
 					reqData.put(h.getKey(), h.getValue());
 					
-					if ( h.getKey().equals(HttpHeaders.Names.AUTHORIZATION) ) decodeAuthorization(h.getValue());
-					else putAuthorization();
+					//if ( h.getKey().equals(HttpHeaders.Names.AUTHORIZATION) ) decodeAuthorization(h.getValue());
+					//else putAuthorization();
 					log.debug("Request get param. {}: {}", h.getKey(), h.getValue());
 				}
 			}
 
-			// parsing authorization
+			// Parsing uri and method
 			reqData.put("REQUEST_URI", request.getUri());
 			reqData.put("REQUEST_METHOD", request.getMethod().name());
 		}
@@ -142,6 +141,7 @@ public class HttpServerRequestHandler extends SimpleChannelInboundHandler<FullHt
 		request = null;
 	}
 	
+	@Deprecated
 	private void decodeAuthorization(String str) {
 
 		// Basic dXNlcjpwd2Q=
@@ -159,6 +159,7 @@ public class HttpServerRequestHandler extends SimpleChannelInboundHandler<FullHt
 		}
 	}
 	
+	@Deprecated
 	private void putAuthorization() {
 		reqData.put("REQUEST_USERNAME", "anonymous");
 		reqData.put("REQUEST_PASSWORD", "anonymous");

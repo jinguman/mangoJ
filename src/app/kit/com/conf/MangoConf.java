@@ -19,6 +19,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
+import app.kit.com.ipfilter.Config;
+import app.kit.com.ipfilter.IpFilter;
+import app.kit.com.ipfilter.IpFilters;
 import app.kit.com.queue.BlockingBigQueue;
 import app.kit.com.util.MangoJCode;
 import edu.sc.seis.seisFile.seedlink.SeedlinkReader;
@@ -202,6 +205,28 @@ public class MangoConf {
 	// Location of file queue name
 	public String getQueueName() {
 		return prop.getString("queue.name");
+	}
+	
+	// Accept Trust Ip
+	public String[] getTrustIpStringArray() {
+		return prop.getStringArray("ac.trustIp");
+	}
+	
+	// Accept Trust Ip Filter
+	
+	@Bean(name="trustIpFilterBean")
+	public IpFilter getTrustIpFilter() {
+		
+		Config config = new Config();
+        config.setDefaultAllow(false);
+        config.setAllowFirst(true);
+        String[] ipPatterns = getTrustIpStringArray();
+        for (String ipPattern : ipPatterns)
+            config.allow(ipPattern.trim());
+		
+        IpFilter filter = IpFilters.create(config);
+        return filter;
+		
 	}
 	
 	@Bean(name="mongoClientBean")

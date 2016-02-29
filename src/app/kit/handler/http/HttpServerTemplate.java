@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.bson.Document;
 
+import app.kit.com.util.MangoTokener;
 import app.kit.exception.HttpServiceException;
 import app.kit.exception.RequestParamException;
 import io.netty.channel.ChannelHandlerContext;
@@ -34,12 +35,13 @@ public abstract class HttpServerTemplate implements HttpServerRequest {
 		
 		boolean bo = true;
 		try {
+			this.getAuthorization();
 			this.requestParamValidation();
 			bo = this.service();
 		} catch (RequestParamException e) {
-			log.warn("{}", e.toString());
+			//log.warn("{}", e.toString());
 			apiResult.append("resultCode", METHOD_NOT_ALLOWED.code())
-					.append("message", e.getMessage());
+					.append("message", e.getMessage());			
 		} catch (HttpServiceException e) {
 			log.error("{}", e);
 			apiResult.append("resultCode", NOT_IMPLEMENTED)
@@ -53,6 +55,21 @@ public abstract class HttpServerTemplate implements HttpServerRequest {
 		
 		if ( getClass().getClasses().length == 0 ) {
 			return;
+		}
+	}
+	
+	private void getAuthorization() throws RequestParamException {
+		
+		
+		if ( !this.reqData.containsKey("id") || !this.reqData.containsKey("token") ) {
+			throw new RequestParamException("id, token parameter is mandatory.");
+		}
+		
+		String id = this.reqData.get("id");
+		String token = MangoTokener.encode(id);
+		if ( !token.equals(this.reqData.get("token")) ) {
+			log.info("Get Illegal token. id: {}, gen_token:{}, get_token:{}", id, token, this.reqData.get("token"));
+			throw new RequestParamException("Illegal token. Get token in NECIS.");
 		}
 	}
 }

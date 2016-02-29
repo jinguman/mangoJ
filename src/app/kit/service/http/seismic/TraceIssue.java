@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.bson.Document;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 import com.mongodb.client.MongoCursor;
 
 import app.kit.com.conf.MangoConf;
+import app.kit.com.ipfilter.IpFilter;
 import app.kit.com.util.Helpers;
 import app.kit.com.util.MangoJCode;
 import app.kit.exception.HttpServiceException;
@@ -56,12 +59,11 @@ import lombok.extern.slf4j.Slf4j;
 @Scope("prototype")
 public class TraceIssue extends HttpServerTemplate {
 
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); 
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	@Resource(name="trustIpFilterBean") private IpFilter ipFilter;
 	@Autowired private TraceDao traceDao;
 	@Autowired private GenerateMiniSeed gm;
 	@Autowired private MangoConf conf;
-	private String[] filteringWord;
-	@Autowired private TrafficLogService logService;
 	
 	public TraceIssue(ChannelHandlerContext ctx, Map<String, String> reqData) {
 		super(ctx, reqData);
@@ -69,10 +71,6 @@ public class TraceIssue extends HttpServerTemplate {
 
 	@Override
 	public void requestParamValidation() throws app.kit.exception.RequestParamException {
-		
-		if ( this.reqData.get("REQUEST_USERNAME").isEmpty() ) {
-			throw new RequestParamException("There is no username, password parameter.");
-		}
 		
 		if ( this.reqData.get("net") == null || this.reqData.get("net").isEmpty()) {
 			throw new RequestParamException("There is no net parameter.");
@@ -128,36 +126,82 @@ public class TraceIssue extends HttpServerTemplate {
 		String channel = this.reqData.get("cha");
 		String stStr = this.reqData.get("st");
 		String etStr = this.reqData.get("et");
-
-		// filtering network
-		filteringWord = conf.getAcRejectStringArray();
-		for(String word : filteringWord) {
-			String key = network + "_" + station;
-			if ( key.startsWith(word) ) {
-				apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted network, station code");
-				return true;
-			}
-		}
 		
-		try {
-			Btime stBtime = Helpers.getBtime(stStr, null);
-			Btime etBtime = Helpers.getBtime(etStr, null);
-			
-			// filtering time length
-			if ( Helpers.getDiffByMinute(stBtime, etBtime) > conf.getAcRejectTimeLength() ) {
-				apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted timelength. Not allowed more than " + conf.getAcRejectTimeLength() + " minutes." );
-				return true;
+		// trust id
+		String host = ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress();
+		if ( !ipFilter.accept(host)) {
+		
+			try {
+				Btime stBtime = Helpers.getBtime(stStr, null);
+				Btime etBtime = Helpers.getBtime(etStr, null);
+	
+				// filtering network.station.starttime.endtime
+				String[] filteringPhrases = conf.getAcRejectStringArray();
+				for(String pharse : filteringPhrases) {
+					
+					String[] words = pharse.trim().split("\\.");
+					switch(words.length) {
+						case 1:
+							// network
+							if ( network.equals(words[0])) {
+								apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted network. " + network );
+								return true;
+							}
+							break;
+						case 2:
+							// network.station
+							if ( network.equals(words[0])) {
+								if ( words[1].length() == 0 ) {
+									apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "Restricted network. " + network );
+									return true;
+								} else if ( words[1].length() > 0 && station.equals(words[1])) {
+									apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "Restricted network, station. " + network + "." + station );
+									return true;
+								}
+							}
+							break;
+						case 4:
+							// network.station.st.et
+							Btime restStBtime = Helpers.getBtime(words[2], new SimpleDateFormat("yyyy-MM-dd'T'HH:mm"));
+							Btime restEtBtime = Helpers.getBtime(words[3], new SimpleDateFormat("yyyy-MM-dd'T'HH:mm"));
+							if ( (stBtime.afterOrEquals(restStBtime) && restEtBtime.afterOrEquals(stBtime)) 
+									|| (etBtime.afterOrEquals(restStBtime) && restEtBtime.afterOrEquals(etBtime)) 
+									) {
+								if ( network.equals(words[0])) {
+									if ( words[1].length() == 0) {
+										apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "Restricted network, time. " + network + ", " + words[2] + " ~ " + words[3]);
+										return true;
+									} else if ( words[1].length() > 0 && station.equals(words[1])) {
+										apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "Restricted network, station, time. " + network + "." + station + ", " + words[2] + " ~ " + words[3]);
+										return true;
+									}
+								}
+							}
+							break;
+						default:
+							// error
+							break;
+					}
+				}
+				
+				// filtering time length
+				if ( Helpers.getDiffByMinute(stBtime, etBtime) > conf.getAcRejectTimeLength() ) {
+					apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted timelength. Not allowed more than " + conf.getAcRejectTimeLength() + " minutes." );
+					return true;
+				}
+				
+				// filtering time 
+				if ( Helpers.getDiffByMinute(etBtime, Helpers.getCurrentUTCBtime()) < conf.getAcRejectNow() ) {
+					apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted time. Not allowed " + conf.getAcRejectNow() + " minutes from now" );
+					return true;
+				}
+			} catch(ParseException e) {
+				log.warn("{}", e);
+	        	apiResult.append("resultCode", HttpResponseStatus.NOT_FOUND.code()).append("message", "Not found. Illegal restricted Time format in conf. Ask to administrator.");
+	            return true;
 			}
-			
-			// filtering time 
-			if ( Helpers.getDiffByMinute(etBtime, Helpers.getCurrentUTCBtime()) < conf.getAcRejectNow() ) {
-				apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted time. Not allowed " + conf.getAcRejectNow() + " minutes from now" );
-				return true;
-			}
-		} catch(ParseException e) {
-			log.warn("{}", e);
-        	apiResult.append("resultCode", HttpResponseStatus.NOT_FOUND.code()).append("message", "Not found. time format is yyyy-MM-ddTHH:mm:ss");
-            return true;
+		} else {
+			log.info("Request from trust IP. No filtering. {}", host);
 		}
 		
     	//MongoCursor<Document> cursor = traceDao.getTraceCursorByAggregate(network, station, location, channel, stStr, etStr);
@@ -270,15 +314,15 @@ public class TraceIssue extends HttpServerTemplate {
 					}
 				}
 			}
-			
-			
 		}
 		
+		String id = reqData.get("id");
 		String host = ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress();
 	    int port = ((InetSocketAddress)ctx.channel().remoteAddress()).getPort();
-		
+		String context = id + "," + network + "," + station + "," + location + "," + channel + "," + stStr + "," + etStr + "," + totSize; 
+				
 		log.info("Seismic TraceIssue send data(byte/kb/mb). {}:{} {}/{}/{}", host, port, totSize, totSize/1024, totSize/1024/1024);
-		logService.write("seismic", host+":"+port, totSize);
+		TrafficLogService.write("seismic", host+":"+port, context);
 		return sendFileFuture;
 	}
 }

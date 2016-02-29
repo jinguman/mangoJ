@@ -6,7 +6,7 @@ public class MangoTokenerTest {
 
 	@Test
 	public void getToken() {
-		String key = "USR0400";
+		String key = "admin";
 		String encodeText = MangoTokener.encode(key);
 		System.out.println(encodeText);
 		
