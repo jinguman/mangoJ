@@ -65,6 +65,10 @@ public abstract class HttpServerTemplate implements HttpServerRequest {
 			throw new RequestParamException("id, token parameter is mandatory.");
 		}
 		
+		if ( this.reqData.get("id").isEmpty() || this.reqData.get("token").isEmpty()  ) {
+			throw new RequestParamException("id, token required.");
+		} 
+		
 		String id = this.reqData.get("id");
 		String token = MangoTokener.encode(id);
 		if ( !token.equals(this.reqData.get("token")) ) {
