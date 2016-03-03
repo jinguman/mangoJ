@@ -72,7 +72,9 @@ public class TraceIssue extends HttpServerTemplate {
 	@Override
 	public void requestParamValidation() throws app.kit.exception.RequestParamException {
 		
-		if ( this.reqData.get("net") == null || this.reqData.get("net").isEmpty()) {
+		if ( this.reqData.get("contents") == null || this.reqData.get("contents").isEmpty()) {
+			throw new RequestParamException("There is no contents(raw,...) parameter.");
+		} else if ( this.reqData.get("net") == null || this.reqData.get("net").isEmpty()) {
 			throw new RequestParamException("There is no net parameter.");
 		} else if (this.reqData.get("sta") == null ||  this.reqData.get("sta").isEmpty()) {
 			throw new RequestParamException("There is no sta parameter.");
@@ -82,10 +84,8 @@ public class TraceIssue extends HttpServerTemplate {
 			throw new RequestParamException("There is no st parameter.");
 		} else if ( this.reqData.get("et") == null || this.reqData.get("et").isEmpty()) {
 			throw new RequestParamException("There is no et parameter.");
-		} else if ( this.reqData.get("contents") == null || this.reqData.get("contents").isEmpty()) {
-			throw new RequestParamException("There is no contents(raw,...) parameter.");
-		}
-
+		} 
+		
 		// format
 		try {
 			String st = this.reqData.get("st");
