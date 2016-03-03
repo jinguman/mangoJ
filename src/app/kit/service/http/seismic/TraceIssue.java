@@ -82,8 +82,8 @@ public class TraceIssue extends HttpServerTemplate {
 			throw new RequestParamException("There is no st parameter.");
 		} else if ( this.reqData.get("et") == null || this.reqData.get("et").isEmpty()) {
 			throw new RequestParamException("There is no et parameter.");
-		} else if ( this.reqData.get("content") == null || this.reqData.get("content").isEmpty()) {
-			throw new RequestParamException("There is no content(raw,...) parameter.");
+		} else if ( this.reqData.get("contents") == null || this.reqData.get("contents").isEmpty()) {
+			throw new RequestParamException("There is no contents(raw,...) parameter.");
 		}
 
 		// format
