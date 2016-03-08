@@ -297,7 +297,7 @@ public class GenerateMiniSeed {
 				drLists.add(dr);
 			}
 			
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			drLists.add(dr);
 			log.warn("Error in parsing dateformat. Can't split datarecord per minute.");			
 		}

@@ -20,11 +20,12 @@ public class ReadTrace {
 		DataInputStream ls = null;
 		DataOutputStream dos = null;
 		
-		String filename = "d:/temp3/ttt.mseed";
-		String filename2 = "d:/ANM.HGZ.2015.337.00.00.00.ccc";
+		//String filename = "d:/KS.DAG2..HHN.2016.063.00.00.00";
+		String filename = "d:/KS.ADO2..HGZ.2016.061.09.10.00";
+		String filename2 = "d:/KS.DAG2..HHN.2016.063.00.00.00.ccc";
 
-		String stStr = "2015-12-03T14:00:10.0000";
-		String etStr = "2015-12-03T14:10:10.5000";
+		String stStr = "2016-03-03T00:00:46.0000";
+		String etStr = "2016-03-03T00:00:53.0000";
 		
 		GenerateMiniSeed gm = new GenerateMiniSeed();
 		
@@ -35,8 +36,9 @@ public class ReadTrace {
 			while(true) {
 				DataRecord dr = (DataRecord) SeedRecord.read(di);
 				//DataRecord record = gm.trimPacket(stStr, etStr, dr, false);
-				System.out.println(dr.toString());
-				System.out.println(dr.getHeader().getSequenceNum());
+				System.out.println(dr.getHeader().getStartTime() + " ~ " + dr.getHeader().getEndTime() + ", " + dr.getHeader().getNumSamples());
+				//System.out.println(dr.toString());
+				//System.out.println(dr.getHeader().getSequenceNum());
 				//if ( record != null ) record.write(dos);
 			}
 			

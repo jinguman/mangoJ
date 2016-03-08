@@ -3,9 +3,11 @@ package app.kit.com.util;
 import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.bson.Document;
@@ -16,6 +18,7 @@ import org.bson.json.JsonWriter;
 import org.bson.json.JsonWriterSettings;
 import org.bson.types.Binary;
 
+import app.kit.vo.StimeState;
 import app.kit.vo.Trace;
 import edu.sc.seis.seisFile.mseed.Btime;
 import edu.sc.seis.seisFile.mseed.DataRecord;
@@ -245,7 +248,7 @@ public class Helpers {
 		return getDiffByMinute(ca1, ca2); 
 	}
 
-	public static long getDiffByMinute(Btime st, Btime et) throws ParseException {
+	public static long getDiffByMinute(Btime st, Btime et) {
 		
 		Calendar ca1 = st.convertToCalendar();
 		Calendar ca2 = et.convertToCalendar();
@@ -412,5 +415,39 @@ public class Helpers {
 			return s1.compareTo(s2);
 		}
 	};
+	
+	public static List<StimeState> splitSttimePerYear(Btime stBtime, Btime etBtime) {
+		List<StimeState> list = new ArrayList<>();
+		
+		if ( (etBtime.year - stBtime.year) == 0 ) {
+			list.add(new StimeState(stBtime, etBtime));
+		} else {
+			
+			int year = stBtime.year;
+			Btime endTemp = new Btime(year, getLastJdate(year), 23, 59, 59, 9999);
+			Btime startTemp = new Btime(year+1, 1, 0, 0, 0, 0);
+			list.add(new StimeState(stBtime, endTemp));
+			while((year+1)<etBtime.year) {
+				
+				++year;
+				endTemp = new Btime(year, getLastJdate(year), 23, 59, 59, 9999);
+				list.add(new StimeState(startTemp, endTemp));
+				startTemp = new Btime(year+1, 1, 0, 0, 0, 0);
+			}
+			
+			
+			list.add(new StimeState(startTemp, etBtime));
+		}
+		
+		return list;
+	}
+	
+	public static int getLastJdate(int year) {
+		int jdate = 365;
+		if(0 ==(year % 4) && 0 !=(year % 100) || 0 == (year % 400)) {
+			jdate++;
+		}
+		return jdate;
+	}
 }
 

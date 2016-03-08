@@ -4,16 +4,18 @@ import static org.junit.Assert.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import org.junit.Test;
 
 import app.kit.com.util.Helpers;
+import app.kit.vo.StimeState;
 import edu.sc.seis.seisFile.mseed.Btime;
 
 
 public class HelpersTest {
 
-	@Test
+	//@Test
 	public void now() throws InterruptedException {
 		
 		while(true) {
@@ -111,5 +113,18 @@ public class HelpersTest {
 		assertEquals("057",Helpers.getStrJDayBtime(bt));
 		assertEquals("12",Helpers.getStrHourBtime(bt));
 		assertEquals("49",Helpers.getStrMinBtime(bt));
+	}
+	
+	@Test
+	public void splitSttimePerYearTest() {
+		
+		Btime stBtime = new Btime(2000, 1, 2, 1, 2 ,1200);
+		Btime etBtime = new Btime(2001, 1, 2, 1, 2 ,1200);
+		
+		List<StimeState> lists = Helpers.splitSttimePerYear(stBtime, etBtime);
+		
+		for(StimeState s : lists) {
+			System.out.println(s);
+		}
 	}
 }
