@@ -91,6 +91,12 @@ public class StationIssue extends HttpServerTemplate {
 				int docLen = documents.size()-1;
 				for(int i = docLen; i>=0; i--) {
 					for(String word : filteringWord) {
+						
+						// net.sta -> net_sta_
+						word = word.replaceAll("\\.", "_");
+						if ( !word.endsWith("_")) word += "_";
+						System.out.println(">>>> " + word);
+						
 						if ( documents.get(i).getString("_id").startsWith(word) ) {
 							documents.remove(i);
 							break;
