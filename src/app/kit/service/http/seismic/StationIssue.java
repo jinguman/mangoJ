@@ -95,7 +95,7 @@ public class StationIssue extends HttpServerTemplate {
 						// net.sta -> net_sta_
 						word = word.replaceAll("\\.", "_");
 						if ( !word.endsWith("_")) word += "_";
-						System.out.println(">>>> " + word);
+						//System.out.println(">>>> " + word);
 						
 						if ( documents.get(i).getString("_id").startsWith(word) ) {
 							documents.remove(i);
