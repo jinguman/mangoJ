@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoCursor;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 import app.kit.com.conf.MangoConf;
 import app.kit.com.ipfilter.IpFilter;
@@ -64,7 +63,8 @@ import lombok.extern.slf4j.Slf4j;
 public class TraceIssue extends HttpServerTemplate {
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	@Resource(name="trustIpFilterBean") private IpFilter ipFilter;
+	@Resource(name="objTrustIpFilterBean") private IpFilter objIpFilter;
+	@Resource(name="timeTrustIpFilterBean") private IpFilter timeIpFilter;
 	@Autowired private TraceDao traceDao;
 	@Autowired private GenerateMiniSeed gm;
 	@Autowired private MangoConf conf;
@@ -143,7 +143,7 @@ public class TraceIssue extends HttpServerTemplate {
 		
 		// trust id
 		String host = ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress();
-		if ( !ipFilter.accept(host)) {
+		if ( !objIpFilter.accept(host)) {
 		
 			// filtering network.station.starttime.endtime
 			String[] filteringPhrases = conf.getAcRejectStringArray();
@@ -205,6 +205,11 @@ public class TraceIssue extends HttpServerTemplate {
 				}
 			}
 			
+		} else {
+			log.debug("Request from trust IP. No obj filtering. {}", host);
+		}
+		
+		if ( !timeIpFilter.accept(host)) {
 			// filtering time length
 			if ( Helpers.getDiffByMinute(stBtime, etBtime) > conf.getAcRejectTimeLength() ) {
 				apiResult.append("resultCode", HttpResponseStatus.NO_CONTENT.code()).append("message", "No data found. Restricted timelength. Not allowed more than " + conf.getAcRejectTimeLength() + " minutes." );
@@ -218,7 +223,7 @@ public class TraceIssue extends HttpServerTemplate {
 			}
 
 		} else {
-			log.info("Request from trust IP. No filtering. {}", host);
+			log.debug("Request from trust IP. No time filtering. {}", host);
 		}
 		
     	// process across year

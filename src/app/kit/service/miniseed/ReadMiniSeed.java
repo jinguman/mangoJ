@@ -76,6 +76,8 @@ public class ReadMiniSeed implements Runnable {
 		} catch (EOFException e) {
 		} catch (SeedFormatException | IOException e) {
 			log.warn("{}", e.toString());
+		} catch (Exception e) {
+			log.warn("{}", e.toString());
 		}
 		
 		if (!isDbCheck) {

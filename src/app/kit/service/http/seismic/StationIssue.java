@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Scope("prototype")
 public class StationIssue extends HttpServerTemplate {
 
-	@Resource(name="trustIpFilterBean") private IpFilter ipFilter;
+	@Resource(name="objTrustIpFilterBean") private IpFilter ipFilter;
 	@Autowired private TraceStatsDao dao;
 	@Autowired private MangoConf conf;
 	private String[] filteringWord;

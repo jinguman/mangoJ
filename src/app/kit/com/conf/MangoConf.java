@@ -208,19 +208,38 @@ public class MangoConf {
 	}
 	
 	// Accept Trust Ip
-	public String[] getTrustIpStringArray() {
-		return prop.getStringArray("ac.trustIp");
+	public String[] getTimeTrustIpStringArray() {
+		return prop.getStringArray("ac.time.trustIp");
+	}
+	
+	public String[] getObjTrustIpStringArray() {
+		return prop.getStringArray("ac.obj.trustIp");
 	}
 	
 	// Accept Trust Ip Filter
 	
-	@Bean(name="trustIpFilterBean")
-	public IpFilter getTrustIpFilter() {
+	@Bean(name="timeTrustIpFilterBean")
+	public IpFilter getTimeTrustIpFilter() {
 		
 		Config config = new Config();
         config.setDefaultAllow(false);
         config.setAllowFirst(true);
-        String[] ipPatterns = getTrustIpStringArray();
+        String[] ipPatterns = getTimeTrustIpStringArray();
+        for (String ipPattern : ipPatterns)
+            config.allow(ipPattern.trim());
+		
+        IpFilter filter = IpFilters.create(config);
+        return filter;
+		
+	}
+	
+	@Bean(name="objTrustIpFilterBean")
+	public IpFilter getObjTrustIpFilter() {
+		
+		Config config = new Config();
+        config.setDefaultAllow(false);
+        config.setAllowFirst(true);
+        String[] ipPatterns = getObjTrustIpStringArray();
         for (String ipPattern : ipPatterns)
             config.allow(ipPattern.trim());
 		
