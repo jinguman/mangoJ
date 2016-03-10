@@ -36,10 +36,11 @@ public class DeleteMiniSeed implements Runnable {
 	
 	@Override
 	public void run() {
-		
+
 		log.debug("Request({}/{}). {}.{}.{}.{} {} - {}", current, total, content.getNetwork(), content.getStation(), content.getLocation(), content.getChannel(), 
 				Trace.getBtimeToStringYMDHMS(content.getStBtime()), Trace.getBtimeToStringYMDHMS(content.getEtBtime()));
 		delete();
+		gaps.clear();
 	}
 	
 	public boolean delete() {
@@ -61,7 +62,7 @@ public class DeleteMiniSeed implements Runnable {
 		}
 		service.insertGaps(gaps);
 		
-		log.info("Delete complete({}/{}). file: {}, {}", current, total, content.getNetwork(), content.getStation(), content.getLocation(), content.getChannel(), 
+		log.info("Delete complete({}/{}). file: {}, {}, {}, {}, {}, {}", current, total, content.getNetwork(), content.getStation(), content.getLocation(), content.getChannel(), 
 				Trace.getBtimeToStringYMDHMS(content.getStBtime()), Trace.getBtimeToStringYMDHMS(content.getEtBtime()));
 		
 		return true;

@@ -122,7 +122,7 @@ public class Trace implements Serializable {
 	
 	//yyyy-MM-dd'T'HH:mm:SS.SSSS
 	public static String getBtimeToStringYMDHMS(Btime btime) {
-		
+
 		Calendar ca = btime.convertToCalendar();
 		int month = ca.get(Calendar.MONTH) + 1;
 		int day = ca.get(Calendar.DAY_OF_MONTH);

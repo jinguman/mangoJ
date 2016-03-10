@@ -23,13 +23,13 @@ public class RestoreWorkerTest {
 
 	@Autowired private RestoreWorker worker;
 	
-	//@Test
+	@Test
 	public void parsing() throws IOException {
 
 		File file = new File("d:/test.restore");
 		List<String> lines = new ArrayList<>();
 		//lines.add("d:/temp/ false");
-		lines.add("D:/26931_USR0400 false");
+		lines.add("D:/26931_USR0400 true");
 
 		FileUtils.writeLines(file, lines);
 		worker.service(file);
@@ -37,7 +37,7 @@ public class RestoreWorkerTest {
 		while(true) {}
 	}
 	
-	@Test
+	//@Test
 	public void sort() {
 		
 		String dir = "d:/ttt";

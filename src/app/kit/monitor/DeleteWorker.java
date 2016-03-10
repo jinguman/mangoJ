@@ -15,7 +15,6 @@ import app.kit.com.conf.MangoConf;
 import app.kit.service.miniseed.DeleteMiniSeed;
 import app.kit.service.mongo.TraceStatsDao;
 import app.kit.vo.FileContentVo;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * filename: xxxx.delete
@@ -56,6 +55,7 @@ public class DeleteWorker {
 				newContent.setLocation(doc.getString("loc"));
 				newContent.setChannel(doc.getString("cha"));
 				newContent.setStBtime(content.getStBtime());
+				newContent.setEtBtime(content.getEtBtime());
 				
 				newContents.add(newContent);
 			}
@@ -65,7 +65,5 @@ public class DeleteWorker {
 		for(FileContentVo c : newContents) {
 			exec.execute(context.getBean(DeleteMiniSeed.class, c, ++i, totSize));
 		}
-		
-
 	}
 }

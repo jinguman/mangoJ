@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ import app.kit.com.util.Helpers;
 import app.kit.service.mongo.MongoSimpleClientService;
 import app.kit.service.mongo.TraceDao;
 import app.kit.service.seedlink.GenerateMiniSeed;
+import app.kit.vo.FileContentVo;
 import app.kit.vo.Gaps;
 import app.kit.vo.Stats;
 import app.kit.vo.Trace;
@@ -45,6 +47,7 @@ public class ReadMiniSeed implements Runnable {
 	private boolean isDbCheck;
 	private int cnt;
 	private int totSize;
+	private static ApplicationContext context;
 	
 	public ReadMiniSeed(File file, boolean isDbCheck, int cnt, int totSize) {
 		this.file = file;
@@ -52,6 +55,11 @@ public class ReadMiniSeed implements Runnable {
 		this.cnt = cnt;
 		this.totSize = totSize;
 	}
+	
+    @Autowired
+    public void init(ApplicationContext context) {
+    	ReadMiniSeed.context = context;
+    }
 	
 	@Override
 	public void run() {
@@ -79,14 +87,39 @@ public class ReadMiniSeed implements Runnable {
 		} catch (Exception e) {
 			log.warn("{}", e.toString());
 		}
-		
-		if (!isDbCheck) {
-			if ( traces.size() > 0 ) directWriteDataRecord(traces);
+
+		// write
+		if ( traces.size() > 0 ) {
+			if (isDbCheck) deleteDataRecord(traces);
+			directWriteDataRecord(traces);
 		}
+		gaps.clear();
 		
 		return true;
 	}
-
+	
+	public void deleteDataRecord(List<Trace> traces) {
+		// assume trace in sort
+		String network = traces.get(0).getNetwork();
+		String station = traces.get(0).getStation();
+		String location = traces.get(0).getLocation();
+		String channel = traces.get(0).getChannel();
+		
+		// min stBtime & max etBtime
+		Btime stBtime = traces.get(0).getStBtime();
+		Btime etBtime = traces.get(0).getEtBtime();
+		for(Trace trace : traces) {
+			if ( stBtime.afterOrEquals(trace.getStBtime())) stBtime = trace.getStBtime();
+			if ( trace.getStBtime().afterOrEquals(etBtime)) etBtime = trace.getStBtime();
+		}
+		stBtime = new Btime(stBtime.getAsBytes());stBtime.sec = 0;stBtime.tenthMilli = 0;
+		etBtime = new Btime(etBtime.getAsBytes());etBtime.sec = 0;etBtime.tenthMilli = 0;
+		
+		FileContentVo content = new FileContentVo(network, station, location, channel, "/temp", stBtime, etBtime);
+		DeleteMiniSeed deleteMiniSeed = context.getBean(DeleteMiniSeed.class, content, 1, 1);
+		deleteMiniSeed.run();
+	}
+	
 	/**
 	 * Write to database
 	 * @param dr

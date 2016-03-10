@@ -112,11 +112,16 @@ public class TraceGapsDao {
     	Document proj = new Document("m." + Trace.getBtimeToStringH(bt) + "." + Trace.getBtimeToStringM(bt), 1);
     	List<Document> docs = findTraceGaps(doc, proj);
     	
-    	if ( docs.size() > 0 ) {
-    		Document mDoc = (Document) docs.get(0).get("m");
-    		Document hourDoc = (Document) mDoc.get(Trace.getBtimeToStringH(bt));
-    		return hourDoc.getInteger(Trace.getBtimeToStringM(bt));
-    	} else {
+    	try {
+	    	if ( docs.size() > 0 ) {
+	    		Document mDoc = (Document) docs.get(0).get("m");
+	    		Document hourDoc = (Document) mDoc.get(Trace.getBtimeToStringH(bt));
+	    		return hourDoc.getInteger(Trace.getBtimeToStringM(bt));
+	    	} else {
+	    		return 0;
+	    	}
+    	} catch(NullPointerException e) {
+    		// if not exists gaps document
     		return 0;
     	}
     }
