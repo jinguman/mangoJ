@@ -61,7 +61,7 @@ public class RestoreWorker {
 			}
 			
 			try {
-				Thread.sleep(60*1000);
+				Thread.sleep(15*1000);
 			} catch (InterruptedException e) {
 				log.error("{}", e);
 			}

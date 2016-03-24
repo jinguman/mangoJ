@@ -29,7 +29,7 @@ public class RestoreWorkerTest {
 		File file = new File("d:/test.restore");
 		List<String> lines = new ArrayList<>();
 		//lines.add("d:/temp/ false");
-		lines.add("D:/26931_USR0400 true");
+		lines.add("D:/20160301_AK/temp false");
 
 		FileUtils.writeLines(file, lines);
 		worker.service(file);

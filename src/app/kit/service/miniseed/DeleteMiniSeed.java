@@ -45,13 +45,17 @@ public class DeleteMiniSeed implements Runnable {
 	
 	public boolean delete() {
 		
-		Btime stBtime = content.getStBtime();
-		Btime etBtime = content.getEtBtime();
+		Btime stBtime = new Btime(content.getStBtime().getAsBytes());
+		Btime etBtime = new Btime(content.getEtBtime().getAsBytes());
+		
+		Btime temp = new Btime(stBtime.getAsBytes());
 		
 		while(etBtime.afterOrEquals(stBtime)) {
 
 			Trace trace = new Trace(content.getNetwork(), content.getStation(), content.getLocation(), content.getChannel(), stBtime);
 			UpdateResult result = service.unsetTrace(trace);
+			
+			//System.out.println(">>>>>>>>>>> " + trace.getChannel() + ": " + stBtime.toString());
 			
 			if ( result.getModifiedCount() > 0 || result.getUpsertedId() != null ) {
 				int value = dao.getTraceGapsValueM(trace.getNetwork(), trace.getStation(), trace.getLocation(), trace.getChannel(), trace.getStBtime());
@@ -63,7 +67,7 @@ public class DeleteMiniSeed implements Runnable {
 		service.insertGaps(gaps);
 		
 		log.info("Delete complete({}/{}). file: {}, {}, {}, {}, {}, {}", current, total, content.getNetwork(), content.getStation(), content.getLocation(), content.getChannel(), 
-				Trace.getBtimeToStringYMDHMS(content.getStBtime()), Trace.getBtimeToStringYMDHMS(content.getEtBtime()));
+				Trace.getBtimeToStringYMDHMS(temp), Trace.getBtimeToStringYMDHMS(etBtime));
 		
 		return true;
 	}

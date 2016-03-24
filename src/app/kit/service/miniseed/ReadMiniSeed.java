@@ -83,9 +83,9 @@ public class ReadMiniSeed implements Runnable {
 			}
 		} catch (EOFException e) {
 		} catch (SeedFormatException | IOException e) {
-			log.warn("{}", e.toString());
+			log.warn("{}, {}", file.getAbsoluteFile(), e.toString());
 		} catch (Exception e) {
-			log.warn("{}", e.toString());
+			log.warn("{}, {}", file.getAbsoluteFile(), e.toString());
 		}
 
 		// write
@@ -126,6 +126,13 @@ public class ReadMiniSeed implements Runnable {
 	 */
 	public void directWriteDataRecord(List<Trace> traces) {
 		
+		/*
+		for(Trace trace : traces) {
+			System.out.println(Trace.getBtimeToStringYMDHMS(trace.getStBtime()) + " " +  Trace.getBtimeToStringYMDHMS(trace.getEtBtime()) + " " + trace.getNumSamples() );
+		}
+		*/
+		
+		
 		for(Trace trace : traces) {
 
 			UpdateResult result = service.insertTrace(trace);
@@ -146,6 +153,7 @@ public class ReadMiniSeed implements Runnable {
 		stats.clear();
 		gaps.clear();
 		traces.clear();
+		
 	}
 	
 	public void writeDataRecord(DataRecord dr) throws ParseException {

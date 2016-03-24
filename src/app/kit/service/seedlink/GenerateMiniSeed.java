@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ public class GenerateMiniSeed {
 			int result = checkRangePacket(stReqBtime, etReqBtime, stPacketBtime, etPacketBtime); 
 			switch (result) {
 				case 0:
-					//logger.debug("Data range invalid. req: {} - {}, packet: {} - {},  before: {}, after: {}", stReqBtime.toString(), etReqBtime.toString(), 
+					//log.debug("Data range invalid. req: {} - {}, packet: {} - {},  before: {}, after: {}", stReqBtime.toString(), etReqBtime.toString(), 
 					//				stPacketBtime.toString(), etPacketBtime.toString());
 					return null;
 				case 1:
@@ -266,6 +267,23 @@ public class GenerateMiniSeed {
 		Btime st = dr.getHeader().getStartBtime();
 		Btime et = dr.getHeader().getPredictedNextStartBtime();
 		
+		// 예외처리
+		// 26:59:0695 ~ 27:00:0695 의 경우 ..
+		// 시간간격은 1분이 넘는데 trim이 안되기 때문에 누락됨.. 따라서 예외처리함..
+		Calendar ca = et.convertToCalendar();
+		ca.set(Calendar.MILLISECOND, 0);
+		long lo = ca.getTimeInMillis() + et.tenthMilli;
+		float f = (1/dr.getHeader().getSampleRate())*1000;
+		lo = lo - (long)f;
+		int milli = (int) ((lo - ((int)(lo/1000))*1000));
+		Btime et_tmp = new Btime(lo/1000);
+		et_tmp = new Btime(et_tmp.year, et_tmp.jday, et_tmp.hour, et_tmp.min, et_tmp.sec, milli );
+		long lo2 = Helpers.getDiffByMinute(st, et_tmp);
+		if ( lo2 <= 0) {
+			drLists.add(dr);
+			return drLists;
+		}
+		
 		try {
 			long l = Helpers.getDiffByMinute(st, et);
 			
@@ -277,8 +295,12 @@ public class GenerateMiniSeed {
 				
 				//System.out.println(tempBtime.toString() + ", " + tempBtimeBeforeMilliSec.toString());
 				
+				//System.out.println(">>> " + st + ": " + et + " / " + tempBtime);
+				 
 				DataRecord trimDr = trimPacket(st, tempBtime, dr, true);
 				if ( trimDr != null ) drLists.add(trimDr);
+				
+				//System.out.println(trimDr.toString());
 				
 				// middle
 				int n = 1;
@@ -294,6 +316,7 @@ public class GenerateMiniSeed {
 				if ( trimDr != null ) drLists.add(trimDr);
 				
 			} else {
+				
 				drLists.add(dr);
 			}
 			

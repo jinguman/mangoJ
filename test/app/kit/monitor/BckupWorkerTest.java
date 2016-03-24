@@ -25,7 +25,7 @@ public class BckupWorkerTest {
 
 		File file = new File("d:/test.bckup");
 		List<String> lines = new ArrayList<>();
-		lines.add("2016-02-10T20:00 2016-02-10T21:59 KS * * * d:/26931_USR0400_BACKUP/");
+		lines.add("2016-03-01T00:00 2016-03-01T23:59 AK ANM * LHZ d:/20160301_AK_LHZ/");
 
 		FileUtils.writeLines(file, lines);
 		worker.service(file);
