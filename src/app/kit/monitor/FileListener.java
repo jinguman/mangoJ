@@ -16,6 +16,7 @@ public class FileListener implements FileAlterationListener {
 
 	@Autowired private BckupWorker bckupWorker;
 	@Autowired private RestoreWorker restoreWorker;
+	@Autowired private DeleteWorker deleteWorker;
 	
 	@Override
 	public void onStart(FileAlterationObserver observer) {
@@ -59,6 +60,13 @@ public class FileListener implements FileAlterationListener {
 		idx = jdate.indexOf(".restore");
 		if ( idx > 0 ) {
 			restoreWorker.service(file);
+			FileUtils.deleteQuietly(file);
+		}
+
+		// delete
+		idx = jdate.indexOf(".delete");
+		if ( idx > 0 ) {
+			deleteWorker.service(file);
 			FileUtils.deleteQuietly(file);
 		}
 	}

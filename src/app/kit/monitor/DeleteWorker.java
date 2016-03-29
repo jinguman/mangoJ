@@ -15,6 +15,7 @@ import app.kit.com.conf.MangoConf;
 import app.kit.service.miniseed.DeleteMiniSeed;
 import app.kit.service.mongo.TraceStatsDao;
 import app.kit.vo.FileContentVo;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * filename: xxxx.delete
@@ -24,6 +25,7 @@ import app.kit.vo.FileContentVo;
  *
  */
 @Component
+@Slf4j
 public class DeleteWorker {
 
 	@Autowired private FileParser parser;
@@ -61,6 +63,7 @@ public class DeleteWorker {
 			}
 		}
 		
+		log.debug("Make contents. size: {}", newContents.size());
 		int i=0, totSize=newContents.size();
 		for(FileContentVo c : newContents) {
 			exec.execute(context.getBean(DeleteMiniSeed.class, c, ++i, totSize));
