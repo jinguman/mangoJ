@@ -104,20 +104,31 @@ public class GenerateMiniSeed {
 			
 	        // steim encoding
 	        SteimFrameBlock steimData = null;
-	        steimData = Steim2.encode(temp2, steimFrameSize, temp2[0]);
+	        //steimData = Steim2.encode(temp2, steimFrameSize, temp2[0]);
+	        steimData = Steim2.encode(temp2, steimFrameSize);
 	        
 	        // Modify data record
 	        if ( !isForceNew ) {
 	        	if (steimData.getNumSamples() == temp2.length ) {
-	        		
-	        		// Modify header
-	    			header.setNumSamples((short)temp2.length);
-	    	        header.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
-	        		
-		        	dr.setData(steimData.getEncodedData());
-		        	//logger.debug("Modify DataRecord. {}", dr.toString());
-			        return dr;
+	        		// pass
+		        } else {
+		        	
+		        	// encode again
+	 	        	while(steimFrameSize < 63) {
+	 	        		steimFrameSize++;
+	 		        	steimData = Steim2.encode(temp2, steimFrameSize);
+	 		        	if (steimData.getNumSamples() >= temp2.length ) break;
+	 	        	}
 		        }
+	        	
+        		// Modify header
+    			header.setNumSamples((short)temp2.length);
+    	        header.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
+        		
+	        	dr.setData(steimData.getEncodedData());
+	        	//logger.debug("Modify DataRecord. {}", dr.toString());
+		        return dr;
+
 	        }
 	        	        
 			// Renew data record
@@ -130,7 +141,9 @@ public class GenerateMiniSeed {
 			reheader.setNetworkCode(dr.getHeader().getNetworkCode());
 			reheader.setLocationIdentifier(dr.getHeader().getLocationIdentifier());
 			reheader.setNumSamples((short) temp2.length);
-			reheader.setSampleRate(dr.getHeader().getSampleRate());
+			//reheader.setSampleRate(100.0);
+			reheader.setSampleRateFactor((short) dr.getHeader().getSampleRateFactor());
+			reheader.setSampleRateMultiplier((short) dr.getHeader().getSampleRateMultiplier());
 	        reheader.setStartBtime(Helpers.getBtimeAddSamples(stPacketBtime, sampleRate, lTrimDelta));
 	        headerSize += 64;
 
@@ -146,6 +159,7 @@ public class GenerateMiniSeed {
 	        }
 	        
 	        // Find steimFrameSize
+	        /*
 	        int cutRatio = (int) Math.floor((temp.length - temp2.length ) / temp.length); 
 	        steimFrameSize = steimFrameSize * cutRatio;
 	        while(true) {
@@ -156,6 +170,26 @@ public class GenerateMiniSeed {
 	 	        
 	 	        if (steimData.getNumSamples() == temp2.length ) break;
 	 	        
+	        }*/
+	        steimFrameSize = 1;
+	        steimData = Steim2.encode(temp2, steimFrameSize);
+	        if (steimData.getNumSamples() < temp2.length ) {
+	        	
+	        	// retry
+	        	boolean isComplete = false;
+	        	while(steimFrameSize < 63) {
+	        		steimFrameSize++;
+		        	steimData = Steim2.encode(temp2, steimFrameSize);
+		        	if (steimData.getNumSamples() >= temp2.length ) {
+		        		isComplete = true;
+		        		break;
+		        	}
+	        	}
+
+	        	if ( !isComplete ) {
+	        		log.error("Can't fit all data into one record, "+steimData.getNumSamples()+" out of "+temp2.length);
+	        		return null;
+	        	}
 	        }
 
 	        // Calculate seed len
