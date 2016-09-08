@@ -25,6 +25,7 @@ import edu.iris.dmc.seedcodec.DecompressedData;
 import edu.iris.dmc.seedcodec.Steim2;
 import edu.iris.dmc.seedcodec.SteimFrameBlock;
 import edu.iris.dmc.seedcodec.UnsupportedCompressionType;
+import edu.sc.seis.seisFile.mseed.Blockette1000;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
@@ -46,7 +47,8 @@ public class ReadMiniSeedTest {
 	@Test
 	public void test() throws SeedFormatException, IOException, UnsupportedCompressionType, CodecException {
 		
-		File file = new File("C:/Users/jman/Downloads/test.mseed");
+		File file = new File("C:/Users/jman/Downloads/KS.ADO2..ELZ.2016.252.07.32.00");
+		//File file = new File("C:/Users/jman/Downloads/test.mseed");
 		//boolean isDbCheck = false;
 		//readMS = context.getBean(ReadMiniSeed.class, file, isDbCheck);
 		//readMS.run();
@@ -65,10 +67,14 @@ public class ReadMiniSeedTest {
 				//System.out.println(record.getHeader().getSampleRate());
 				//System.out.println(record.getHeader().getSampleRateFactor());
         		//traces.add(new Trace(record));
+				//System.out.println(record);
 				record.write(dos);
 				
 				dr.getHeader().setSampleRateMultiplier((short) 1);
 				dr.getHeader().setSampleRateFactor((short) 100);
+				
+				//Blockette1000 blockette1000 = (Blockette1000) dr.getBlockettes()[1];
+				//System.out.println(">>>>>>>>> " + blockette1000.getDataRecordLength());
 				
 				DecompressedData decomData = dr.decompress();
 				int[] ints = decomData.getAsInt();

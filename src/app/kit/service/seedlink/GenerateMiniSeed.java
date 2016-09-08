@@ -100,7 +100,8 @@ public class GenerateMiniSeed {
 			if ( temp2.length == 0 ) return null;
 			
 			// Get steim Frame size
-			int steimFrameSize = getSteimFrameSize(dr.getDataSize());
+			//int steimFrameSize = getSteimFrameSize(dr.getDataSize());
+			int steimFrameSize = 62;
 			
 	        // steim encoding
 	        SteimFrameBlock steimData = null;
@@ -171,8 +172,9 @@ public class GenerateMiniSeed {
 	 	        if (steimData.getNumSamples() == temp2.length ) break;
 	 	        
 	        }*/
-	        steimFrameSize = 1;
+	        steimFrameSize = 62;
 	        steimData = Steim2.encode(temp2, steimFrameSize);
+	        
 	        if (steimData.getNumSamples() < temp2.length ) {
 	        	
 	        	// retry
@@ -191,12 +193,27 @@ public class GenerateMiniSeed {
 	        		return null;
 	        	}
 	        }
+	        
 
+	        //System.out.println( steimData.getNumFrames());
+	        //System.out.println(">>>>>>>>>> Frames: " + steimData.getNumSamples() + " : " + temp2.length);
+	        
 	        // Calculate seed len
 	        int dataRecordSize = (steimFrameSize*64) + headerSize;
 	        byte seed = (byte)get2Power(dataRecordSize);
-	        //logger.debug("Size: steimframe: {}, dataRecordSize: {}, seed: {}", steimFrameSize, dataRecordSize, seed);
-
+	        
+	        if ( temp2.length != steimData.getNumSamples() ) {
+	        	log.error("Recreate datarecord failed.. ----------------------------------------------------------------------------");
+	        	log.debug("Recreate datarecord. SCNL:" + record.getHeader().getStationIdentifier().trim() + ". "
+		        		+ record.getHeader().getChannelIdentifier().trim() + "."
+		        		+ record.getHeader().getLocationIdentifier().trim() + "."
+		        		+ record.getHeader().getNetworkCode().trim() + " " 
+		        		+ record.getHeader().getStartTime() + " "
+		        		+ temp2.length + " vs "
+		        		+ steimData.getNumSamples()
+		        		);
+	        }
+	        
 	        // 1000 Blockette
 	        Blockette1000 blockette1000 = new Blockette1000();
 	        blockette1000.setEncodingFormat((byte)B1000Types.STEIM2);
